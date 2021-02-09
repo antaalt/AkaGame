@@ -1,13 +1,7 @@
 #include "Game/Game.h"
 
-// TODO use cmake
-// implement other backend
-// add 3D
-
 int main()
 {
-	aka::Logger::info(aka::Path::cwd());
-	aka::Logger::info(aka::Path::executable());
 	aka::Game app;
 
 	aka::Config cfg;

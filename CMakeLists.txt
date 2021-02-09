@@ -5,7 +5,7 @@ project(AkaGame)
 # Include Aka
 add_subdirectory(lib/Aka)
 
-add_executable(AkaGame
+set(SRC
 	"src/main.cpp"
 
 	"src/System/AnimatorSystem.cpp"
@@ -36,15 +36,32 @@ add_executable(AkaGame
 	"src/Component/TileLayer.cpp"
 	"src/Component/TileMap.cpp"
 	"src/Component/Transform2D.cpp"
-
-	"lib/imgui/imgui.cpp"
-	"lib/imgui/imgui_demo.cpp"
-	"lib/imgui/imgui_draw.cpp"
-	"lib/imgui/imgui_widgets.cpp"
-	"lib/imgui/imgui_tables.cpp"
-	"lib/imgui/backends/imgui_impl_opengl3.cpp"
-	"lib/imgui/backends/imgui_impl_dx11.cpp"
-	"lib/imgui/backends/imgui_impl_glfw.cpp"
+)
+if(GRAPHIC_OPENGL)
+	set(SRC
+		${SRC}
+		"lib/imgui/imgui.cpp"
+		"lib/imgui/imgui_demo.cpp"
+		"lib/imgui/imgui_draw.cpp"
+		"lib/imgui/imgui_widgets.cpp"
+		"lib/imgui/imgui_tables.cpp"
+		"lib/imgui/backends/imgui_impl_opengl3.cpp"
+		"lib/imgui/backends/imgui_impl_glfw.cpp"
+	)
+elseif(GRAPHIC_D3D11)
+	set(SRC
+		${SRC}
+		"lib/imgui/imgui.cpp"
+		"lib/imgui/imgui_demo.cpp"
+		"lib/imgui/imgui_draw.cpp"
+		"lib/imgui/imgui_widgets.cpp"
+		"lib/imgui/imgui_tables.cpp"
+		"lib/imgui/backends/imgui_impl_dx11.cpp"
+		"lib/imgui/backends/imgui_impl_glfw.cpp"
+	)
+endif()
+add_executable(AkaGame
+	${SRC}
 )
 
 # Add third party libs
