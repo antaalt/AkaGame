@@ -120,7 +120,7 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 						if (ImGui::TreeNodeEx(animation.name.c_str()))
 						{
 							char buffer[256];
-							strcpy_s(buffer, animation.name.c_str());
+							STR_CPY(buffer, 256, animation.name.c_str());
 							if (ImGui::InputText("Name", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue))
 								animation.name = buffer;
 							uint32_t frameID = 0;

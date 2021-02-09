@@ -6,7 +6,7 @@
 #include "../Component/Transform2D.h"
 #include "../Component/Animator.h"
 #include "../Component/TileMap.h"
-#include "../Component/Tilelayer.h"
+#include "../Component/TileLayer.h"
 
 namespace aka {
 

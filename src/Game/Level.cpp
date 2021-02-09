@@ -10,6 +10,11 @@
 #include "../Component/Text.h"
 #include "../Component/Player.h"
 #include "../Component/Door.h"
+
+#include <cstddef>
+#include <cstring>
+
+
 #include <Aka/Core/Sprite.h>
 #include <Aka/Core/ECS/World.h>
 

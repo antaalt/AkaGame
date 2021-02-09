@@ -2,6 +2,8 @@
 
 #include <Aka/Aka.h>
 
+#include <inttypes.h>
+
 #include "../Component/Transform2D.h"
 #include "../Component/Collider2D.h"
 #include "../Component/Camera2D.h"
@@ -97,7 +99,7 @@ void EntityWidget::draw(World& world, Resources& resources)
 							{
 								if (currentSprite == sprite.second)
 								{
-									strcpy_s(currentSpriteName, 256, sprite.first.c_str());
+									STR_CPY(currentSpriteName, 256, sprite.first.c_str());
 								}
 							}
 							snprintf(buffer, 256, "%s", currentSpriteName);
@@ -115,7 +117,7 @@ void EntityWidget::draw(World& world, Resources& resources)
 											animator->currentAnimation = 0;
 											animator->currentFrame = 0;
 											animator->update();
-											strcpy_s(currentSpriteName, 256, sprite.first.c_str());
+											STR_CPY(currentSpriteName, 256, sprite.first.c_str());
 										}
 									}
 									if (sameSprite)
@@ -126,7 +128,7 @@ void EntityWidget::draw(World& world, Resources& resources)
 							uint32_t i = 0;
 							for (Sprite::Animation& anim : animator->sprite->animations)
 							{
-								snprintf(buffer, 256, "%s (%llu ms)", anim.name.c_str(), anim.duration().milliseconds());
+								snprintf(buffer, 256, "%s (%" PRIu64 " ms)", anim.name.c_str(), anim.duration().milliseconds());
 								bool currentAnimation = animator->currentAnimation == i;
 								if (ImGui::RadioButton(buffer, currentAnimation))
 								{
@@ -279,7 +281,7 @@ void EntityWidget::draw(World& world, Resources& resources)
 							}
 
 							char t[256];
-							strcpy_s(t, text->text.c_str());
+							STR_CPY(t, 256, text->text.c_str());
 							if (ImGui::InputText("Text", t, 256))
 								text->text = t;
 

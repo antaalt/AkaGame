@@ -16,6 +16,12 @@
 #endif
 #endif
 
+#if defined(AKA_PLATFORM_WINDOWS)
+#define STR_CPY(dest, destSize, src) strcpy_s(dest, destSize, src);
+#else
+#define STR_CPY(dest, destSize, src) strcpy(dest, src);
+#endif
+
 namespace aka {
 
 class GUIWidget

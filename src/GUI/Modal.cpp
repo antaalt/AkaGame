@@ -1,6 +1,9 @@
 #include "Modal.h"
 
 #include "IconsFontAwesome5.h"
+#include "GUINode.h"
+
+#include <algorithm>
 
 namespace aka {
 
@@ -15,7 +18,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 	{
 		ImGui::OpenPopup(buffer);
 		currentPath = Asset::path("");
-		strcpy_s(currentPathBuffer, 256, currentPath.c_str());
+		STR_CPY(currentPathBuffer, 256, currentPath.c_str());
 		selectedPath = nullptr;
 		paths = Path::enumerate(currentPath);
 	}
@@ -105,7 +108,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		ImGui::EndChild();
 		if (updatedList)
 		{
-			strcpy_s(currentPathBuffer, 256, currentPath.c_str());
+			STR_CPY(currentPathBuffer, 256, currentPath.c_str());
 			paths = Path::enumerate(currentPath);
 			selectedPath = nullptr;
 		}
