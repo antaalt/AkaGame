@@ -1,0 +1,12 @@
+[submodule "lib/imgui"]
+	path = lib/imgui
+	url = git@github.com:ocornut/imgui.git
+[submodule "lib/json"]
+	path = lib/json
+	url = git@github.com:nlohmann/json.git
+[submodule "lib/Aka"]
+	path = lib/Aka
+	url = git@github.com:antaalt/Aka.git
+[submodule "lib/IconFontCppHeaders"]
+	path = lib/IconFontCppHeaders
+	url = git@github.com:juliettef/IconFontCppHeaders.git
