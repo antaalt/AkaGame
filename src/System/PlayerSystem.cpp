@@ -32,7 +32,7 @@ void PlayerSystem::update(Time::Unit deltaTime)
 			{
 				player->coin++;
 				coin->picked = true;
-				event->right->get<Animator>()->play("picked");
+				event->right->get<Animator>()->play("Picked");
 				text->text = std::to_string(player->coin);
 			}
 		}
@@ -56,16 +56,21 @@ void PlayerSystem::update(Time::Unit deltaTime)
 		{
 			if (player->left.pressed())
 			{
+				if (player->left.down())
+					animator->play("Run");
 				animator->flipU = true;
 				rigid->velocity.x = -player->speed.metric();
 			}
 			else if (player->right.pressed())
 			{
+				if (player->right.down())
+					animator->play("Run");
 				animator->flipU = false;
 				rigid->velocity.x = player->speed.metric();
 			}
 			else if (player->right.up() || player->left.up())
 			{
+				animator->play("Idle");
 				rigid->velocity = vec2f(0.f);
 			}
 
@@ -81,18 +86,23 @@ void PlayerSystem::update(Time::Unit deltaTime)
 		{
 			if (player->left.pressed())
 			{
+				if (player->left.down())
+					animator->play("Run");
 				animator->flipU = true;
 				player->state = Player::State::Walking;
 				rigid->velocity.x = -player->speed.metric();
 			}
 			else if (player->right.pressed())
 			{
+				if(player->right.down())
+					animator->play("Run");
 				animator->flipU = false;
 				player->state = Player::State::Walking;
 				rigid->velocity.x = player->speed.metric();
 			}
 			else if (player->right.up() || player->left.up())
 			{
+				animator->play("Idle");
 				player->state = Player::State::Idle;
 				rigid->velocity = vec2f(0.f);
 			}

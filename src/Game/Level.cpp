@@ -114,53 +114,24 @@ void WorldMap::loadLevel(const std::string &str)
 
 	{
 		// - Colliders
-		Sprite::Animation animation;
-		animation.name = "default";
-		Image image = Image::load(Asset::path("textures/debug/collider.png"));
-		animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(500)));
-		Sprite* sprite = m_resources.sprite.create("Collider", new Sprite());
-		sprite->animations.push_back(animation);
+		Sprite s = Sprite::parse(Asset::path("textures/debug/collider.aseprite"));
+		Sprite* sp = new Sprite;
+		*sp = s;
+		Sprite* sprite = m_resources.sprite.create("Collider", sp);
 	}
 	{
 		// - Coins
-		Sprite::Animation animation;
-		animation.name = "picked";
-		std::vector<Path> frames = {
-			Asset::path("textures/interact/coin01.png"),
-			Asset::path("textures/interact/coin02.png"),
-			Asset::path("textures/interact/coin03.png")
-		};
-		for (Path path : frames)
-		{
-			Image image = Image::load(path);
-			animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(100)));
-		}
-		Sprite* sprite = m_resources.sprite.create("Coin", new Sprite());
-		sprite->animations.push_back(animation);
-		Texture::Ptr tex = animation.frames[0].texture;
-		animation.frames.clear();
-		animation.name = "idle";
-		animation.frames.push_back(Sprite::Frame::create(tex, Time::Unit::milliseconds(500)));
-		sprite->animations.push_back(animation);
+		Sprite s = Sprite::parse(Asset::path("textures/interact/interact.aseprite"));
+		Sprite* sp = new Sprite;
+		*sp = s;
+		Sprite* sprite = m_resources.sprite.create("Coin", sp);
 	}
 	{
 		// - Player
-		// TODO move initialisation in SpriteAnimator & parse ase sprite directly ?
-		// TODO load gif ?
-		Sprite::Animation animation;
-		animation.name = "idle";
-		std::vector<Path> frames = {
-			Asset::path("textures/player/player01.png"),
-			Asset::path("textures/player/player02.png"),
-			Asset::path("textures/player/player03.png")
-		};
-		for (Path path : frames)
-		{
-			Image image = Image::load(path);
-			animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(500)));
-		}
-		Sprite* sprite = m_resources.sprite.create("Player", new Sprite());
-		sprite->animations.push_back(animation);
+		Sprite s = Sprite::parse(Asset::path("textures/player/player.aseprite"));
+		Sprite* sp = new Sprite;
+		*sp = s;
+		Sprite* sprite = m_resources.sprite.create("Player", sp);
 	}
 	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Colliders");
 	for (const OgmoLevel::Entity& entity : layer->entities)
@@ -178,7 +149,7 @@ void WorldMap::loadLevel(const std::string &str)
 			Entity* e = m_world.createEntity();
 			e->add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0)));
 			e->add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), 0.1f, 0.1f));
-			e->add<Animator>(Animator(m_resources.sprite.get("Coin"), 1))->play("idle");
+			e->add<Animator>(Animator(m_resources.sprite.get("Coin"), 1))->play("Idle");
 			e->add<Coin>(Coin());
 			level->entities.push_back(e);
 		}
@@ -188,7 +159,7 @@ void WorldMap::loadLevel(const std::string &str)
 			Sprite* playerSprite = m_resources.sprite.get("Player");
 			Entity* e = m_world.createEntity();
 			e->add<Transform2D>(Transform2D(vec2f(80, 224), vec2f(1.f), radianf(0)));
-			e->add<Animator>(Animator(playerSprite, 1))->play("idle");
+			e->add<Animator>(Animator(playerSprite, 1))->play("Idle");
 			e->add<RigidBody2D>(RigidBody2D(1.f));
 			e->add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)playerSprite->animations[0].frames[0].width, (float)playerSprite->animations[0].frames[0].height), 0.1f, 0.1f));
 
