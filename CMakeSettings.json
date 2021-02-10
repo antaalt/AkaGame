@@ -12,11 +12,6 @@
       "ctestCommandArgs": "",
       "variables": [
         {
-          "name": "GLEW_DIR",
-          "value": "./lib/Aka/lib/glew",
-          "type": "PATH"
-        },
-        {
           "name": "FREETYPE_INCLUDE_DIR_freetype2",
           "value": "./lib/Aka/lib/freetype/include",
           "type": "PATH"

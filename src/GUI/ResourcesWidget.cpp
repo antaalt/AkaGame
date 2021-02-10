@@ -32,8 +32,13 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 						ImGui::Image(
 							(ImTextureID)character.texture.texture->handle().value(),
 							ImVec2(30, 30),
+#if defined(ORIGIN_BOTTOM_LEFT)
+							ImVec2(character.texture.get(0).u, character.texture.get(0).v + uvy),
+							ImVec2(character.texture.get(0).u + uvx, character.texture.get(0).v),
+#else
 							ImVec2(character.texture.get(0).u, character.texture.get(0).v),
 							ImVec2(character.texture.get(0).u + uvx, character.texture.get(0).v + uvy),
+#endif
 							ImVec4(1,1,1,1),
 							ImVec4(1,1,1,1)
 						);
@@ -148,7 +153,15 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 										frame.height = (uint32_t)size[1];
 									}
 									float ratio = static_cast<float>(frame.texture->width()) / static_cast<float>(frame.texture->height());
-									ImGui::Image((ImTextureID)frame.texture->handle().value(), ImVec2(200, 200 * 1 / ratio));
+									ImGui::Image(
+										(ImTextureID)frame.texture->handle().value(),
+										ImVec2(200, 200 * 1 / ratio),
+#if defined(ORIGIN_BOTTOM_LEFT)
+										ImVec2(0, 1), ImVec2(1,0)
+#else
+										ImVec2(0, 0), ImVec2(1, 1)
+#endif
+									);
 									ImGui::TreePop();
 								}
 							}
