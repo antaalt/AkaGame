@@ -77,19 +77,19 @@ void Game::initialize()
 
 	{
 		// INIT FONTS
-		m_resources.font.create("Espera48", new Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-		m_resources.font.create("Espera16", new Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-		Font *font = m_resources.font.create("BoldFont48", new Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
+		m_resources.font.create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
+		m_resources.font.create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
+		Font &font = m_resources.font.create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
 		Entity* e = m_world.createEntity();
 		Transform2D* transform = e->add<Transform2D>(Transform2D());
 		Text* text = e->add<Text>(Text());
 
 		text->offset = vec2f(0.f);
 		text->color = color4f(1.f);
-		text->font = font;
+		text->font = &font;
 		text->text = "Find them all !";
 		text->layer = 2;
-		vec2i size = font->size(text->text);
+		vec2i size = font.size(text->text);
 		transform->translate(vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50)));
 	}
 
@@ -102,11 +102,11 @@ void Game::initialize()
 		Sprite::Animation animation;
 		animation.name = "default";
 		animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(500)));
-		Sprite *sprite = m_resources.sprite.create("Background", new Sprite());
-		sprite->animations.push_back(animation);
+		Sprite &sprite = m_resources.sprite.create("Background", Sprite());
+		sprite.animations.push_back(animation);
 
 		Entity *e = m_world.createEntity();
-		e->add<Animator>(Animator(sprite, -2))->play("default");
+		e->add<Animator>(Animator(&sprite, -2))->play("default");
 	}
 
 	{

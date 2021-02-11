@@ -1,6 +1,6 @@
 #include "Modal.h"
 
-#include "IconsFontAwesome5.h"
+#include <IconsFontAwesome5.h>
 #include "GUINode.h"
 
 #include <algorithm>

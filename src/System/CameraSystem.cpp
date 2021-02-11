@@ -62,12 +62,15 @@ void CameraSystem::update(Time::Unit deltaTime)
 
 		// Clamp camera position to the current level bounds.
 		TileLayer * layer = m_world->first<TileLayer>();
-		vec2f grid = vec2f(layer->gridSize * layer->gridCount) + layer->offset;
-		
-		camera->position.x = max<float>(camera->position.x, layer->offset.x);
-		camera->position.x = min<float>(camera->position.x, grid.x - camera->viewport.x);
-		camera->position.y = max<float>(camera->position.y, layer->offset.y);
-		camera->position.y = min<float>(camera->position.y, grid.y - camera->viewport.y);
+		if (layer != nullptr)
+		{
+			vec2f grid = vec2f(layer->gridSize * layer->gridCount) + layer->offset;
+
+			camera->position.x = max<float>(camera->position.x, layer->offset.x);
+			camera->position.x = min<float>(camera->position.x, grid.x - camera->viewport.x);
+			camera->position.y = max<float>(camera->position.y, layer->offset.y);
+			camera->position.y = min<float>(camera->position.y, grid.y - camera->viewport.y);
+		}
 	});
 }
 

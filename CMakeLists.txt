@@ -1,6 +1,8 @@
-﻿cmake_minimum_required (VERSION 3.8)
-
+﻿cmake_minimum_required (VERSION 3.10)
 project(AkaGame)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include Aka
 add_subdirectory(lib/Aka)
@@ -27,6 +29,7 @@ set(SRC
 
 	"src/Game/Game.cpp"
 	"src/Game/Level.cpp"
+	"src/Game/Resources.cpp"
 	"src/Game/OgmoWorld.cpp"
 
 	"src/Component/Animator.cpp"

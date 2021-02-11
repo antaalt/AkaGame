@@ -7,11 +7,9 @@ namespace aka {
 template <typename T>
 class ResourceManager
 {
-	using map = std::map<std::string, T*>;
+	using map = std::map<std::string, T>;
 public:
-	ResourceManager();
-	~ResourceManager();
-	T* create(const std::string& str, T* font);
+	T& create(const std::string& str, T&& data);
 	T* get(const std::string& str);
 	T* getDefault();
 	void destroy(const std::string& str);
@@ -30,32 +28,16 @@ using SpriteManager = ResourceManager<Sprite>;
 
 struct Resources
 {
-	FontManager font;
-	SpriteManager sprite;
+	static FontManager font;
+	static SpriteManager sprite;
 };
 
-
-
 template <typename T>
-ResourceManager<T>::ResourceManager()
+T& ResourceManager<T>::create(const std::string& str, T&& data)
 {
-
-}
-
-template <typename T>
-ResourceManager<T>::~ResourceManager()
-{
-	for (auto it : m_data)
-		delete it.second;
-}
-
-template <typename T>
-T* ResourceManager<T>::create(const std::string& str, T* data)
-{
-	auto it = m_data.insert(std::make_pair(str, data));
+	auto it = m_data.insert(std::make_pair(str, std::move(data)));
 	if (it.second)
 		return it.first->second;
-	delete data;
 	return it.first->second;
 }
 
@@ -65,13 +47,13 @@ T* ResourceManager<T>::get(const std::string& str)
 	auto it = m_data.find(str);
 	if (it == m_data.end())
 		return nullptr;
-	return it->second;
+	return &it->second;
 }
 
 template<typename T>
-inline T* ResourceManager<T>::getDefault()
+T* ResourceManager<T>::getDefault()
 {
-	return m_data.begin()->second;
+	return &m_data.begin()->second;
 }
 
 template <typename T>
@@ -80,7 +62,6 @@ void ResourceManager<T>::destroy(const std::string& str)
 	auto it = m_data.find(str);
 	if (it == m_data.end())
 		return;
-	delete it.second;
 	m_data.erase(it);
 }
 

@@ -113,25 +113,12 @@ void WorldMap::loadLevel(const std::string &str)
 
 
 	{
-		// - Colliders
-		Sprite s = Sprite::parse(Asset::path("textures/debug/collider.aseprite"));
-		Sprite* sp = new Sprite;
-		*sp = s;
-		Sprite* sprite = m_resources.sprite.create("Collider", sp);
-	}
-	{
-		// - Coins
-		Sprite s = Sprite::parse(Asset::path("textures/interact/interact.aseprite"));
-		Sprite* sp = new Sprite;
-		*sp = s;
-		Sprite* sprite = m_resources.sprite.create("Coin", sp);
-	}
-	{
-		// - Player
-		Sprite s = Sprite::parse(Asset::path("textures/player/player.aseprite"));
-		Sprite* sp = new Sprite;
-		*sp = s;
-		Sprite* sprite = m_resources.sprite.create("Player", sp);
+		// Colliders
+		m_resources.sprite.create("Collider", Sprite::parse(Asset::path("textures/debug/collider.aseprite")));
+		// Coins
+		m_resources.sprite.create("Coin", Sprite::parse(Asset::path("textures/interact/interact.aseprite")));
+		// Player
+		m_resources.sprite.create("Player", Sprite::parse(Asset::path("textures/player/player.aseprite")));
 	}
 	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Colliders");
 	for (const OgmoLevel::Entity& entity : layer->entities)

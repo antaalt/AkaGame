@@ -11,24 +11,24 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 	{
 		if (ImGui::CollapsingHeader("Fonts", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			for (auto it : resources.font)
+			for (auto &it : resources.font)
 			{
 				std::string name = it.first;
-				Font* font = it.second;
+				Font& font = it.second;
 				if (ImGui::TreeNode(name.c_str()))
 				{
-					ImGui::Text("Family : %s", font->family().c_str());
-					ImGui::Text("Style : %s", font->style().c_str());
-					ImGui::Text("Height : %upx", font->height());
+					ImGui::Text("Family : %s", font.family().c_str());
+					ImGui::Text("Style : %s", font.style().c_str());
+					ImGui::Text("Height : %upx", font.height());
 
-					Texture::Ptr atlas = font->getCharacter(0).texture.texture;
-					float uvx = 1.f / (atlas->height() / font->height());
-					float uvy = 1.f / (atlas->width() / font->height());
+					Texture::Ptr atlas = font.getCharacter(0).texture.texture;
+					float uvx = 1.f / (atlas->height() / font.height());
+					float uvy = 1.f / (atlas->width() / font.height());
 
 					uint32_t lineCount = 0;
 					for (uint32_t i = 0; i < NUM_GLYPH; i++)
 					{
-						const Character &character = font->getCharacter(i);
+						const Character &character = font.getCharacter(i);
 						ImGui::Image(
 							(ImTextureID)character.texture.texture->handle().value(),
 							ImVec2(30, 30),
@@ -92,8 +92,7 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 					try
 					{
 						std::string name = Path::name(path);
-						if (resources.font.create(name, new Font(path, height)) == nullptr)
-							error = "Failed to create the font";
+						resources.font.create(name, Font(path, height));
 					}
 					catch (const std::exception& e)
 					{
@@ -114,10 +113,10 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 		}
 		if (ImGui::CollapsingHeader("Sprites", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			for (auto it : resources.sprite)
+			for (auto &it : resources.sprite)
 			{
 				std::string name = it.first;
-				Sprite* sprite = it.second;
+				Sprite* sprite = &it.second;
 				if (ImGui::TreeNode(name.c_str()))
 				{
 					for (Sprite::Animation& animation : sprite->animations)
@@ -217,7 +216,7 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 				ImGui::InputText("Name", spriteName, 256);
 				if (ImGui::Button("Create"))
 				{
-					resources.sprite.create(spriteName, new Sprite);
+					resources.sprite.create(spriteName, Sprite());
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::SameLine();
