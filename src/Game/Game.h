@@ -29,7 +29,7 @@ private:
 	Framebuffer::Ptr m_framebuffer;
 	// Entity
 	World m_world;
-	Entity* m_cameraEntity;
+	Entity m_cameraEntity;
 	// Levels
 	std::string m_currentLevel;
 	WorldMap m_map;

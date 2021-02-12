@@ -3,7 +3,7 @@
 #include "Resources.h"
 #include "OgmoWorld.h"
 
-#include <Aka/Core/ECS/Entity.h>
+#include <Aka/Scene/Entity.h>
 
 #include <string>
 
@@ -33,7 +33,7 @@ struct Level
 	Texture::Ptr backgroundTexture;
 	std::vector<Door> doors;
 
-	std::vector<Entity*> entities;
+	std::vector<Entity> entities;
 };
 
 class WorldMap

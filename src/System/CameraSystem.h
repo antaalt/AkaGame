@@ -1,15 +1,13 @@
 #pragma once
 
-#include <Aka/Core/ECS/System.h>
+#include <Aka/Scene/System.h>
 
 namespace aka {
 
 class CameraSystem : public System
 {
 public:
-	CameraSystem(World* world);
-
-	void update(Time::Unit deltaTime) override;
+	void update(World& world, Time::Unit deltaTime) override;
 };
 
 };

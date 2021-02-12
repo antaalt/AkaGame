@@ -25,6 +25,7 @@
 
 
 namespace aka {
+
 Game::Game() :
 	m_map(m_world, m_resources)
 {
@@ -43,23 +44,24 @@ void Game::initialize()
 	sampler.wrapS = aka::Sampler::Wrap::Clamp;
 	sampler.wrapT = aka::Sampler::Wrap::Clamp;
 	{
-		// INI SYSTEMS
-		m_world.createSystem<PhysicSystem>();
-		m_world.createSystem<CollisionSystem>();
-		m_world.createSystem<TileSystem>();
-		m_world.createSystem<TileMapSystem>();
-		m_world.createSystem<AnimatorSystem>();
-		m_world.createSystem<CameraSystem>();
-		m_world.createSystem<TextRenderSystem>();
-		m_world.createSystem<PlayerSystem>();
-		m_world.createSystem<CoinSystem>();
-		m_world.createSystem<SoundSystem>();
+		// INIT SYSTEMS
+		m_world.attachSystem<PhysicSystem>();
+		m_world.attachSystem<CollisionSystem>();
+		m_world.attachSystem<TileSystem>();
+		m_world.attachSystem<TileMapSystem>();
+		m_world.attachSystem<AnimatorSystem>();
+		m_world.attachSystem<CameraSystem>();
+		m_world.attachSystem<TextRenderSystem>();
+		m_world.attachSystem<PlayerSystem>();
+		m_world.attachSystem<CoinSystem>();
+		m_world.attachSystem<SoundSystem>();
+		m_world.create();
 	}
 
 	{
 		// INIT sounds
-		Entity *e = m_world.createEntity();
-		e->add<SoundInstance>(SoundInstance(Asset::path("sounds/forest.mp3"), true));
+		Entity e = m_world.createEntity("BackgroundMusic");
+		e.add<SoundInstance>(SoundInstance(Asset::path("sounds/forest.mp3"), true));
 	}
 
 	{
@@ -70,9 +72,9 @@ void Game::initialize()
 
 	{
 		// INIT CAMERA
-		m_cameraEntity = m_world.createEntity();
-		m_cameraEntity->add<Transform2D>(Transform2D());
-		m_cameraEntity->add<Camera2D>(Camera2D(vec2f(0), vec2f(320, 180) ));
+		m_cameraEntity = m_world.createEntity("Camera");
+		m_cameraEntity.add<Transform2D>(Transform2D());
+		m_cameraEntity.add<Camera2D>(Camera2D(vec2f(0), vec2f(320, 180) ));
 	}
 
 	{
@@ -80,17 +82,19 @@ void Game::initialize()
 		m_resources.font.create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
 		m_resources.font.create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
 		Font &font = m_resources.font.create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
-		Entity* e = m_world.createEntity();
-		Transform2D* transform = e->add<Transform2D>(Transform2D());
-		Text* text = e->add<Text>(Text());
+		Entity e = m_world.createEntity("Text");
+		e.add<Transform2D>(Transform2D());
+		e.add<Text>(Text());
 
-		text->offset = vec2f(0.f);
-		text->color = color4f(1.f);
-		text->font = &font;
-		text->text = "Find them all !";
-		text->layer = 2;
-		vec2i size = font.size(text->text);
-		transform->translate(vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50)));
+		Text& text = e.get<Text>();
+		text.offset = vec2f(0.f);
+		text.color = color4f(1.f);
+		text.font = &font;
+		text.text = "Find them all !";
+		text.layer = 2;
+		vec2i size = font.size(text.text);
+		Transform2D& transform = e.get<Transform2D>();
+		transform.translate(vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50)));
 	}
 
 	{
@@ -100,13 +104,15 @@ void Game::initialize()
 		ASSERT(image.height == m_framebuffer->height(), "incorrect height");
 
 		Sprite::Animation animation;
-		animation.name = "default";
+		animation.name = "Default";
 		animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(500)));
 		Sprite &sprite = m_resources.sprite.create("Background", Sprite());
 		sprite.animations.push_back(animation);
 
-		Entity *e = m_world.createEntity();
-		e->add<Animator>(Animator(&sprite, -2))->play("default");
+		Entity e = m_world.createEntity("");
+		e.add<Transform2D>(Transform2D());
+		e.add<Animator>(Animator(&sprite, -2));
+		e.get<Animator>().play("Default");
 	}
 
 	{
@@ -120,11 +126,6 @@ void Game::initialize()
 		m_gui.add(new EntityWidget);
 		m_gui.add(new ResourcesWidget);
 		m_gui.initialize();
-	}
-
-	{
-		// Initialize every systems
-		m_world.create();
 	}
 }
 
@@ -156,7 +157,7 @@ void Game::update(Time::Unit deltaTime)
 
 	Level *level = m_map.getLevel(m_currentLevel);
 	// TODO store player entity in Game instead of level
-	m_world.each<Player, Transform2D>([&](Entity* e, Player* player, Transform2D *transform) {
+	/*m_world.each<Player, Transform2D>([&](Entity* e, Player* player, Transform2D *transform) {
 		vec2f pos = transform->position();
 		vec2f size = transform->size();
 		if (pos.x + size.x > level->width)
@@ -185,7 +186,7 @@ void Game::update(Time::Unit deltaTime)
 		{
 
 		}
-	});
+	});*/
 
 	// Quit the app if requested
 	if (input::pressed(aka::input::Key::Escape))
@@ -198,12 +199,12 @@ void Game::render()
 {
 	{
 		// Render to framebuffer
-		Camera2D* camera = m_cameraEntity->get<Camera2D>();
+		Camera2D& camera = m_cameraEntity.get<Camera2D>();
 		mat4f view = mat4f::inverse(mat4f(
 			col4f(1.f, 0.f, 0.f, 0.f),
 			col4f(0.f, 1.f, 0.f, 0.f),
 			col4f(0.f, 0.f, 1.f, 0.f),
-			col4f(camera->position.x, camera->position.y, 0.f, 1.f)
+			col4f(camera.position.x, camera.position.y, 0.f, 1.f)
 		));
 		mat4f projection = mat4f::orthographic(0.f, static_cast<float>(m_framebuffer->height()), 0.f, static_cast<float>(m_framebuffer->width()));
 		m_framebuffer->clear(1.f, 0.63f, 0.f, 1.f); 

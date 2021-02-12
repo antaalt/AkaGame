@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Aka/Core/ECS/System.h>
+#include <Aka/Scene/System.h>
 #include <Aka/Graphic/Shader.h>
 
 namespace aka {
@@ -8,9 +8,7 @@ namespace aka {
 class TileMapSystem : public System
 {
 public:
-	TileMapSystem(World* world);
-
-	void draw(Batch &batch) override;
+	void draw(World& world, Batch &batch) override;
 };
 
 }

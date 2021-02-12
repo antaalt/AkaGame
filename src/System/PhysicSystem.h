@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Aka/OS/Time.h>
-#include <Aka/Core/ECS/System.h>
+#include <Aka/Scene/System.h>
 #include "../Component/Collider2D.h"
 
 namespace aka {
@@ -12,9 +12,8 @@ namespace aka {
 class PhysicSystem : public System
 {
 public:
-	PhysicSystem(World* world);
 
-	void update(Time::Unit deltaTime) override;
+	void update(World& world, Time::Unit deltaTime) override;
 };
 
 };

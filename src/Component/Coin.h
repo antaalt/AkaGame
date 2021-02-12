@@ -1,10 +1,11 @@
 #pragma once
 
-#include <Aka/Core/ECS/Component.h>
+#include <Aka/Scene/Component.h>
 
 namespace aka {
 
-struct Coin : public Component {
+struct Coin
+{
 	bool picked = false;
 };
 

@@ -2,7 +2,7 @@
 
 //#include "Shape2D.h"
 #include <Aka/Core/Geometry.h>
-#include <Aka/Core/ECS/Component.h>
+#include <Aka/Scene/Component.h>
 
 namespace aka {
 
@@ -41,22 +41,31 @@ struct CircleCollider2D : public Collider2D
 
 Collision2D overlap(const vec2f& p0, const vec2f &s0, const vec2f& p1, const vec2f& s1);
 
+enum class CollisionType
+{
+	Solid = 1,
+	Event = 2,
+};
 
-struct Collider2D : public Component
+struct Collider2D
 {
 	Collider2D();
-	Collider2D(const vec2f& position, const vec2f& size, float bouncing = 0.f, float friction = 0.f);
+	Collider2D(const vec2f& position, const vec2f& size, CollisionType type = CollisionType::Solid, float bouncing = 0.f, float friction = 0.f);
 
 	//Collision2D overlaps(const Collider2D& collider);
-
+	CollisionType type;
 	vec2f position;
 	vec2f size;
+
+	bool is(CollisionType c) {
+		return (((int)type & (int)c) == (int)c);
+	}
 
 	float bouncing;
 	float friction;
 };
 
-struct RigidBody2D : public Component
+struct RigidBody2D
 {
 	static const vec2f maxVelocity;
 

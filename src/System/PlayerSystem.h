@@ -1,7 +1,6 @@
 #pragma once
 
-#include <Aka/Core/ECS/System.h>
-#include <Aka/Core/ECS/Event.h>
+#include <Aka/Scene/System.h>
 #include "CollisionSystem.h"
 
 namespace aka {
@@ -9,9 +8,10 @@ namespace aka {
 class PlayerSystem : public System
 {
 public:
-	PlayerSystem(World* world);
-
-	void update(Time::Unit deltaTime) override;
+	void create(World& world) override;
+	void destroy(World& world) override;
+	void receive(const CollisionEvent& event);
+	void update(World& world, Time::Unit deltaTime) override;
 };
 
 };

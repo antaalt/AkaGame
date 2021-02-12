@@ -29,18 +29,21 @@ void InfoWidget::draw(World& world, Resources& resources)
 		static bool renderColliders = false;
 		if (ImGui::Checkbox("Render colliders", &renderColliders))
 		{
-			world.each<Collider2D>([&](Entity* entity, Collider2D* collider) {
+			auto view = world.registry().view<Collider2D>();
+			for (entt::entity e : view)
+			{
+				Entity entity(e, &world);
 				if (renderColliders)
 				{
-					if (!entity->has<Animator>())
-						entity->add<Animator>(Animator(resources.sprite.get("Collider"), 2));
+					if (!entity.has<Animator>())
+						entity.add<Animator>(Animator(resources.sprite.get("Collider"), 2));
 				}
 				else
 				{
-					if (entity->has<Animator>() && !entity->has<Player>() && !entity->has<Coin>())
-						entity->remove<Animator>();
+					if (entity.has<Animator>() && !entity.has<Player>() && !entity.has<Coin>())
+						entity.remove<Animator>();
 				}
-			});
+			}
 		}
 		static bool vsync = true;
 		if (ImGui::Checkbox("Vsync", &vsync))

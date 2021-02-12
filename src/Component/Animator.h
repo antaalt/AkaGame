@@ -1,13 +1,13 @@
 #pragma once
 
 #include <Aka/Core/Sprite.h>
-#include <Aka/Core/ECS/Component.h>
+#include <Aka/Scene/Component.h>
 
 namespace aka {
 
 class AnimatorSystem;
 
-struct Animator : public Component
+struct Animator
 {
 	friend AnimatorSystem;
 

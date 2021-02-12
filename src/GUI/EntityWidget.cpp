@@ -24,21 +24,21 @@ namespace aka {
 
 template <typename T>
 struct ComponentNode {
-	static const char* icon();
-	static const char* name();
-	static void draw(T& component);
+	static const char* icon() { return ""; }
+	static const char* name() { return "None"; }
+	static void draw(T& component) { Logger::error("Trying to draw an undefined component"); }
 };
 
 // Avoid conflict of ID uniqueness
 struct UniqueID {
-	UniqueID(void* data) : data(data) {}
+	UniqueID(const void* data) : data(data) {}
 
 	const char* operator()(const char* label) {
 		static char buffer[256];
 		int err = snprintf(buffer, 256, "%s##%p", label, data);
 		return buffer;
 	}
-	void* data;
+	const void* data;
 };
 
 const char* ComponentNode<Transform2D>::name() { return "Transform2D"; }
@@ -267,23 +267,23 @@ void ComponentNode<TileMap>::draw(TileMap& map)
 
 // if return false, element deleted
 template <typename T>
-void component(Entity* entity)
+void component(Entity entity)
 {
 	static char buffer[256];
-	T* component = entity->get<T>();
-	if (component != nullptr)
+	if (entity.has<T>())
 	{
+		T& component = entity.get<T>();
 		snprintf(buffer, 256, "%s %s##%p", ComponentNode<T>::icon(), ComponentNode<T>::name(), &component);
 		if (ImGui::TreeNodeEx(buffer, ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			snprintf(buffer, 256, "ClosePopUp##%p", &component);
 			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
 				ImGui::OpenPopup(buffer);
-			ComponentNode<T>::draw(*component);
+			ComponentNode<T>::draw(component);
 			if (ImGui::BeginPopupContextItem(buffer))
 			{
 				if (ImGui::MenuItem("Remove"))
-					entity->remove<T>();
+					entity.remove<T>();
 				ImGui::EndPopup();
 			}
 			ImGui::TreePop();
@@ -291,26 +291,53 @@ void component(Entity* entity)
 	}
 }
 
+bool filterValid(Entity entity, uint8_t componentID)
+{
+	if (ComponentType::get<Transform2D>() == componentID && entity.has<Transform2D>())
+		return true;
+	if (ComponentType::get<Animator>() == componentID && entity.has<Animator>())
+		return true;
+	if (ComponentType::get<Collider2D>() == componentID && entity.has<Collider2D>())
+		return true;
+	if (ComponentType::get<RigidBody2D>() == componentID && entity.has<RigidBody2D>())
+		return true;
+	if (ComponentType::get<Text>() == componentID && entity.has<Text>())
+		return true;
+	if (ComponentType::get<TileMap>() == componentID && entity.has<TileMap>())
+		return true;
+	if (ComponentType::get<TileLayer>() == componentID && entity.has<TileLayer>())
+		return true;
+	if (ComponentType::get<Coin>() == componentID && entity.has<Coin>())
+		return true;
+	if (ComponentType::get<Player>() == componentID && entity.has<Player>())
+		return true;
+	if (ComponentType::get<Camera2D>() == componentID && entity.has<Camera2D>())
+		return true;
+	if (ComponentType::get<SoundInstance>() == componentID && entity.has<SoundInstance>())
+		return true;
+	return false;
+}
+
 void EntityWidget::draw(World& world, Resources& resources)
 {
 	if (ImGui::Begin("Entities##window"))
 	{
-		ImVec4 color = ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f);
+		static ImVec4 color = ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f);
 		static bool filterEntities = false;
 		static const char noItem[256] = "All";
 		static uint8_t componentID = 0;
-		std::vector<const char*> items(Component::Type::count(), noItem);
-		items[Component::Type::get<Transform2D>()] = ComponentNode<Transform2D>::name();
-		items[Component::Type::get<Animator>()] = ComponentNode<Animator>::name();
-		items[Component::Type::get<Player>()] = ComponentNode<Player>::name();
-		items[Component::Type::get<Collider2D>()] = ComponentNode<Collider2D>::name();
-		items[Component::Type::get<RigidBody2D>()] = ComponentNode<RigidBody2D>::name();
-		items[Component::Type::get<Camera2D>()] = ComponentNode<Camera2D>::name();
-		items[Component::Type::get<SoundInstance>()] = ComponentNode<SoundInstance>::name();
-		items[Component::Type::get<Coin>()] = ComponentNode<Coin>::name();
-		items[Component::Type::get<Text>()] = ComponentNode<Text>::name();
-		items[Component::Type::get<TileLayer>()] = ComponentNode<TileLayer>::name();
-		items[Component::Type::get<TileMap>()] = ComponentNode<TileMap>::name();
+		static std::vector<const char*> items(ComponentType::count(), noItem);
+		items[ComponentType::get<Transform2D>()] = ComponentNode<Transform2D>::name();
+		items[ComponentType::get<Animator>()] = ComponentNode<Animator>::name();
+		items[ComponentType::get<Player>()] = ComponentNode<Player>::name();
+		items[ComponentType::get<Collider2D>()] = ComponentNode<Collider2D>::name();
+		items[ComponentType::get<RigidBody2D>()] = ComponentNode<RigidBody2D>::name();
+		items[ComponentType::get<Camera2D>()] = ComponentNode<Camera2D>::name();
+		items[ComponentType::get<SoundInstance>()] = ComponentNode<SoundInstance>::name();
+		items[ComponentType::get<Coin>()] = ComponentNode<Coin>::name();
+		items[ComponentType::get<Text>()] = ComponentNode<Text>::name();
+		items[ComponentType::get<TileLayer>()] = ComponentNode<TileLayer>::name();
+		items[ComponentType::get<TileMap>()] = ComponentNode<TileMap>::name();
 
 		ImGui::Checkbox("##EnableFilter", &filterEntities);
 		ImGui::SameLine();
@@ -332,10 +359,10 @@ void EntityWidget::draw(World& world, Resources& resources)
 		uint32_t index = 0;
 		if (ImGui::BeginChild("##list", ImVec2(0, -30), true))
 		{
-			world.each([&](Entity* entity) {
-				UniqueID u(entity);
+			world.each([&](Entity entity) {
+				UniqueID u(&entity);
 				index++;
-				if (filterEntities && !entity->has(componentID))
+				if (filterEntities && !filterValid(entity, componentID))
 					return;
 				char buffer[256];
 				snprintf(buffer, 256, "Entity %u", index);
@@ -348,35 +375,35 @@ void EntityWidget::draw(World& world, Resources& resources)
 						// Add component
 						static int currentComponent = 0;
 						if (ImGui::BeginMenu("Add component")) {
-							if (ImGui::MenuItem(ComponentNode<Transform2D>::name(), nullptr, nullptr, !entity->has<Transform2D>()))
-								entity->add<Transform2D>(Transform2D());
-							else if (ImGui::MenuItem(ComponentNode<Animator>::name(), nullptr, nullptr, !entity->has<Animator>()))
-								entity->add<Animator>(Animator(resources.sprite.getDefault(), 0));
-							else if (ImGui::MenuItem(ComponentNode<Collider2D>::name(), nullptr, nullptr, !entity->has<Collider2D>()))
-								entity->add<Collider2D>(Collider2D());
-							else if (ImGui::MenuItem(ComponentNode<RigidBody2D>::name(), nullptr, nullptr, !entity->has<RigidBody2D>()))
-								entity->add<RigidBody2D>(RigidBody2D());
-							else if (ImGui::MenuItem(ComponentNode<Text>::name(), nullptr, nullptr, !entity->has<Text>()))
-								entity->add<Text>(Text());
-							else if (ImGui::MenuItem(ComponentNode<TileMap>::name(), nullptr, nullptr, !entity->has<TileMap>()))
-								entity->add<TileMap>(TileMap());
-							else if (ImGui::MenuItem(ComponentNode<TileLayer>::name(), nullptr, nullptr, !entity->has<TileLayer>()))
-								entity->add<TileLayer>(TileLayer());
-							else if (ImGui::MenuItem(ComponentNode<Coin>::name(), nullptr, nullptr, !entity->has<Coin>()))
-								entity->add<Coin>(Coin());
-							else if (ImGui::MenuItem(ComponentNode<Player>::name(), nullptr, nullptr, !entity->has<Player>()))
-								entity->add<Player>(Player());
-							else if (ImGui::MenuItem(ComponentNode<Camera2D>::name(), nullptr, nullptr, !entity->has<Camera2D>()))
-								entity->add<Camera2D>(Camera2D());
-							else if (ImGui::MenuItem(ComponentNode<SoundInstance>::name(), nullptr, nullptr, !entity->has<SoundInstance>()))
-								entity->add<SoundInstance>(SoundInstance());
+							if (ImGui::MenuItem(ComponentNode<Transform2D>::name(), nullptr, nullptr, !entity.has<Transform2D>()))
+								entity.add<Transform2D>(Transform2D());
+							else if (ImGui::MenuItem(ComponentNode<Animator>::name(), nullptr, nullptr, !entity.has<Animator>()))
+								entity.add<Animator>(Animator(resources.sprite.getDefault(), 0));
+							else if (ImGui::MenuItem(ComponentNode<Collider2D>::name(), nullptr, nullptr, !entity.has<Collider2D>()))
+								entity.add<Collider2D>(Collider2D());
+							else if (ImGui::MenuItem(ComponentNode<RigidBody2D>::name(), nullptr, nullptr, !entity.has<RigidBody2D>()))
+								entity.add<RigidBody2D>(RigidBody2D());
+							else if (ImGui::MenuItem(ComponentNode<Text>::name(), nullptr, nullptr, !entity.has<Text>()))
+								entity.add<Text>(Text());
+							else if (ImGui::MenuItem(ComponentNode<TileMap>::name(), nullptr, nullptr, !entity.has<TileMap>()))
+								entity.add<TileMap>(TileMap());
+							else if (ImGui::MenuItem(ComponentNode<TileLayer>::name(), nullptr, nullptr, !entity.has<TileLayer>()))
+								entity.add<TileLayer>(TileLayer());
+							else if (ImGui::MenuItem(ComponentNode<Coin>::name(), nullptr, nullptr, !entity.has<Coin>()))
+								entity.add<Coin>(Coin());
+							else if (ImGui::MenuItem(ComponentNode<Player>::name(), nullptr, nullptr, !entity.has<Player>()))
+								entity.add<Player>(Player());
+							else if (ImGui::MenuItem(ComponentNode<Camera2D>::name(), nullptr, nullptr, !entity.has<Camera2D>()))
+								entity.add<Camera2D>(Camera2D());
+							else if (ImGui::MenuItem(ComponentNode<SoundInstance>::name(), nullptr, nullptr, !entity.has<SoundInstance>()))
+								entity.add<SoundInstance>(SoundInstance());
 							ImGui::EndMenu();
 						}
 						//ImGui::SameLine();
 						//ImGui::Combo("##Component", &currentComponent, items.data(), items.size());
 						// Remove entity
 						if (ImGui::MenuItem("Delete entity"))
-							entity->destroy();
+							entity.destroy();
 						ImGui::EndPopup();
 					}
 					component<Transform2D>(entity);
@@ -395,7 +422,7 @@ void EntityWidget::draw(World& world, Resources& resources)
 		}
 		ImGui::EndChild();
 		if (ImGui::Button("Add entity")) {
-			world.createEntity();
+			world.createEntity("New entity");
 		}
 	}
 	ImGui::End();

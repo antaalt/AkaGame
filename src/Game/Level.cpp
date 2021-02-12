@@ -10,13 +10,13 @@
 #include "../Component/Text.h"
 #include "../Component/Player.h"
 #include "../Component/Door.h"
-
+#include "../System/SoundSystem.h"
 #include <cstddef>
 #include <cstring>
 
 
 #include <Aka/Core/Sprite.h>
-#include <Aka/Core/ECS/World.h>
+#include <Aka/Scene/World.h>
 
 namespace aka {
 
@@ -40,8 +40,8 @@ void WorldMap::deleteLevel(const std::string& levelName)
 	Level* level = getLevel(levelName);
 	if (level != nullptr)
 	{
-		for (Entity* e : level->entities)
-			e->destroy();
+		for (Entity& e : level->entities)
+			e.destroy();
 		delete level;
 		m_levels.erase(levelName);
 	}
@@ -69,9 +69,9 @@ void WorldMap::loadLevel(const std::string &str)
 	sampler.wrapS = aka::Sampler::Wrap::Clamp;
 	sampler.wrapT = aka::Sampler::Wrap::Clamp;
 	std::map<std::string, Texture::Ptr> atlas;
-	auto createTileLayer = [&](Level::Layer& layer, const OgmoLevel::Layer* ogmoLayer, int32_t layerDepth) -> Entity* {
+	auto createTileLayer = [&](Level::Layer& layer, const OgmoLevel::Layer* ogmoLayer, int32_t layerDepth) -> Entity {
 		if (ogmoLayer->layer->type != OgmoWorld::LayerType::Tile)
-			return nullptr;
+			return Entity::null();
 		ASSERT(ogmoLayer->tileset->tileSize == ogmoLayer->gridCellSize, "");
 		Texture::Ptr texture;
 		auto it = atlas.find(ogmoLayer->tileset->name);
@@ -94,10 +94,10 @@ void WorldMap::loadLevel(const std::string &str)
 		layer.atlas = texture;
 		layer.tileID = ogmoLayer->data;
 
-		Entity* entity = m_world.createEntity();
-		entity->add<Transform2D>(Transform2D(vec2f(0.f), vec2f(1.f), radianf(0.f)));
-		entity->add<TileMap>(TileMap(ogmoLayer->tileset->tileCount, ogmoLayer->tileset->tileSize, texture));
-		entity->add<TileLayer>(TileLayer(vec2f(0.f), ogmoLayer->gridCellCount, ogmoLayer->gridCellSize, color4f(1.f), ogmoLayer->data, layerDepth));
+		Entity entity = m_world.createEntity("Layer");
+		entity.add<Transform2D>(Transform2D(vec2f(0.f), vec2f(1.f), radianf(0.f)));
+		entity.add<TileMap>(TileMap(ogmoLayer->tileset->tileCount, ogmoLayer->tileset->tileSize, texture));
+		entity.add<TileLayer>(TileLayer(vec2f(0.f), ogmoLayer->gridCellCount, ogmoLayer->gridCellSize, color4f(1.f), ogmoLayer->data, layerDepth));
 		return entity;
 	};
 	// - Layers
@@ -125,47 +125,50 @@ void WorldMap::loadLevel(const std::string &str)
 	{
 		if (entity.entity->name == "Collider")
 		{
-			Entity* e = m_world.createEntity();
-			e->add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0.f)));
-			e->add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f)));
-			//e->add<Animator>(Animator(m_sprites.back().get(), 1));
+			Entity e = m_world.createEntity("Collider");
+			e.add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0.f)));
+			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f)));
+			//e.add<Animator>(Animator(m_sprites.back().get(), 1));
 			level->entities.push_back(e);
 		}
 		else if (entity.entity->name == "Coin")
 		{
-			Entity* e = m_world.createEntity();
-			e->add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0)));
-			e->add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), 0.1f, 0.1f));
-			e->add<Animator>(Animator(m_resources.sprite.get("Coin"), 1))->play("Idle");
-			e->add<Coin>(Coin());
+			Entity e = m_world.createEntity("Coin");
+			e.add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0)));
+			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
+			e.add<Animator>(Animator(m_resources.sprite.get("Coin"), 1));
+			e.add<Coin>(Coin());
+			e.get<Animator>().play("Idle");
 			level->entities.push_back(e);
 		}
 		else if (entity.entity->name == "Character")
 		{
 			// TODO do not load player with level
 			Sprite* playerSprite = m_resources.sprite.get("Player");
-			Entity* e = m_world.createEntity();
-			e->add<Transform2D>(Transform2D(vec2f(80, 224), vec2f(1.f), radianf(0)));
-			e->add<Animator>(Animator(playerSprite, 1))->play("Idle");
-			e->add<RigidBody2D>(RigidBody2D(1.f));
-			e->add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)playerSprite->animations[0].frames[0].width, (float)playerSprite->animations[0].frames[0].height), 0.1f, 0.1f));
+			Entity e = m_world.createEntity("Character");
+			e.add<Transform2D>(Transform2D(vec2f(80, 224), vec2f(1.f), radianf(0)));
+			e.add<Animator>(Animator(playerSprite, 1));
+			e.add<RigidBody2D>(RigidBody2D(1.f));
+			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)playerSprite->animations[0].frames[0].width, (float)playerSprite->animations[0].frames[0].height), CollisionType::Solid, 0.1f, 0.1f));
+			e.add<Player>(Player());
 
-			Player* player = e->add<Player>(Player());
-			player->jump = Control(input::Key::Space);
-			player->left = Control(input::Key::Q);
-			player->right = Control(input::Key::D);
+			e.get<Animator>().play("Idle");
+			Player& player = e.get<Player>();
+			player.jump = Control(input::Key::Space);
+			player.left = Control(input::Key::Q);
+			player.right = Control(input::Key::D);
 
-			e->add<Text>(Text(vec2f(3.f, 17.f), m_resources.font.get("Espera16"), "0", color4f(1.f), 3));
+			e.add<Text>(Text(vec2f(3.f, 17.f), m_resources.font.get("Espera16"), "0", color4f(1.f), 3));
 			level->entities.push_back(e);
 		}
 		else if (entity.entity->name == "LevelDoor")
 		{
 			const vec2f pos = vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y));
 			const vec2f size = vec2f(entity.size);
-			Entity* e = m_world.createEntity();
-			e->add<Transform2D>(Transform2D(pos, size, radianf(0)));
-			e->add<Collider2D>(Collider2D(vec2f(0.f), vec2f(1.f)));
-			e->add<Door>(Door());
+			Entity e = m_world.createEntity("Door");
+			e.add<Transform2D>(Transform2D(pos, size, radianf(0)));
+			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(1.f)));
+			e.add<Door>(Door());
 			level->entities.push_back(e);
 			level->doors.emplace_back();
 			level->doors.back().name = entity.entity->name; // TODO get level name from ogmo file

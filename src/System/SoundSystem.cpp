@@ -1,33 +1,50 @@
 #include "SoundSystem.h"
 
 #include <Aka/OS/Logger.h>
-#include <Aka/Core/ECS/World.h>
+#include <Aka/Scene/World.h>
 
 namespace aka {
 
-
-SoundSystem::SoundSystem(World* world) :
-	System(world)
+void onAudioAdd(entt::registry& registry, entt::entity entity)
 {
+	SoundInstance& sound = registry.get<SoundInstance>(entity);
+	sound.audio = AudioBackend::play(sound.path, sound.loop);
 }
 
-void SoundSystem::update(Time::Unit deltaTime)
+void onAudioRemove(entt::registry& registry, entt::entity entity)
 {
-	m_world->each<SoundInstance>([&](Entity * entity, SoundInstance * sound) {
-		if (AudioBackend::exist(sound->audio))
+	SoundInstance& sound = registry.get<SoundInstance>(entity);
+	AudioBackend::close(sound.audio);
+}
+
+void SoundSystem::create(World& world)
+{
+	world.registry().on_construct<SoundInstance>().connect<&onAudioAdd>();
+	world.registry().on_destroy<SoundInstance>().connect<&onAudioRemove>();
+}
+
+void SoundSystem::destroy(World& world)
+{
+	world.registry().on_construct<SoundInstance>().disconnect<&onAudioAdd>();
+	world.registry().on_destroy<SoundInstance>().disconnect<&onAudioRemove>();
+}
+
+void SoundSystem::update(World& world, Time::Unit deltaTime)
+{
+	auto view = world.registry().view<SoundInstance>();
+	for (entt::entity entity : view) {
+		SoundInstance& sound = world.registry().get<SoundInstance>(entity);
+		if (AudioBackend::exist(sound.audio))
 		{
-			AudioBackend::setVolume(sound->audio, sound->volume);
-			if (AudioBackend::finished(sound->audio))
+			AudioBackend::setVolume(sound.audio, sound.volume);
+			if (AudioBackend::finished(sound.audio))
 			{
-				AudioBackend::close(sound->audio);
-				entity->destroy();
+				// TODO do not destroy entity.
+				world.registry().destroy(entity);
+				//world.registry().remove<SoundInstance>(entity);
 			}
 		}
-		else
-		{
-			sound->audio = AudioBackend::play(sound->path, sound->loop);
-		}
-	});
+	}
 }
 
 };

@@ -137,10 +137,11 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 									if (ImGui::SliderInt("Duration", &d, 0, 1000))
 									{
 										frame.duration = Time::Unit::milliseconds(d);
-										world.each<Animator>([&](Entity* ent, Animator* animator) {
+										auto view = world.registry().view<Animator>();
+										view.each([sprite](Animator& animator) {
 											// Reset current frame duration stored in animator
-											if (animator->sprite == sprite)
-												animator->update();
+											if (animator.sprite == sprite)
+												animator.update();
 										});
 									}
 									int size[2]{ (int)frame.width, (int)frame.height };

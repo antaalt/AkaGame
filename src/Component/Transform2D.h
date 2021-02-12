@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Aka/Core/ECS/Component.h>
+#include <Aka/Scene/Component.h>
 #include <Aka/Core/Geometry.h>
 
 namespace aka {
 
-struct Transform2D : public Component
+struct Transform2D
 {
 	Transform2D();
 	Transform2D(const vec2f& position, const vec2f& scale, radianf rotation);

@@ -73,7 +73,8 @@ Collider2D::Collider2D() :
 {
 }
 
-Collider2D::Collider2D(const vec2f& position, const vec2f& size, float bouncing, float friction) :
+Collider2D::Collider2D(const vec2f& position, const vec2f& size, CollisionType type, float bouncing, float friction) :
+	type(type),
 	position(position),
 	size(size),
 	bouncing(bouncing),

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <Aka/Core/Geometry.h>
-#include <Aka/Core/ECS/Component.h>
+#include <Aka/Scene/Component.h>
 
 #include <vector>
 
 namespace aka {
 
-struct TileLayer : public Component
+struct TileLayer
 {
 	TileLayer();
 	TileLayer(const vec2f& offset, const vec2u &gridCount, const vec2u &gridSize, const color4f &color, const std::vector<int> &tileID, int32_t layer);

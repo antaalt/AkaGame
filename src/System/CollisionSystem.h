@@ -1,28 +1,22 @@
 #pragma once
 
-#include <Aka/Core/ECS/System.h>
-#include <Aka/Core/ECS/Event.h>
+#include <Aka/Scene/System.h>
 #include "../Component/Collider2D.h"
 
 namespace aka {
 
-struct CollisionEvent : public Event {
-	CollisionEvent(Entity *left, Entity *right, vec2f separation) :
-		left(left), right(right), separation(separation) {}
+struct CollisionEvent {
+	CollisionEvent(Entity s, Entity d, CollisionType type);
 
-	Entity* left;
-	Entity* right;
-	vec2f separation;
-
-	void resolve() const;
+	Entity staticEntity;
+	Entity dynamicEntity;
+	CollisionType staticType;
 };
 
 class CollisionSystem : public System
 {
 public:
-	CollisionSystem(World* world);
-
-	void update(Time::Unit deltaTime) override;
+	void update(World& world, Time::Unit deltaTime) override;
 };
 
 };

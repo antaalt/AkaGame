@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Aka/Core/ECS/Component.h>
+#include <Aka/Scene/Component.h>
 #include <Aka/Platform/Input.h>
 
 namespace aka {
@@ -57,7 +57,7 @@ private:
 	std::vector<input::Button> m_buttons;
 };
 
-struct Player : public Component
+struct Player
 {
 	int coin = 0;
 
@@ -73,7 +73,6 @@ struct Player : public Component
 	Control jump;
 	Control left;
 	Control right;
-	bool ground;
 };
 
 }
