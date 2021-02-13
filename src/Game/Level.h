@@ -39,7 +39,7 @@ struct Level
 class WorldMap
 {
 public:
-	WorldMap(World& world, Resources& resources);
+	WorldMap(World& world);
 
 	// Ask for a level
 	Level* getLevel(const std::string& level);
@@ -50,7 +50,6 @@ public:
 	void loadLevel(const std::string& level);
 private:
 	World& m_world;
-	Resources& m_resources;
 	OgmoWorld m_ogmoWorld;
 	std::map<std::string, Level*> m_levels;
 };

@@ -20,9 +20,8 @@
 
 namespace aka {
 
-WorldMap::WorldMap(World& world, Resources& resources) :
+WorldMap::WorldMap(World& world) :
 	m_world(world),
-	m_resources(resources),
 	m_ogmoWorld(OgmoWorld::load(Asset::path("levels/world.ogmo")))
 {
 }
@@ -114,16 +113,16 @@ void WorldMap::loadLevel(const std::string &str)
 
 	{
 		// Audio effect
-		Resources::audio.create("Jump", AudioStream::loadMemory(Asset::path("sounds/jump.mp3")));
+		AudioManager::create("Jump", AudioStream::loadMemory(Asset::path("sounds/jump.mp3")));
 	}
 
 	{
 		// Colliders
-		m_resources.sprite.create("Collider", Sprite::parse(Asset::path("textures/debug/collider.aseprite")));
+		SpriteManager::create("Collider", Sprite::parse(Asset::path("textures/debug/collider.aseprite")));
 		// Coins
-		m_resources.sprite.create("Coin", Sprite::parse(Asset::path("textures/interact/interact.aseprite")));
+		SpriteManager::create("Coin", Sprite::parse(Asset::path("textures/interact/interact.aseprite")));
 		// Player
-		m_resources.sprite.create("Player", Sprite::parse(Asset::path("textures/player/player.aseprite")));
+		SpriteManager::create("Player", Sprite::parse(Asset::path("textures/player/player.aseprite")));
 	}
 	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Colliders");
 	for (const OgmoLevel::Entity& entity : layer->entities)
@@ -141,7 +140,7 @@ void WorldMap::loadLevel(const std::string &str)
 			Entity e = m_world.createEntity("Coin");
 			e.add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0)));
 			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
-			e.add<Animator>(Animator(m_resources.sprite.get("Coin"), 1));
+			e.add<Animator>(Animator(&SpriteManager::get("Coin"), 1));
 			e.add<Coin>(Coin());
 			e.get<Animator>().play("Idle");
 			level->entities.push_back(e);
@@ -149,12 +148,12 @@ void WorldMap::loadLevel(const std::string &str)
 		else if (entity.entity->name == "Character")
 		{
 			// TODO do not load player with level
-			Sprite* playerSprite = m_resources.sprite.get("Player");
+			Sprite& playerSprite = SpriteManager::get("Player");
 			Entity e = m_world.createEntity("Character");
 			e.add<Transform2D>(Transform2D(vec2f(80, 224), vec2f(1.f), radianf(0)));
-			e.add<Animator>(Animator(playerSprite, 1));
+			e.add<Animator>(Animator(&playerSprite, 1));
 			e.add<RigidBody2D>(RigidBody2D(1.f));
-			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)playerSprite->animations[0].frames[0].width, (float)playerSprite->animations[0].frames[0].height), CollisionType::Solid, 0.1f, 0.1f));
+			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)playerSprite.animations[0].frames[0].width, (float)playerSprite.animations[0].frames[0].height), CollisionType::Solid, 0.1f, 0.1f));
 			e.add<Player>(Player());
 
 			e.get<Animator>().play("Idle");
@@ -163,7 +162,7 @@ void WorldMap::loadLevel(const std::string &str)
 			player.left = Control(input::Key::Q);
 			player.right = Control(input::Key::D);
 
-			e.add<Text>(Text(vec2f(3.f, 17.f), m_resources.font.get("Espera16"), "0", color4f(1.f), 3));
+			e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
 			level->entities.push_back(e);
 		}
 		/*else if (entity.entity->name == "LevelDoor")

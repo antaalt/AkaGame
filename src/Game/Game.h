@@ -21,8 +21,6 @@ public:
 private:
 	// UI
 	GUI m_gui;
-	// Resources
-	Resources m_resources;
 	// Rendering
 	uint32_t m_drawCall = 0;
 	Batch m_batch;

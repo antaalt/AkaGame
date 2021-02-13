@@ -7,7 +7,7 @@ class EntityWidget : public GUIWidget
 {
 public:
 	//void update() override;
-	void draw(World& world, Resources& resources) override;
+	void draw(World& world) override;
 };
 
 };

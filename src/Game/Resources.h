@@ -2,6 +2,8 @@
 
 #include <Aka/Aka.h>
 
+#include <mutex>
+
 namespace aka {
 
 template <typename T>
@@ -9,35 +11,42 @@ class ResourceManager
 {
 	using map = std::map<std::string, T>;
 public:
-	T& create(const std::string& str, T&& data);
-	bool has(const std::string& str);
-	T* get(const std::string& str);
-	T* getDefault();
-	void destroy(const std::string& str);
-	size_t count() const { return m_data.size(); }
+	static T& create(const std::string& str, T&& data);
+	static bool has(const std::string& str);
+	static T& get(const std::string& str);
+	static T& getDefault();
+	static void destroy(const std::string& str);
+	static size_t count() { return m_data.size(); }
 
-	typename map::iterator begin() { return m_data.begin(); }
-	typename map::iterator end() { return m_data.end(); }
-	typename map::const_iterator begin()const { return m_data.begin(); }
-	typename map::const_iterator end() const { return m_data.end(); }
+	struct Iterator
+	{
+		using map = std::map<std::string, T>;
+		typename map::iterator begin() { return ResourceManager<T>::m_data.begin(); }
+		typename map::iterator end() { return ResourceManager<T>::m_data.end(); }
+		typename map::const_iterator begin()const { return ResourceManager<T>::m_data.begin(); }
+		typename map::const_iterator end() const { return ResourceManager<T>::m_data.end(); }
+	};
+	static Iterator iterator;
 private:
-	map m_data;
+	static std::mutex m_lock;
+	static map m_data;
 };
+
+template <typename T>
+std::mutex ResourceManager<T>::m_lock;
+template <typename T>
+std::map<std::string, T> ResourceManager<T>::m_data;
+template <typename T>
+typename ResourceManager<T>::Iterator ResourceManager<T>::iterator;
 
 using FontManager = ResourceManager<Font>;
 using SpriteManager = ResourceManager<Sprite>;
 using AudioManager = ResourceManager<AudioStream::Ptr>;
 
-struct Resources
-{
-	static FontManager font;
-	static SpriteManager sprite;
-	static AudioManager audio;
-};
-
 template <typename T>
 T& ResourceManager<T>::create(const std::string& str, T&& data)
 {
+	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.insert(std::make_pair(str, std::move(data)));
 	if (it.second)
 		return it.first->second;
@@ -47,28 +56,30 @@ T& ResourceManager<T>::create(const std::string& str, T&& data)
 template<typename T>
 inline bool ResourceManager<T>::has(const std::string& str)
 {
+	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
 	return it != m_data.end();
 }
 
 template <typename T>
-T* ResourceManager<T>::get(const std::string& str)
+T& ResourceManager<T>::get(const std::string& str)
 {
+	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
-	if (it == m_data.end())
-		return nullptr;
-	return &it->second;
+	return it->second;
 }
 
 template<typename T>
-T* ResourceManager<T>::getDefault()
+T& ResourceManager<T>::getDefault()
 {
-	return &m_data.begin()->second;
+	std::lock_guard<std::mutex> m(m_lock);
+	return m_data.begin()->second;
 }
 
 template <typename T>
 void ResourceManager<T>::destroy(const std::string& str)
 {
+	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
 	if (it == m_data.end())
 		return;

@@ -7,7 +7,7 @@
 
 namespace aka {
 
-void InfoWidget::draw(World& world, Resources& resources)
+void InfoWidget::draw(World& world)
 {
 	if (ImGui::Begin("Infos"))
 	{
@@ -36,7 +36,7 @@ void InfoWidget::draw(World& world, Resources& resources)
 				if (renderColliders)
 				{
 					if (!entity.has<Animator>())
-						entity.add<Animator>(Animator(resources.sprite.get("Collider"), 2));
+						entity.add<Animator>(Animator(&SpriteManager::get("Collider"), 2));
 				}
 				else
 				{

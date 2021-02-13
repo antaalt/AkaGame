@@ -65,13 +65,13 @@ void ComponentNode<Animator>::draw(Animator& animator)
 	// Set the name of the current sprite
 	char currentSpriteName[256] = "None";
 	Sprite* currentSprite = animator.sprite;
-	for (auto& sprite : Resources::sprite)
+	for (auto& sprite : SpriteManager::iterator)
 		if (currentSprite == &sprite.second)
 			STR_CPY(currentSpriteName, 256, sprite.first.c_str());
 	snprintf(buffer, 256, "%s", currentSpriteName);
 	if (ImGui::BeginCombo("Sprite", buffer))
 	{
-		for (auto& sprite : Resources::sprite)
+		for (auto& sprite : SpriteManager::iterator)
 		{
 			bool sameSprite = (currentSprite == &sprite.second);
 			snprintf(buffer, 256, "%s", sprite.first.c_str());
@@ -171,7 +171,7 @@ void ComponentNode<Text>::draw(Text& text)
 	snprintf(buffer, 256, "%s (%u)", text.font->family().c_str(), text.font->height());
 	if (ImGui::BeginCombo("Font", buffer))
 	{
-		for (auto& font : Resources::font)
+		for (auto& font : FontManager::iterator)
 		{
 			bool sameHeight = (currentHeight == font.second.height());
 			bool sameFamily = (currentFont == font.second.family().c_str());
@@ -320,7 +320,7 @@ bool filterValid(Entity entity, uint8_t componentID)
 	return false;
 }
 
-void EntityWidget::draw(World& world, Resources& resources)
+void EntityWidget::draw(World& world)
 {
 	if (ImGui::Begin("Entities##window"))
 	{
@@ -380,7 +380,7 @@ void EntityWidget::draw(World& world, Resources& resources)
 							if (ImGui::MenuItem(ComponentNode<Transform2D>::name(), nullptr, nullptr, !entity.has<Transform2D>()))
 								entity.add<Transform2D>(Transform2D());
 							else if (ImGui::MenuItem(ComponentNode<Animator>::name(), nullptr, nullptr, !entity.has<Animator>()))
-								entity.add<Animator>(Animator(resources.sprite.getDefault(), 0));
+								entity.add<Animator>(Animator(&SpriteManager::getDefault(), 0));
 							else if (ImGui::MenuItem(ComponentNode<Collider2D>::name(), nullptr, nullptr, !entity.has<Collider2D>()))
 								entity.add<Collider2D>(Collider2D());
 							else if (ImGui::MenuItem(ComponentNode<RigidBody2D>::name(), nullptr, nullptr, !entity.has<RigidBody2D>()))

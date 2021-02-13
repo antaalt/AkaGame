@@ -27,7 +27,7 @@
 namespace aka {
 
 Game::Game() :
-	m_map(m_world, m_resources)
+	m_map(m_world)
 {
 }
 void Game::initialize()
@@ -61,7 +61,7 @@ void Game::initialize()
 	{
 		// INIT sounds
 		Entity e = m_world.createEntity("BackgroundMusic");
-		AudioStream::Ptr audio = m_resources.audio.create("Forest", AudioStream::openStream(Asset::path("sounds/forest.mp3")));
+		AudioStream::Ptr audio = AudioManager::create("Forest", AudioStream::openStream(Asset::path("sounds/forest.mp3")));
 		e.add<SoundInstance>(SoundInstance(audio, true));
 	}
 
@@ -80,9 +80,9 @@ void Game::initialize()
 
 	{
 		// INIT FONTS
-		m_resources.font.create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-		m_resources.font.create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-		Font &font = m_resources.font.create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
+		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
+		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
+		Font &font = FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
 		Entity e = m_world.createEntity("Text");
 		e.add<Transform2D>(Transform2D());
 		e.add<Text>(Text());
@@ -107,7 +107,7 @@ void Game::initialize()
 		Sprite::Animation animation;
 		animation.name = "Default";
 		animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(500)));
-		Sprite &sprite = m_resources.sprite.create("Background", Sprite());
+		Sprite &sprite = SpriteManager::create("Background", Sprite());
 		sprite.animations.push_back(animation);
 
 		Entity e = m_world.createEntity("");
@@ -228,7 +228,7 @@ void Game::render()
 
 	{
 		// Rendering imgui
-		m_gui.draw(m_world, m_resources);
+		m_gui.draw(m_world);
 		//ImGui::ShowDemoWindow();
 		m_gui.render();
 	}

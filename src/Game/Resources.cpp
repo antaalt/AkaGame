@@ -2,8 +2,4 @@
 
 namespace aka{
 
-FontManager Resources::font;
-SpriteManager Resources::sprite;
-AudioManager Resources::audio;
-
 }

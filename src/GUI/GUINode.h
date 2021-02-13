@@ -28,7 +28,7 @@ class GUIWidget
 {
 public:
 	virtual void update() {}
-	virtual void draw(World& world, Resources& resources) {}
+	virtual void draw(World& world) {}
 };
 
 class GUI
@@ -45,10 +45,10 @@ public:
 		for (GUIWidget *widget : m_widgets)
 			widget->update();
 	}
-	void draw(World& world, Resources& resources) {
+	void draw(World& world) {
 		if (m_visible)
 			for (GUIWidget* widget : m_widgets)
-				widget->draw(world, resources);
+				widget->draw(world);
 	}
 	void frame();
 	void render();

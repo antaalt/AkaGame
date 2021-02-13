@@ -5,13 +5,13 @@
 
 namespace aka {
 
-void ResourcesWidget::draw(World& world, Resources& resources)
+void ResourcesWidget::draw(World& world)
 {
 	if (ImGui::Begin("Resources"))
 	{
 		if (ImGui::CollapsingHeader("Fonts", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			for (auto &it : resources.font)
+			for (auto &it : FontManager::iterator)
 			{
 				std::string name = it.first;
 				Font& font = it.second;
@@ -26,7 +26,7 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 					float uvy = 1.f / (atlas->width() / font.height());
 
 					uint32_t lineCount = 0;
-					for (uint32_t i = 0; i < NUM_GLYPH; i++)
+					for (uint32_t i = 0; i < (uint32_t)font.count(); i++)
 					{
 						const Character &character = font.getCharacter(i);
 						ImGui::Image(
@@ -85,14 +85,15 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 			{
 				error = "";
 				static int height = 48;
+				static char buffer[256];
 				ImGui::Text("%s", path.c_str());
+				ImGui::InputText("Name##Font", buffer, 256);
 				ImGui::SliderInt("Height", &height, 1, 200);
-				if (ImGui::Button("OK"))
+				if (ImGui::Button("OK") && strlen(buffer) > 0)
 				{
 					try
 					{
-						std::string name = Path::name(path);
-						resources.font.create(name, Font(path, height));
+						FontManager::create(buffer, Font(path, height));
 					}
 					catch (const std::exception& e)
 					{
@@ -113,7 +114,7 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 		}
 		if (ImGui::CollapsingHeader("Sprites", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			for (auto &it : resources.sprite)
+			for (auto &it : SpriteManager::iterator)
 			{
 				std::string name = it.first;
 				Sprite* sprite = &it.second;
@@ -217,7 +218,7 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 				ImGui::InputText("Name", spriteName, 256);
 				if (ImGui::Button("Create"))
 				{
-					resources.sprite.create(spriteName, Sprite());
+					SpriteManager::create(spriteName, Sprite());
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::SameLine();
@@ -225,6 +226,66 @@ void ResourcesWidget::draw(World& world, Resources& resources)
 					ImGui::CloseCurrentPopup();
 				ImGui::EndPopup();
 			}
+		}
+		if (ImGui::CollapsingHeader("Audios", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			for (auto& it : AudioManager::iterator)
+			{
+				std::string name = it.first;
+				AudioStream::Ptr audio = it.second;
+				if (ImGui::TreeNode(name.c_str()))
+				{
+					float duration = audio->samples() / (float)(audio->frequency() * audio->channels());
+					uint32_t ms = (uint32_t)(duration * 1000.f) % 1000;
+					uint32_t s = (uint32_t)(duration) % 60;
+					uint32_t m = (uint32_t)(duration / 60);
+					uint32_t h = (uint32_t)(duration / (60 * 60));
+					ImGui::Text("Duration : %02u:%02u:%02u.%03u", h, m, s, ms);
+					ImGui::Text("Frequency : %u", audio->frequency());
+					ImGui::Text("Channels : %u", audio->channels());
+					ImGui::TreePop();
+				}
+				ImGui::Separator();
+			}
+			static Path path;
+			// Load a file
+			if (Modal::LoadButton("Load audio", &path))
+				ImGui::OpenPopup("Audio settings");
+			// Load a font
+			static std::string error;
+			bool opened = true;
+			if (ImGui::BeginPopupModal("Audio settings", &opened, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				error = "";
+				static bool memory;
+				static char buffer[256];
+				ImGui::InputText("Name##Audio", buffer, 256);
+				ImGui::Checkbox("Memory", &memory);
+				if (ImGui::Button("OK"))
+				{
+					AudioStream::Ptr stream;
+					if (memory)
+						stream = AudioStream::loadMemory(path);
+					else
+						stream = AudioStream::openStream(path);
+					if (stream == nullptr)
+						error = "Could not load audio";
+					else
+					{
+						AudioManager::create(buffer, std::move(stream));
+					}
+					path = "";
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Cancel"))
+				{
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+			if (error.size() > 0)
+				ImGui::TextColored(ImVec4(1, 0, 0, 1), "%s", error.c_str());
 		}
 	}
 	ImGui::End();
