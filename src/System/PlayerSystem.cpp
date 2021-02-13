@@ -9,6 +9,7 @@
 #include "../Component/Text.h"
 #include "../Component/Door.h"
 #include "SoundSystem.h"
+#include "../Game/Resources.h"
 
 namespace aka {
 
@@ -81,7 +82,7 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 
 			if (player.jump.down() && player.state == Player::State::Jumping)
 			{
-				world.createEntity("DoubleJumpFX").add<SoundInstance>(SoundInstance(Asset::path("sounds/jump.mp3"), 1.f));
+				world.createEntity("DoubleJumpFX").add<SoundInstance>(SoundInstance(*Resources::audio.get("Jump"), 1.f));
 				player.state = Player::State::DoubleJumping;
 				rigid.acceleration.y = 0.f;
 				rigid.velocity.y = 16.f;
@@ -114,7 +115,7 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 
 			if (player.jump.down())
 			{
- 				world.createEntity("JumpFX").add<SoundInstance>(SoundInstance(Asset::path("sounds/jump.mp3"), 1.f));
+ 				world.createEntity("JumpFX").add<SoundInstance>(SoundInstance(*Resources::audio.get("Jump"), 1.f));
 				player.state = Player::State::Jumping;
 				rigid.velocity.y = 16.f;
 			}

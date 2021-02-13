@@ -41,7 +41,8 @@ void WorldMap::deleteLevel(const std::string& levelName)
 	if (level != nullptr)
 	{
 		for (Entity& e : level->entities)
-			e.destroy();
+			if(e.valid())
+				e.destroy();
 		delete level;
 		m_levels.erase(levelName);
 	}
@@ -111,6 +112,10 @@ void WorldMap::loadLevel(const std::string &str)
 	memset(data.data(), 0xffffffff, sizeof(data.size()));
 	level->backgroundTexture = Texture::create(level->width, level->height, Texture::Format::Rgba, data.data(), sampler);
 
+	{
+		// Audio effect
+		Resources::audio.create("Jump", AudioStream::loadMemory(Asset::path("sounds/jump.mp3")));
+	}
 
 	{
 		// Colliders
@@ -161,7 +166,7 @@ void WorldMap::loadLevel(const std::string &str)
 			e.add<Text>(Text(vec2f(3.f, 17.f), m_resources.font.get("Espera16"), "0", color4f(1.f), 3));
 			level->entities.push_back(e);
 		}
-		else if (entity.entity->name == "LevelDoor")
+		/*else if (entity.entity->name == "LevelDoor")
 		{
 			const vec2f pos = vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y));
 			const vec2f size = vec2f(entity.size);
@@ -172,7 +177,7 @@ void WorldMap::loadLevel(const std::string &str)
 			level->entities.push_back(e);
 			level->doors.emplace_back();
 			level->doors.back().name = entity.entity->name; // TODO get level name from ogmo file
-		}
+		}*/
 		else
 		{
 			Logger::warn("Ogmo entity not supported : ", entity.entity->name);

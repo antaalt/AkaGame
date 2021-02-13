@@ -61,7 +61,8 @@ void Game::initialize()
 	{
 		// INIT sounds
 		Entity e = m_world.createEntity("BackgroundMusic");
-		e.add<SoundInstance>(SoundInstance(Asset::path("sounds/forest.mp3"), true));
+		AudioStream::Ptr audio = m_resources.audio.create("Forest", AudioStream::openStream(Asset::path("sounds/forest.mp3")));
+		e.add<SoundInstance>(SoundInstance(audio, true));
 	}
 
 	{
@@ -157,9 +158,10 @@ void Game::update(Time::Unit deltaTime)
 
 	Level *level = m_map.getLevel(m_currentLevel);
 	// TODO store player entity in Game instead of level
-	/*m_world.each<Player, Transform2D>([&](Entity* e, Player* player, Transform2D *transform) {
-		vec2f pos = transform->position();
-		vec2f size = transform->size();
+	auto view = m_world.registry().view<Player, Transform2D>();
+	view.each([&](Player& player, Transform2D& transform) {
+		vec2f pos = transform.position();
+		vec2f size = transform.size();
 		if (pos.x + size.x > level->width)
 		{
 			if (m_currentLevel != "level1")
@@ -186,7 +188,7 @@ void Game::update(Time::Unit deltaTime)
 		{
 
 		}
-	});*/
+	});
 
 	// Quit the app if requested
 	if (input::pressed(aka::input::Key::Escape))

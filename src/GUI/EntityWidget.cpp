@@ -142,7 +142,9 @@ const char* ComponentNode<SoundInstance>::icon() { return ICON_FA_MUSIC; }
 void ComponentNode<SoundInstance>::draw(SoundInstance& sound)
 {
 	UniqueID u(&sound);
-	ImGui::Text("Sound : %s", sound.path.c_str());
+	// TODO sound progress bar ?
+	ImGui::Text("Channels : %u", sound.audio->channels());
+	ImGui::Text("Frequency : %u", sound.audio->frequency());
 	ImGui::SliderFloat(u("Volume"), &sound.volume, 0.f, 2.f);
 	ImGui::Checkbox(u("Loop"), &sound.loop);
 }

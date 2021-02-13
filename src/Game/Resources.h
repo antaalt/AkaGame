@@ -10,6 +10,7 @@ class ResourceManager
 	using map = std::map<std::string, T>;
 public:
 	T& create(const std::string& str, T&& data);
+	bool has(const std::string& str);
 	T* get(const std::string& str);
 	T* getDefault();
 	void destroy(const std::string& str);
@@ -25,11 +26,13 @@ private:
 
 using FontManager = ResourceManager<Font>;
 using SpriteManager = ResourceManager<Sprite>;
+using AudioManager = ResourceManager<AudioStream::Ptr>;
 
 struct Resources
 {
 	static FontManager font;
 	static SpriteManager sprite;
+	static AudioManager audio;
 };
 
 template <typename T>
@@ -39,6 +42,13 @@ T& ResourceManager<T>::create(const std::string& str, T&& data)
 	if (it.second)
 		return it.first->second;
 	return it.first->second;
+}
+
+template<typename T>
+inline bool ResourceManager<T>::has(const std::string& str)
+{
+	auto it = m_data.find(str);
+	return it != m_data.end();
 }
 
 template <typename T>
