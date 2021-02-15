@@ -9,10 +9,12 @@ namespace aka {
 
 void InfoWidget::draw(World& world)
 {
-	if (ImGui::Begin("Infos"))
+	uint32_t width, height;
+	PlatformBackend::getSize(&width, &height);
+	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
+	ImGui::SetNextWindowPos(ImVec2(width - 10, 30), ImGuiCond_Always, ImVec2(1.f, 0.f));
+	if (ImGui::Begin("Info", nullptr, flags))
 	{
-		uint32_t width, height;
-		PlatformBackend::getSize(&width, &height);
 		static Device device = Device::getDefault();
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("Resolution : %ux%u", width, height);
@@ -25,33 +27,28 @@ void InfoWidget::draw(World& world)
 		};
 		ImGui::Text("Api : %s", apiName[(int)GraphicBackend::api()]);
 		ImGui::Text("Device : %s", device.vendor);
-
-		static bool renderColliders = false;
-		if (ImGui::Checkbox("Render colliders", &renderColliders))
-		{
-			auto view = world.registry().view<Collider2D>();
-			for (entt::entity e : view)
-			{
-				Entity entity(e, &world);
-				if (renderColliders)
-				{
-					if (!entity.has<Animator>())
-						entity.add<Animator>(Animator(&SpriteManager::get("Collider"), 2));
-				}
-				else
-				{
-					if (entity.has<Animator>() && !entity.has<Player>() && !entity.has<Coin>())
-						entity.remove<Animator>();
-				}
-			}
-		}
-		static bool vsync = true;
-		if (ImGui::Checkbox("Vsync", &vsync))
-		{
-			GraphicBackend::vsync(vsync);
-		}
 	}
 	ImGui::End();
+
+	/*static bool renderColliders = false;
+	if (ImGui::Checkbox("Render colliders", &renderColliders))
+	{
+		auto view = world.registry().view<Collider2D>();
+		for (entt::entity e : view)
+		{
+			Entity entity(e, &world);
+			if (renderColliders)
+			{
+				if (!entity.has<Animator>())
+					entity.add<Animator>(Animator(&SpriteManager::get("Collider"), 2));
+			}
+			else
+			{
+				if (entity.has<Animator>() && !entity.has<Player>() && !entity.has<Coin>())
+					entity.remove<Animator>();
+			}
+		}
+	}*/
 }
 
 };

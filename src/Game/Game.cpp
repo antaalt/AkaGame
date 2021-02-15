@@ -7,6 +7,7 @@
 #include "../Component/TileMap.h"
 #include "../Component/TileLayer.h"
 #include "../Component/Player.h"
+#include "../Component/SoundInstance.h"
 #include "../Component/Coin.h"
 #include "../System/PhysicSystem.h"
 #include "../System/AnimatorSystem.h"
@@ -21,6 +22,7 @@
 #include "../GUI/EntityWidget.h"
 #include "../GUI/InfoWidget.h"
 #include "../GUI/ResourcesWidget.h"
+#include "../GUI/MenuWidget.h"
 #include "OgmoWorld.h"
 
 
@@ -45,16 +47,16 @@ void Game::initialize()
 	sampler.wrapT = aka::Sampler::Wrap::Clamp;
 	{
 		// INIT SYSTEMS
-		m_world.attachSystem<PhysicSystem>();
-		m_world.attachSystem<CollisionSystem>();
-		m_world.attachSystem<TileSystem>();
-		m_world.attachSystem<TileMapSystem>();
-		m_world.attachSystem<AnimatorSystem>();
-		m_world.attachSystem<CameraSystem>();
-		m_world.attachSystem<TextRenderSystem>();
-		m_world.attachSystem<PlayerSystem>();
-		m_world.attachSystem<CoinSystem>();
-		m_world.attachSystem<SoundSystem>();
+		m_world.attach<PhysicSystem>();
+		m_world.attach<CollisionSystem>();
+		m_world.attach<TileSystem>();
+		m_world.attach<TileMapSystem>();
+		m_world.attach<AnimatorSystem>();
+		m_world.attach<CameraSystem>();
+		m_world.attach<TextRenderSystem>();
+		m_world.attach<PlayerSystem>();
+		m_world.attach<CoinSystem>();
+		m_world.attach<SoundSystem>();
 		m_world.create();
 	}
 
@@ -123,9 +125,10 @@ void Game::initialize()
 
 	{
 		// Initialize GUI
-		m_gui.add(new InfoWidget);
-		m_gui.add(new EntityWidget);
-		m_gui.add(new ResourcesWidget);
+		m_gui.add<InfoWidget>();
+		m_gui.add<EntityWidget>();
+		m_gui.add<ResourcesWidget>();
+		m_gui.add<MenuWidget>();
 		m_gui.initialize();
 	}
 }
@@ -195,6 +198,7 @@ void Game::update(Time::Unit deltaTime)
 	{
 		quit();
 	}
+	m_gui.update(m_world);
 }
 
 void Game::render()
@@ -229,7 +233,7 @@ void Game::render()
 	{
 		// Rendering imgui
 		m_gui.draw(m_world);
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 		m_gui.render();
 	}
 

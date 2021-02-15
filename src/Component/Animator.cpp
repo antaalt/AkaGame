@@ -21,9 +21,9 @@ Animator::Animator(Sprite* sprite, int32_t layer) :
 {
 }
 
-Sprite::Frame& Animator::getCurrentSpriteFrame() const
+const Sprite::Frame& Animator::getCurrentSpriteFrame() const
 {
-    return sprite->animations[currentAnimation].frames[currentFrame];
+    return sprite->getFrame(currentAnimation, currentFrame);
 }
 
 void Animator::play(const std::string& animation)

@@ -8,8 +8,9 @@ namespace aka {
 
 struct Text
 {
-	Text();
-	Text(const vec2f &offset, Font* font, const std::string& text, const color4f& color, int32_t layer);
+	Text() : Text(vec2f(0.f), nullptr, "", color4f(1.f), 0) {}
+	Text(const vec2f &offset, Font* font, const std::string& text, const color4f& color, int32_t layer) :
+		offset(offset), font(font), text(text), color(color), layer(layer) {}
 
 	vec2f offset;
 	Font *font;
@@ -17,6 +18,8 @@ struct Text
 	color4f color;
 	int32_t layer;
 };
+template <>
+const char* ComponentHandle<Text>::name = "Text";
 
 }
 

@@ -9,6 +9,8 @@ namespace Modal {
 
 bool LoadButton(const char* label, Path* path);
 
+bool Error(const char* label, std::string& error);
+
 };
 
 };

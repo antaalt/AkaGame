@@ -7,17 +7,6 @@
 
 namespace aka {
 
-class SoundSystem;
-
-struct SoundInstance {
-	SoundInstance() : SoundInstance(nullptr, 1.f, false) {}
-	SoundInstance(AudioStream::Ptr audio, float volume, bool loop = false) : audio(audio), volume(volume), loop(loop) {}
-
-	AudioStream::Ptr audio;
-	float volume;
-	bool loop;
-};
-
 class SoundSystem : public System
 {
 public:

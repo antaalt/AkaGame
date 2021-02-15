@@ -26,6 +26,7 @@ set(SRC
 	"src/GUI/InfoWidget.cpp"
 	"src/GUI/Modal.cpp"
 	"src/GUI/ResourcesWidget.cpp"
+	"src/GUI/MenuWidget.cpp"
 
 	"src/Game/Game.cpp"
 	"src/Game/Level.cpp"
@@ -33,11 +34,6 @@ set(SRC
 	"src/Game/OgmoWorld.cpp"
 
 	"src/Component/Animator.cpp"
-	"src/Component/Camera2D.cpp"
-	"src/Component/Collider2D.cpp"
-	"src/Component/Text.cpp"
-	"src/Component/TileLayer.cpp"
-	"src/Component/TileMap.cpp"
 	"src/Component/Transform2D.cpp"
 )
 if(GRAPHIC_OPENGL)

@@ -8,7 +8,7 @@
 #include "../Component/Animator.h"
 #include "../Component/Text.h"
 #include "../Component/Door.h"
-#include "SoundSystem.h"
+#include "../Component/SoundInstance.h"
 #include "../Game/Resources.h"
 
 namespace aka {

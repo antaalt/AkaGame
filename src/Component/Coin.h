@@ -8,6 +8,8 @@ struct Coin
 {
 	bool picked = false;
 };
+template <>
+const char* ComponentHandle<Coin>::name = "Coin";
 
 
 }

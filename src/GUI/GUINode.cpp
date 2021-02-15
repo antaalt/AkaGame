@@ -98,9 +98,9 @@ void GUI::initialize()
         colors[ImGuiCol_ResizeGripHovered] = colors[ImGuiCol_HeaderHovered];
         colors[ImGuiCol_ResizeGripActive] = colors[ImGuiCol_HeaderActive];
         // Tab
-        colors[ImGuiCol_Tab] = ImLerp(colors[ImGuiCol_Header], colors[ImGuiCol_TitleBgActive], 0.80f);
+        colors[ImGuiCol_Tab] = ImLerp(red, dark, 0.80f);
         colors[ImGuiCol_TabHovered] = colors[ImGuiCol_HeaderHovered];
-        colors[ImGuiCol_TabActive] = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
+        colors[ImGuiCol_TabActive] = red;
         colors[ImGuiCol_TabUnfocused] = ImLerp(colors[ImGuiCol_Tab], colors[ImGuiCol_TitleBg], 0.80f);
         colors[ImGuiCol_TabUnfocusedActive] = ImLerp(colors[ImGuiCol_TabActive], colors[ImGuiCol_TitleBg], 0.40f);
         // Plot
@@ -129,10 +129,14 @@ void GUI::initialize()
         style.PopupBorderSize = 1.f;
 	}
 #endif
+    for (GUIWidget* widget : m_widgets)
+        widget->initialize();
 }
 
 void GUI::destroy()
 {
+    for (GUIWidget* widget : m_widgets)
+        widget->destroy();
 #if defined(USE_IMGUI)
 #if defined(AKA_USE_OPENGL)
 	ImGui_ImplOpenGL3_Shutdown();

@@ -74,5 +74,7 @@ struct Player
 	Control left;
 	Control right;
 };
+template <>
+const char* ComponentHandle<Player>::name = "Player";
 
 }

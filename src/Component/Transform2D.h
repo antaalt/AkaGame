@@ -20,5 +20,7 @@ struct Transform2D
 	void rotate(radianf rotation);
 	void scale(const vec2f& scale);
 };
+template <>
+const char* ComponentHandle<Transform2D>::name = "Transform2D";
 
 }

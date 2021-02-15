@@ -1,5 +1,6 @@
 #include "CollisionSystem.h"
 
+#include <Aka/Core/Physic.h>
 #include <Aka/Scene/World.h>
 
 #include "../Component/Transform2D.h"
@@ -25,8 +26,9 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 		RigidBody2D& rigidBodyDynamic = world.registry().get<RigidBody2D>(entityDynamic);
 		Collider2D& colliderDynamic = world.registry().get<Collider2D>(entityDynamic);
 
-		vec2f positionDynamic = transformDynamic.model.multiplyPoint(colliderDynamic.position);
-		vec2f sizeDynamic = transformDynamic.model.multiplyVector(colliderDynamic.size);
+		Rect2D rectDynamic;
+		rectDynamic.pos = transformDynamic.model.multiplyPoint(colliderDynamic.position);
+		rectDynamic.size = transformDynamic.model.multiplyVector(colliderDynamic.size);
 
 		for (entt::entity entityStatic : viewStatic)
 		{
@@ -37,9 +39,10 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 			if (entityDynamic == entityStatic)
 				continue;
 
-			vec2f positionStatic = transformStatic.model.multiplyPoint(colliderStatic.position);
-			vec2f sizeStatic = transformStatic.model.multiplyVector(colliderStatic.size);
-			Collision2D c = overlap(positionDynamic, sizeDynamic, positionStatic, sizeStatic);
+			Rect2D rectStatic;
+			rectStatic.pos = transformStatic.model.multiplyPoint(colliderStatic.position);
+			rectStatic.size = transformStatic.model.multiplyVector(colliderStatic.size);
+			Collision2D c = overlap(rectDynamic, rectStatic);
 			if (c.collided)
 			{
 				if (colliderStatic.is(CollisionType::Solid))

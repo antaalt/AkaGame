@@ -30,32 +30,8 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		// Go to parent folder
 		if (ImGui::Button(ICON_FA_ARROW_UP))
 		{
-			std::string path = currentPath.str();
-			const size_t separatorCount = std::count(path.begin(), path.end(), '/');
-			const size_t lastCharacterOffset = path.size() - 1;
-			size_t offset = path.find_last_of('/');
-			if (1 == separatorCount)
-			{
-				if (offset != lastCharacterOffset)
-				{
-					currentPath = Path(path.substr(0, offset + 1));
-					updatedList = true;
-				}
-			}
-			else
-			{
-				if (offset == lastCharacterOffset)
-				{
-					offset = path.substr(0, offset).find_last_of('/');
-					currentPath = path.substr(0, offset + 1);
-					updatedList = true;
-				}
-				else
-				{
-					currentPath = path.substr(0, offset + 1);
-					updatedList = true;
-				}
-			}
+			currentPath = currentPath.up();
+			updatedList = true;
 		}
 		// Refresh directory
 		ImGui::SameLine();
@@ -129,6 +105,37 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		ImGui::EndPopup();
 	}
 	return (loading && resultPath->str().size() > 0 && file::exist(Path(*resultPath)));
-};
+}
+
+bool Modal::Error(const char* label, std::string& error)
+{
+	static bool errorShown = false;
+	if (error.size() > 0 && !errorShown)
+	{
+		ImGui::OpenPopup("Error");
+		ImGui::SetNextWindowSize(ImVec2(200, -1));
+		errorShown = true;
+	}
+	if (ImGui::BeginPopupModal("Error", &errorShown, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Error while loading resources : ");
+		ImGui::Separator();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 0, 50)));
+		ImGui::TextWrapped("%s", error.c_str());
+		ImGui::PopStyleColor();
+		ImGui::Separator();
+		if (ImGui::Button("OK"))
+		{
+			ImGui::CloseCurrentPopup();
+			errorShown = false;
+			error = "";
+		}
+		ImGui::EndPopup();
+	}
+	if (!errorShown)
+		error = "";
+	return false;
+}
+;
 
 };

@@ -20,7 +20,7 @@ struct Animator
 	int32_t layer;
 	bool flipU, flipV;
 
-	Sprite::Frame& getCurrentSpriteFrame() const;
+	const Sprite::Frame& getCurrentSpriteFrame() const;
 
 	void play(const std::string& animation);
 	void update();
@@ -28,6 +28,8 @@ private:
 	Time::Unit animationTimer;
 	Time::Unit currentAnimationDuration;
 };
+template <>
+const char* ComponentHandle<Animator>::name = "Animator";
 
 };
 

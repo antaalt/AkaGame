@@ -27,7 +27,9 @@ namespace aka {
 class GUIWidget
 {
 public:
-	virtual void update() {}
+	virtual void initialize() {}
+	virtual void destroy() {}
+	virtual void update(World& world) {}
 	virtual void draw(World& world) {}
 };
 
@@ -41,9 +43,9 @@ public:
 	}
 	void initialize();
 	void destroy();
-	void update() {
+	void update(World& world) {
 		for (GUIWidget *widget : m_widgets)
-			widget->update();
+			widget->update(world);
 	}
 	void draw(World& world) {
 		if (m_visible)
@@ -55,7 +57,8 @@ public:
 	bool isVisible() { return m_visible; }
 	void setVisible(bool visible) { m_visible = visible; }
 
-	void add(GUIWidget* widget) { m_widgets.push_back(widget); }
+	template <typename T>
+	void add() { m_widgets.push_back(new T); }
 
 	bool focused() const { const ImGuiIO& io = ImGui::GetIO(); return io.WantCaptureMouse; }
 private:
