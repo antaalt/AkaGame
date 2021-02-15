@@ -20,7 +20,7 @@ void CoinSystem::destroy(World& world)
 void CoinSystem::receive(const AnimationFinishedEvent& event)
 {
 	Entity entity = event.entity;
-	if (entity.has<Coin>())
+	if (entity.valid() && entity.has<Coin>())
 	{
 		const Coin& coin = entity.get<Coin>();
 		if (coin.picked)

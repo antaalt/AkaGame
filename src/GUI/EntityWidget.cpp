@@ -137,6 +137,7 @@ bool ComponentNode<Camera2D>::draw(Camera2D& camera)
 	UniqueID u(&camera);
 	ImGui::InputFloat2(u("Position"), camera.position.data);
 	ImGui::InputFloat2(u("Viewport"), camera.viewport.data);
+	ImGui::Checkbox(u("Clamp"), &camera.clampBorder);
 	return false;
 }
 
@@ -374,7 +375,7 @@ bool filterValid(Entity entity, ComponentID filterComponentID)
 }
 
 // Draw an overlay over current widget components
-void overlay(World &world, Entity m_currentEntity)
+void overlay(World &world, Entity entity)
 {
 	const Camera2D* camera = nullptr;
 	world.each([&camera](Entity entity) {
@@ -387,17 +388,17 @@ void overlay(World &world, Entity m_currentEntity)
 			col3f(1.f, 0.f, 0.f),
 			col3f(0.f, 1.f, 0.f),
 			col3f(camera->position.x, camera->position.y, 1.f)
-		)); 
+		));
+		Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
+		vec2f scale = vec2f(backbuffer->width(), backbuffer->height()) / camera->viewport;
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f));
+		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// Animator overlay for current entity
-		if (m_currentEntity.has<Transform2D>() && m_currentEntity.has<Animator>())
+		if (entity.has<Transform2D>() && entity.has<Animator>())
 		{
-			Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-			Transform2D& t = m_currentEntity.get<Transform2D>();
-			Animator& a = m_currentEntity.get<Animator>();
+			Transform2D& t = entity.get<Transform2D>();
+			Animator& a = entity.get<Animator>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
-			ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-			vec2f scale = vec2f(backbuffer->width(), backbuffer->height()) / camera->viewport;
 			vec2f p = vec2f(view * t.model * vec3f(0, 0, 1));
 			p.y = camera->viewport.y - p.y;
 			vec2f s = vec2f(view * t.model * vec3f(f.width, f.height, 0));
@@ -406,16 +407,26 @@ void overlay(World &world, Entity m_currentEntity)
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
 		}
 		// Collider overlay for current entity
-		else if (m_currentEntity.has<Transform2D>() && m_currentEntity.has<Collider2D>())
+		else if (entity.has<Transform2D>() && entity.has<Collider2D>())
 		{
-			Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-			Transform2D& t = m_currentEntity.get<Transform2D>();
-			Collider2D& c = m_currentEntity.get<Collider2D>();
-			ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-			vec2f scale = vec2f(backbuffer->width(), backbuffer->height()) / camera->viewport;
+			Transform2D& t = entity.get<Transform2D>();
+			Collider2D& c = entity.get<Collider2D>();
 			vec2f p = vec2f(view * t.model * vec3f(c.position, 1));
 			p.y = camera->viewport.y - p.y;
 			vec2f s = vec2f(view * t.model * vec3f(c.size, 0));
+			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
+			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
+			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
+		}
+		// Text overlay for current entity
+		else if (entity.has<Text>())
+		{
+			Transform2D& t = entity.get<Transform2D>();
+			Text& text = entity.get<Text>();
+			vec2i size = text.font->size(text.text);
+			vec2f p = vec2f(view * t.model * vec3f(text.offset, 1));
+			p.y = camera->viewport.y - p.y;
+			vec2f s = vec2f(view * t.model * vec3f(vec2f(size), 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
@@ -502,7 +513,8 @@ Entity pickEntity(World &world)
 
 void EntityWidget::update(World& world)
 {
-	if ( ImGui::IsMouseReleased(0))
+	ImGuiIO& io = ImGui::GetIO();
+	if ( ImGui::IsMouseReleased(0) && !io.WantCaptureMouse)
 		m_currentEntity = pickEntity(world);
 }
 

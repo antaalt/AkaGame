@@ -99,8 +99,8 @@ void ResourcesWidget::draw(World& world)
 							ImGui::TreePop();
 						}
 					}
-					ImGui::EndChild();
 				}
+				ImGui::EndChild();
 				if (ImGui::Button("Load font"))
 					ImGui::OpenPopup("Font settings");
 				bool opened = true;
@@ -245,8 +245,8 @@ void ResourcesWidget::draw(World& world)
 							ImGui::TreePop();
 						}
 					}
-					ImGui::EndChild();
 				}
+				ImGui::EndChild();
 				if (ImGui::Button("Load sprite"))
 					ImGui::OpenPopup("Sprite loader");
 				ImGui::SameLine();
@@ -326,8 +326,8 @@ void ResourcesWidget::draw(World& world)
 							ImGui::TreePop();
 						}
 					}
-					ImGui::EndChild();
 				}
+				ImGui::EndChild();
 				if (ImGui::Button("Load Audio"))
 					ImGui::OpenPopup("Audio settings");
 				bool opened = true;

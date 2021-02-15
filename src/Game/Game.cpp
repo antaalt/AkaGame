@@ -19,6 +19,7 @@
 #include "../System/PlayerSystem.h"
 #include "../System/CoinSystem.h"
 #include "../System/SoundSystem.h"
+#include "../System/LevelSystem.h"
 #include "../GUI/EntityWidget.h"
 #include "../GUI/InfoWidget.h"
 #include "../GUI/ResourcesWidget.h"
@@ -28,12 +29,12 @@
 
 namespace aka {
 
-Game::Game() :
-	m_map(m_world)
+Game::Game()
 {
 }
 void Game::initialize()
 {
+	Logger::debug.mute();
 	Device device = Device::getDefault();
 	Logger::info("Device vendor : ", device.vendor);
 	Logger::info("Device renderer : ", device.renderer);
@@ -57,11 +58,12 @@ void Game::initialize()
 		m_world.attach<PlayerSystem>();
 		m_world.attach<CoinSystem>();
 		m_world.attach<SoundSystem>();
+		m_world.attach<LevelSystem>(m_map);
 		m_world.create();
 	}
 
 	{
-		// INIT sounds
+		// INIT background sounds
 		Entity e = m_world.createEntity("BackgroundMusic");
 		AudioStream::Ptr audio = AudioManager::create("Forest", AudioStream::openStream(Asset::path("sounds/forest.mp3")));
 		e.add<SoundInstance>(SoundInstance(audio, true));
@@ -119,8 +121,29 @@ void Game::initialize()
 	}
 
 	{
-		m_currentLevel = "level0";
-		m_map.loadLevel(m_currentLevel);
+		// Set first level
+		m_map.set(0, 0, m_world);
+	}
+
+	{
+		Level& level = m_map.get();
+		// Init character
+		Sprite& playerSprite = SpriteManager::get("Player");
+		const Sprite::Frame& frame = playerSprite.getFrame(0, 0);
+		Entity e = m_world.createEntity("Character");
+		e.add<Transform2D>(Transform2D(vec2f(level.spawn), vec2f(1.f), radianf(0)));
+		e.add<Animator>(Animator(&playerSprite, 1));
+		e.add<RigidBody2D>(RigidBody2D(1.f));
+		e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)frame.width, (float)frame.height), CollisionType::Solid, 0.1f, 0.1f));
+		e.add<Player>(Player());
+
+		e.get<Animator>().play("Idle");
+		Player& player = e.get<Player>();
+		player.jump = Control(input::Key::Space);
+		player.left = Control(input::Key::Q);
+		player.right = Control(input::Key::D);
+
+		e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
 	}
 
 	{
@@ -142,9 +165,7 @@ void Game::frame()
 {
 	m_gui.frame();
 }
-// Need a component movable -> take inputs and update movements
-// Component hurtable
-// collision -> if hurtable and collider has component damage
+
 void Game::update(Time::Unit deltaTime)
 {
 	if (input::pressed(input::Key::F1))
@@ -159,44 +180,22 @@ void Game::update(Time::Unit deltaTime)
 	// Update world after moving manually objects
 	m_world.update(deltaTime);
 
-	Level *level = m_map.getLevel(m_currentLevel);
-	// TODO store player entity in Game instead of level
-	auto view = m_world.registry().view<Player, Transform2D>();
-	view.each([&](Player& player, Transform2D& transform) {
-		vec2f pos = transform.position();
-		vec2f size = transform.size();
-		if (pos.x + size.x > level->width)
-		{
-			if (m_currentLevel != "level1")
-			{
-				m_map.deleteLevel("level0");
-				m_map.loadLevel("level1");
-				m_currentLevel = "level1";
-			}
-		}
-		else if (pos.x < 0)
-		{
-			if (m_currentLevel != "level0")
-			{
-				m_map.deleteLevel("level1");
-				m_map.loadLevel("level0");
-				m_currentLevel = "level0";
-			}
-		}
-		else if (pos.y + size.y > level->height)
-		{
-
-		}
-		else if (pos.y < 0)
-		{
-
-		}
-	});
-
 	// Quit the app if requested
-	if (input::pressed(aka::input::Key::Escape))
+	if (input::down(input::Key::Escape))
 	{
 		quit();
+	}
+	// Reset
+	if (input::down(input::Key::LeftCtrl))
+	{
+		m_map.set(0, 0, m_world);
+		Level& level = m_map.get();
+		auto view = m_world.registry().view<Transform2D, Player>();
+		// TODO reinstantiate player ?
+		view.each([&](Transform2D& transform, Player& player) {
+			transform.model[2].x = level.spawn.x;
+			transform.model[2].y = level.spawn.y;
+		});
 	}
 	m_gui.update(m_world);
 }
@@ -233,7 +232,6 @@ void Game::render()
 	{
 		// Rendering imgui
 		m_gui.draw(m_world);
-		ImGui::ShowDemoWindow();
 		m_gui.render();
 	}
 

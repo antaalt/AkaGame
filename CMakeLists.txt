@@ -20,6 +20,7 @@ set(SRC
 	"src/System/TextRenderSystem.cpp"
 	"src/System/TileMapSystem.cpp"
 	"src/System/TileRenderSystem.cpp"
+	"src/System/LevelSystem.cpp"
 
 	"src/GUI/EntityWidget.cpp"
 	"src/GUI/GUINode.cpp"

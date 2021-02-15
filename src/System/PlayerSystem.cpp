@@ -138,11 +138,6 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 			Logger::info("DoubleJumping");
 			break;
 		}*/
-
-		if (input::pressed(input::Key::LeftCtrl))
-		{
-			transform.move(vec2f(80, 224));
-		}
 	});
 }
 

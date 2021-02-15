@@ -98,7 +98,7 @@
       "nodeGhost": true,
       "tags": [],
       "values": [],
-      "texture": "../textures/debug/collider.png",
+      "texture": "../textures/collider/collider.png",
       "textureImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAGdJREFUOI1jXGNk9J+BAsACY4ScO8dIika4xTAGKS5B0YOskRhDMNSja8JnCFa12DSQJIbLRmK8tsbI6D8LNgkGBkiswDTiiyEmXBJEA0q9QP1ApCgaKUpI5CZloqIKnyGMpNiMDQAAP8NmhCizhEsAAAAASUVORK5CYII="
     },
     {
@@ -214,7 +214,7 @@
       "values": [
         {"name": "Level", "definition": "String", "display": 0, "defaults": "Level0", "maxLength": 0, "trimWhitespace": true}
       ],
-      "texture": "../textures/debug/collider.png",
+      "texture": "../textures/collider/collider.png",
       "textureImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAGdJREFUOI1jXGNk9J+BAsACY4ScO8dIika4xTAGKS5B0YOskRhDMNSja8JnCFa12DSQJIbLRmK8tsbI6D8LNgkGBkiswDTiiyEmXBJEA0q9QP1ApCgaKUpI5CZloqIKnyGMpNiMDQAAP8NmhCizhEsAAAAASUVORK5CYII="
     }
   ],

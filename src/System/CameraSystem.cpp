@@ -49,7 +49,7 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 			}
 
 			// Vertical
-			if (playerRelativePosition.y < vThreshold)
+			/*if (playerRelativePosition.y < vThreshold)
 			{
 				float distance = abs<float>(playerRelativePosition.y - vThreshold);
 				if (distance > 1.f)
@@ -60,20 +60,23 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 				float distance = playerRelativePosition.y - (camera.viewport.y - vThreshold);
 				if (distance > 1.f)
 					camera.position.y += pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
-			}
+			}*/
 			break; // Only track first player encountered.
 		}
 
 		// Clamp camera position to the current level bounds.
-		for (entt::entity layerEntity : layerView)
+		if (camera.clampBorder)
 		{
-			TileLayer& layer = world.registry().get<TileLayer>(layerEntity);
-			vec2f grid = vec2f(layer.gridSize * layer.gridCount) + layer.offset;
-			camera.position.x = max<float>(camera.position.x, layer.offset.x);
-			camera.position.x = min<float>(camera.position.x, grid.x - camera.viewport.x);
-			camera.position.y = max<float>(camera.position.y, layer.offset.y);
-			camera.position.y = min<float>(camera.position.y, grid.y - camera.viewport.y);
-			break; // Only first layer encountered
+			for (entt::entity layerEntity : layerView)
+			{
+				TileLayer& layer = world.registry().get<TileLayer>(layerEntity);
+				vec2f grid = vec2f(layer.gridSize * layer.gridCount) + layer.offset;
+				camera.position.x = max<float>(camera.position.x, layer.offset.x);
+				camera.position.x = min<float>(camera.position.x, grid.x - camera.viewport.x);
+				camera.position.y = max<float>(camera.position.y, layer.offset.y);
+				camera.position.y = min<float>(camera.position.y, grid.y - camera.viewport.y);
+				break; // Only first layer encountered
+			}
 		}
 	}
 }

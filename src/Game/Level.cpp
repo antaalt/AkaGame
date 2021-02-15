@@ -20,47 +20,49 @@
 
 namespace aka {
 
-WorldMap::WorldMap(World& world) :
-	m_world(world),
+WorldMap::WorldMap() :
 	m_ogmoWorld(OgmoWorld::load(Asset::path("levels/world.ogmo")))
 {
 }
 
-Level* WorldMap::getLevel(const std::string& level)
+void WorldMap::set(uint32_t x, uint32_t y, World& world)
 {
-	auto it = m_levels.find(level);
-	if (it == m_levels.end())
-		return nullptr;
-	return it->second;
+	m_currentLevel = vec2u(x, y);
+	m_level.destroy(world);
+	m_level.load(getLevelFromGrid(x, y), m_ogmoWorld, world);
 }
 
-void WorldMap::deleteLevel(const std::string& levelName)
+void WorldMap::next(int32_t xOffset, int32_t yOffset, World& world)
 {
-	Level* level = getLevel(levelName);
-	if (level != nullptr)
-	{
-		for (Entity& e : level->entities)
-			if(e.valid())
-				e.destroy();
-		delete level;
-		m_levels.erase(levelName);
-	}
+	ASSERT((m_currentLevel.x + xOffset) >= 0, "Integer overflow");
+	ASSERT((m_currentLevel.y + yOffset) >= 0, "Integer overflow");
+	uint32_t x = (m_currentLevel.x + xOffset) % m_grid.cols();
+	uint32_t y = (m_currentLevel.y + yOffset) % m_grid.rows();
+	set(x, y, world);
 }
 
-void WorldMap::loadLevel(const std::string &str)
+Level& WorldMap::get()
 {
-	Level* level = new Level;
-	auto it = m_levels.insert(std::make_pair(str, level));
+	return m_level;
+}
 
+const std::string& WorldMap::getLevelFromGrid(uint32_t x, uint32_t y)
+{
+	ASSERT(y < m_grid.rows(), "Not enough rows");
+	ASSERT(x < m_grid.cols(), "Not enough cols");
+	return m_grid[y][x];
+}
+
+void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
+{
 	// Load Ogmo level
-	Path path = Asset::path("levels/" + str + ".json");
-	OgmoLevel ogmoLevel = OgmoLevel::load(m_ogmoWorld, path);
+	Path path = Asset::path("levels/" + level + ".json");
+	OgmoLevel ogmoLevel = OgmoLevel::load(ogmoWorld, path);
 	const OgmoLevel::Layer* foreground = ogmoLevel.getLayer("Foreground");
 
 	// - Size
-	//ogmoLevel.offset;
-	level->width = ogmoLevel.size.x;
-	level->height = ogmoLevel.size.y;
+	this->offset = ogmoLevel.offset;
+	this->size = ogmoLevel.size;
 
 	// - Layers
 	Sampler sampler;
@@ -78,10 +80,10 @@ void WorldMap::loadLevel(const std::string &str)
 		if (it == atlas.end())
 		{
 			texture = Texture::create(
-				ogmoLayer->tileset->image.width, 
-				ogmoLayer->tileset->image.height, 
-				Texture::Format::Rgba, 
-				ogmoLayer->tileset->image.bytes.data(), 
+				ogmoLayer->tileset->image.width,
+				ogmoLayer->tileset->image.height,
+				Texture::Format::Rgba,
+				ogmoLayer->tileset->image.bytes.data(),
 				sampler
 			);
 			atlas.insert(std::make_pair(ogmoLayer->tileset->name, texture));
@@ -90,26 +92,26 @@ void WorldMap::loadLevel(const std::string &str)
 		{
 			texture = it->second;
 		}
-		
+
 		layer.atlas = texture;
 		layer.tileID = ogmoLayer->data;
 
-		Entity entity = m_world.createEntity("Layer");
+		Entity entity = world.createEntity("Layer");
 		entity.add<Transform2D>(Transform2D(vec2f(0.f), vec2f(1.f), radianf(0.f)));
 		entity.add<TileMap>(TileMap(ogmoLayer->tileset->tileCount, ogmoLayer->tileset->tileSize, texture));
-		entity.add<TileLayer>(TileLayer(vec2f(0.f), ogmoLayer->gridCellCount, ogmoLayer->gridCellSize, color4f(1.f), ogmoLayer->data, layerDepth));
+		entity.add<TileLayer>(TileLayer(vec2f(offset), ogmoLayer->gridCellCount, ogmoLayer->gridCellSize, color4f(1.f), ogmoLayer->data, layerDepth));
 		return entity;
 	};
 	// - Layers
-	level->entities.push_back(createTileLayer(level->background, ogmoLevel.getLayer("Background"), -1));
-	level->entities.push_back(createTileLayer(level->playerGround, ogmoLevel.getLayer("Playerground"), 0));
-	level->entities.push_back(createTileLayer(level->foreground, ogmoLevel.getLayer("Foreground"), 1));
+	this->entities.push_back(createTileLayer(this->background, ogmoLevel.getLayer("Background"), -1));
+	this->entities.push_back(createTileLayer(this->playerGround, ogmoLevel.getLayer("Playerground"), 0));
+	this->entities.push_back(createTileLayer(this->foreground, ogmoLevel.getLayer("Foreground"), 1));
 
 	// - Background texture
 	std::vector<uint8_t> data;
-	data.resize(level->width * level->height * 4);
+	data.resize(this->size.x * this->size.y * 4);
 	memset(data.data(), 0xffffffff, sizeof(data.size()));
-	level->backgroundTexture = Texture::create(level->width, level->height, Texture::Format::Rgba, data.data(), sampler);
+	this->backgroundTexture = Texture::create(this->size.x, this->size.y, Texture::Format::Rgba, data.data(), sampler);
 
 	{
 		// Audio effect
@@ -125,63 +127,50 @@ void WorldMap::loadLevel(const std::string &str)
 		SpriteManager::create("Player", Sprite::parse(Asset::path("textures/player/player.aseprite")));
 	}
 	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Colliders");
+	auto flipY = [](const vec2u& pos, const vec2u& size, const OgmoLevel::Layer *layer) -> vec2f {
+		return vec2f((float)pos.x, (float)(layer->getHeight() - pos.y - size.y));
+	};
 	for (const OgmoLevel::Entity& entity : layer->entities)
 	{
 		if (entity.entity->name == "Collider")
 		{
-			Entity e = m_world.createEntity("Collider");
-			e.add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0.f)));
+			Entity e = world.createEntity("Collider");
+			e.add<Transform2D>(Transform2D(vec2f(offset) + flipY(entity.position, entity.size, layer), vec2f(entity.size) / 16.f, radianf(0.f)));
 			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f)));
-			//e.add<Animator>(Animator(m_sprites.back().get(), 1));
-			level->entities.push_back(e);
+			this->entities.push_back(e);
 		}
 		else if (entity.entity->name == "Coin")
 		{
-			Entity e = m_world.createEntity("Coin");
-			e.add<Transform2D>(Transform2D(vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y)), vec2f(entity.size) / 16.f, radianf(0)));
+			Entity e = world.createEntity("Coin");
+			e.add<Transform2D>(Transform2D(vec2f(offset) + flipY(entity.position, entity.size, layer), vec2f(entity.size) / 16.f, radianf(0)));
 			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
 			e.add<Animator>(Animator(&SpriteManager::get("Coin"), 1));
 			e.add<Coin>(Coin());
 			e.get<Animator>().play("Idle");
-			level->entities.push_back(e);
+			this->entities.push_back(e);
 		}
 		else if (entity.entity->name == "Character")
 		{
-			// TODO do not load player with level
-			Sprite& playerSprite = SpriteManager::get("Player");
-			Entity e = m_world.createEntity("Character");
-			e.add<Transform2D>(Transform2D(vec2f(80, 224), vec2f(1.f), radianf(0)));
-			e.add<Animator>(Animator(&playerSprite, 1));
-			e.add<RigidBody2D>(RigidBody2D(1.f));
-			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)playerSprite.animations[0].frames[0].width, (float)playerSprite.animations[0].frames[0].height), CollisionType::Solid, 0.1f, 0.1f));
-			e.add<Player>(Player());
-
-			e.get<Animator>().play("Idle");
-			Player& player = e.get<Player>();
-			player.jump = Control(input::Key::Space);
-			player.left = Control(input::Key::Q);
-			player.right = Control(input::Key::D);
-
-			e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
-			level->entities.push_back(e);
+			this->spawn = vec2u(vec2f(offset) + flipY(entity.position, entity.size, layer));
 		}
-		/*else if (entity.entity->name == "LevelDoor")
-		{
-			const vec2f pos = vec2f((float)entity.position.x, (float)(layer->getHeight() - entity.position.y - entity.size.y));
-			const vec2f size = vec2f(entity.size);
-			Entity e = m_world.createEntity("Door");
-			e.add<Transform2D>(Transform2D(pos, size, radianf(0)));
-			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(1.f)));
-			e.add<Door>(Door());
-			level->entities.push_back(e);
-			level->doors.emplace_back();
-			level->doors.back().name = entity.entity->name; // TODO get level name from ogmo file
-		}*/
 		else
 		{
 			Logger::warn("Ogmo entity not supported : ", entity.entity->name);
 		}
 	}
+}
+
+void Level::destroy(World& world)
+{
+	for (Entity& e : entities)
+		if (e.valid())
+			e.destroy();
+	size = vec2u(0);
+	offset = vec2i(0);
+	foreground = Layer{};
+	playerGround = Layer{};
+	background = Layer{};
+	backgroundTexture.reset();
 }
 
 };
