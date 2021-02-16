@@ -100,7 +100,7 @@ void Game::initialize()
 		text.layer = 2;
 		vec2i size = font.size(text.text);
 		Transform2D& transform = e.get<Transform2D>();
-		transform.translate(vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50)));
+		transform.position += vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50));
 	}
 
 	{
@@ -195,8 +195,8 @@ void Game::update(Time::Unit deltaTime)
 		auto view = m_world.registry().view<Transform2D, Player>();
 		// TODO reinstantiate player ?
 		view.each([&](Transform2D& transform, Player& player) {
-			transform.model[2].x = (float)level.spawn.x;
-			transform.model[2].y = (float)level.spawn.y;
+			transform.position.x = (float)level.spawn.x;
+			transform.position.y = (float)level.spawn.y;
 		});
 	}
 	// Update interface

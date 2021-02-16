@@ -111,6 +111,7 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 	}
 
 	{
+		// Background
 		Image image = Image::load(Asset::path("textures/background/background.png"));
 
 		Sprite::Animation animation;
@@ -122,8 +123,9 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 		animation.frames.back().texture->upload(image.bytes.data());
 		animation.frames.back().width = this->size.x;
 		animation.frames.back().height = this->size.y;
-		Sprite& sprite = SpriteManager::create("Background", Sprite());
-		sprite.animations.push_back(animation);
+		Sprite s;
+		s.animations.push_back(animation);
+		Sprite& sprite = SpriteManager::create("Background", std::move(s));
 
 		Entity e = world.createEntity("");
 		e.add<Transform2D>(Transform2D(Transform2D(vec2f(offset), vec2f(1.f), radianf(0.f))));

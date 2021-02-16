@@ -32,7 +32,7 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 
 			const float hThreshold = 0.4f * camera.viewport.x;
 			const float vThreshold = 0.2f * camera.viewport.y;
-			const vec2f playerPosition = transform.position();
+			const vec2f playerPosition = transform.position;
 			const vec2f playerRelativePosition = playerPosition - camera.position;
 			// Horizontal
 			if (playerRelativePosition.x < hThreshold)

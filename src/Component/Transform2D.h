@@ -10,15 +10,11 @@ struct Transform2D
 	Transform2D();
 	Transform2D(const vec2f& position, const vec2f& scale, radianf rotation);
 
-	mat3f model;
+	vec2f position;
+	vec2f size;
+	radianf rotation;
 
-	vec2f position() const;
-	vec2f size() const;
-
-	void translate(const vec2f& translation);
-	void move(const vec2f& move);
-	void rotate(radianf rotation);
-	void scale(const vec2f& scale);
+	mat3f model() const;
 };
 template <>
 const char* ComponentHandle<Transform2D>::name = "Transform2D";

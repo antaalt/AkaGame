@@ -46,15 +46,9 @@ struct UniqueID {
 const char* ComponentNode<Transform2D>::icon() { return ICON_FA_ARROWS_ALT; }
 bool ComponentNode<Transform2D>::draw(Transform2D& transform)
 {
-	UniqueID u(&transform);
-	ImGui::InputFloat2(u("Position"), transform.model[2].data);
-	vec2f size = vec2f(transform.model[0].x, transform.model[1].y);
-	if (ImGui::InputFloat2(u("Size"), size.data))
-	{
-		transform.model[0].x = size.x;
-		transform.model[1].y = size.y;
-	}
-	//ImGui::InputFloat("Rotation", &transform->rotation(), 0.1f, 1.f, 3);
+	ImGui::InputFloat2("Position", transform.position.data);
+	ImGui::InputFloat2("Size", transform.size.data);
+	ImGui::SliderAngle("Rotation", &transform.rotation());
 	return false;
 }
 
@@ -422,9 +416,9 @@ void overlay(World &world, Entity entity)
 			Transform2D& t = entity.get<Transform2D>();
 			Animator& a = entity.get<Animator>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
-			vec2f p = vec2f(view * t.model * vec3f(0, 0, 1));
+			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
 			p.y = camera->viewport.y - p.y;
-			vec2f s = vec2f(view * t.model * vec3f((float)f.width, (float)f.height, 0));
+			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
@@ -434,9 +428,9 @@ void overlay(World &world, Entity entity)
 		{
 			Transform2D& t = entity.get<Transform2D>();
 			Collider2D& c = entity.get<Collider2D>();
-			vec2f p = vec2f(view * t.model * vec3f(c.position, 1));
+			vec2f p = vec2f(view * t.model() * vec3f(c.position, 1));
 			p.y = camera->viewport.y - p.y;
-			vec2f s = vec2f(view * t.model * vec3f(c.size, 0));
+			vec2f s = vec2f(view * t.model() * vec3f(c.size, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
@@ -447,9 +441,9 @@ void overlay(World &world, Entity entity)
 			Transform2D& t = entity.get<Transform2D>();
 			Text& text = entity.get<Text>();
 			vec2i size = text.font->size(text.text);
-			vec2f p = vec2f(view * t.model * vec3f(text.offset, 1));
+			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
 			p.y = camera->viewport.y - p.y;
-			vec2f s = vec2f(view * t.model * vec3f(vec2f(size), 0));
+			vec2f s = vec2f(view * t.model() * vec3f(vec2f(size), 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
@@ -486,8 +480,8 @@ Entity pickEntity(World &world)
 		{
 			Transform2D& t = entity.get<Transform2D>();
 			Collider2D& c = entity.get<Collider2D>();
-			vec2f p = vec2f(view * t.model * vec3f(c.position, 1));
-			vec2f s = vec2f(view * t.model * vec3f(c.size, 0));
+			vec2f p = vec2f(view * t.model() * vec3f(c.position, 1));
+			vec2f s = vec2f(view * t.model() * vec3f(c.size, 0));
 			vec2f pos0 = scale * p;
 			vec2f pos1 = scale * (p + s);
 			if (pos0.x < screenPos.x && pos0.y < screenPos.y && pos1.x > screenPos.x && pos1.y > screenPos.y)
@@ -502,8 +496,8 @@ Entity pickEntity(World &world)
 			Animator& a = entity.get<Animator>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			// local to world to view space (320x180)
-			vec2f p = vec2f(view * t.model * vec3f(0, 0, 1));
-			vec2f s = vec2f(view * t.model * vec3f((float)f.width, (float)f.height, 0));
+			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
+			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
 			// scale to 1920x1080, bottom left
 			vec2f pos0 = scale * p;
 			vec2f pos1 = scale * (p + s);
@@ -519,8 +513,8 @@ Entity pickEntity(World &world)
 			Text& text = entity.get<Text>();
 			vec2i size = text.font->size(text.text);
 			// local to world to view space (320x180)
-			vec2f p = vec2f(view * t.model * vec3f(text.offset, 1));
-			vec2f s = vec2f(view * t.model * vec3f(vec2f(size), 0));
+			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
+			vec2f s = vec2f(view * t.model() * vec3f(vec2f(size), 0));
 			// scale to 1920x1080, bottom left
 			vec2f pos0 = scale * p;
 			vec2f pos1 = scale * (p + s);

@@ -20,8 +20,8 @@ void LevelSystem::update(World& world, Time::Unit deltaTime)
 	Level& level = m_map.get();
 	auto view = world.registry().view<Player, Collider2D, Transform2D>();
 	view.each([&](Player& player, Collider2D& collider, Transform2D& transform) {
-		vec2f pos = transform.model.multiplyPoint(collider.position);
-		vec2f size = transform.model.multiplyVector(collider.size);
+		vec2f pos = transform.model().multiplyPoint(collider.position);
+		vec2f size = transform.model().multiplyVector(collider.size);
 
 		int32_t xOffset = 0;
 		int32_t yOffset = 0;

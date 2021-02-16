@@ -24,7 +24,7 @@ void PhysicSystem::update(World& world, Time::Unit deltaTime)
 	// Move all rigid body.
 	auto viewTransform = world.registry().view<RigidBody2D, Transform2D>();
 	viewTransform.each([dt](RigidBody2D& rigid, Transform2D& transform) {
-		transform.translate(rigid.velocity * dt * 16.f); // scale by 16 as 16 is ~ 1m in game unit
+		transform.position += rigid.velocity * dt * 16.f; // scale by 16 as 16 is ~ 1m in game unit
 	});
 }
 

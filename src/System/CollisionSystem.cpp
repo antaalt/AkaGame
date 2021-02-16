@@ -27,8 +27,8 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 		Collider2D& colliderDynamic = world.registry().get<Collider2D>(entityDynamic);
 
 		Rect2D rectDynamic;
-		rectDynamic.pos = transformDynamic.model.multiplyPoint(colliderDynamic.position);
-		rectDynamic.size = transformDynamic.model.multiplyVector(colliderDynamic.size);
+		rectDynamic.pos = transformDynamic.model().multiplyPoint(colliderDynamic.position);
+		rectDynamic.size = transformDynamic.model().multiplyVector(colliderDynamic.size);
 
 		for (entt::entity entityStatic : viewStatic)
 		{
@@ -40,8 +40,8 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 				continue;
 
 			Rect2D rectStatic;
-			rectStatic.pos = transformStatic.model.multiplyPoint(colliderStatic.position);
-			rectStatic.size = transformStatic.model.multiplyVector(colliderStatic.size);
+			rectStatic.pos = transformStatic.model().multiplyPoint(colliderStatic.position);
+			rectStatic.size = transformStatic.model().multiplyVector(colliderStatic.size);
 			Collision2D c = overlap(rectDynamic, rectStatic);
 			if (c.collided)
 			{
@@ -74,7 +74,7 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 						otherRigid.velocity = otherRigid.velocity + (p * r + t * f);
 					}
 					// Move the rigid & its collider to avoid overlapping.
-					transformDynamic.translate(c.separation);
+					transformDynamic.position += c.separation;
 				}
 				world.emit<CollisionEvent>(CollisionEvent(Entity(entityDynamic, &world), Entity(entityStatic, &world), colliderStatic.type));
 			}
