@@ -54,33 +54,30 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 	world.dispatcher().update<CollisionEvent>();
 	auto view = world.registry().view<Player, Transform2D, RigidBody2D, Animator>();
 	view.each([&](Player& player, Transform2D& transform, RigidBody2D& rigid, Animator& animator) {
-		player.jump.update(deltaTime);
-		player.left.update(deltaTime);
-		player.right.update(deltaTime);
 
 		if (player.state == Player::State::Jumping || player.state == Player::State::DoubleJumping)
 		{
-			if (player.left.pressed())
+			if (input::pressed(player.left))
 			{
-				if (player.left.down())
+				if (input::down(player.left))
 					animator.play("Run");
 				animator.flipU = true;
 				rigid.velocity.x = -player.speed.metric();
 			}
-			else if (player.right.pressed())
+			else if (input::pressed(player.right))
 			{
-				if (player.right.down())
+				if (input::down(player.right))
 					animator.play("Run");
 				animator.flipU = false;
 				rigid.velocity.x = player.speed.metric();
 			}
-			else if (player.right.up() || player.left.up())
+			else if (input::up(player.right) || input::up(player.left))
 			{
 				animator.play("Idle");
 				rigid.velocity = vec2f(0.f);
 			}
 
-			if (player.jump.down() && player.state == Player::State::Jumping)
+			if (input::down(player.jump) && player.state == Player::State::Jumping)
 			{
 				world.createEntity("DoubleJumpFX").add<SoundInstance>(SoundInstance(AudioManager::get("Jump"), 1.f));
 				player.state = Player::State::DoubleJumping;
@@ -90,30 +87,30 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 		}
 		else
 		{
-			if (player.left.pressed())
+			if (input::pressed(player.left))
 			{
-				if (player.left.down())
+				if (input::down(player.left))
 					animator.play("Run");
 				animator.flipU = true;
 				player.state = Player::State::Walking;
 				rigid.velocity.x = -player.speed.metric();
 			}
-			else if (player.right.pressed())
+			else if (input::pressed(player.right))
 			{
-				if (player.right.down())
+				if (input::down(player.right))
 					animator.play("Run");
 				animator.flipU = false;
 				player.state = Player::State::Walking;
 				rigid.velocity.x = player.speed.metric();
 			}
-			else if (player.right.up() || player.left.up())
+			else if (input::up(player.right) || input::up(player.left))
 			{
 				animator.play("Idle");
 				player.state = Player::State::Idle;
 				rigid.velocity = vec2f(0.f);
 			}
 
-			if (player.jump.down())
+			if (input::down(player.jump))
 			{
  				world.createEntity("JumpFX").add<SoundInstance>(SoundInstance(AudioManager::get("Jump"), 1.f));
 				player.state = Player::State::Jumping;

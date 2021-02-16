@@ -246,6 +246,28 @@ bool ComponentNode<Text>::draw(Text& text)
 	return false;
 }
 
+void keySelector(const char *label, input::Key& currentKey)
+{
+	std::string currentName = input::getKeyName(currentKey);
+	if (ImGui::BeginCombo(label, currentName.c_str()))
+	{
+		for (uint32_t iKey = 0; iKey < (uint32_t)input::Key::Count; iKey++)
+		{
+			input::Key key = (input::Key)iKey;
+			bool sameKey = key == currentKey;
+			std::string name = input::getKeyName(key);
+			if (ImGui::Selectable(name.c_str(), sameKey))
+			{
+				if (!sameKey)
+					currentKey = key;
+			}
+			if (sameKey)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+}
+
 const char* ComponentNode<Player>::icon() { return ICON_FA_RUNNING; }
 bool ComponentNode<Player>::draw(Player& player)
 {
@@ -254,10 +276,10 @@ bool ComponentNode<Player>::draw(Player& player)
 	float metric = player.speed.metric();
 	if (ImGui::SliderFloat(u("Speed"), &metric, 0.f, 50.f))
 		player.speed = Speed(metric);
-	player.state; // TODO key selector ?
-	player.jump;
-	player.left;
-	player.right;
+	keySelector("Jump", player.jump);
+	keySelector("Left", player.left);
+	keySelector("Right", player.right);
+	player.state;
 	return false;
 }
 
@@ -279,7 +301,7 @@ bool ComponentNode<TileLayer>::draw(TileLayer& layer)
 		ImGui::InputInt4(u("TileID"), layer.tileID.data() + id);
 	}
 	ImGui::SliderInt(u("Layer"), &layer.layer, -20, 20);
-	ImGui::InputFloat4(u("Color"), layer.color.data);
+	ImGui::ColorEdit4(u("Color"), layer.color.data, ImGuiColorEditFlags_Float);
 	return false;
 }
 
