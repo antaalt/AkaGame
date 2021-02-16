@@ -13,6 +13,7 @@ public:
 	LevelSystem(WorldMap& map);
 	void update(World& world, Time::Unit deltaTime) override;
 private:
+	bool m_transition;
 	WorldMap& m_map;
 };
 

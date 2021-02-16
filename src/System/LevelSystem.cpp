@@ -9,6 +9,7 @@
 namespace aka {
 
 LevelSystem::LevelSystem(WorldMap& map) :
+	m_transition(false),
 	m_map(map)
 {
 }
@@ -44,8 +45,11 @@ void LevelSystem::update(World& world, Time::Unit deltaTime)
 			yOffset = -1;
 			Logger::info("Previous level y");
 		}
-		if(xOffset != 0 || yOffset != 0)
+		if (xOffset != 0 || yOffset != 0)
+		{
+			m_transition = true;
 			m_map.next(xOffset, yOffset, world);
+		}
 	});
 }
 

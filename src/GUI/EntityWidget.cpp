@@ -180,7 +180,7 @@ bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 	ASSERT(error > 0, "");
 	ImGui::ProgressBar(current / duration, ImVec2(0.f, 0.f), buffer);
 	if (ImGui::Button(ICON_FA_BACKWARD))
-		audio.audio->seek(max(current - 10.f, 0.f) * audio.audio->frequency());
+		audio.audio->seek((uint64_t)max(current - 10.f, 0.f) * audio.audio->frequency());
 	ImGui::SameLine();
 	if (ImGui::Button(ICON_FA_PAUSE))
 	{
@@ -188,7 +188,7 @@ bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 	}
 	ImGui::SameLine();
 	if (ImGui::Button(ICON_FA_FORWARD))
-		audio.audio->seek(min(current + 10.f, duration) * audio.audio->frequency());
+		audio.audio->seek((uint64_t)min(current + 10.f, duration) * audio.audio->frequency());
 	
 	if (ImGui::SliderFloat(u("Volume"), &audio.volume, 0.f, 2.f))
 	{
@@ -306,7 +306,8 @@ bool ComponentNode<TileMap>::draw(TileMap& map)
 				sampler.filterMin = aka::Sampler::Filter::Nearest;
 				sampler.wrapS = aka::Sampler::Wrap::Clamp;
 				sampler.wrapT = aka::Sampler::Wrap::Clamp;
-				map.texture = Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler);
+				map.texture = Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, sampler);
+				map.texture->upload(image.bytes.data());
 			}
 			catch (const std::exception&) {}
 		}
@@ -390,7 +391,7 @@ void overlay(World &world, Entity entity)
 			col3f(camera->position.x, camera->position.y, 1.f)
 		));
 		Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-		vec2f scale = vec2f(backbuffer->width(), backbuffer->height()) / camera->viewport;
+		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera->viewport;
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f));
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// Animator overlay for current entity
@@ -401,7 +402,7 @@ void overlay(World &world, Entity entity)
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			vec2f p = vec2f(view * t.model * vec3f(0, 0, 1));
 			p.y = camera->viewport.y - p.y;
-			vec2f s = vec2f(view * t.model * vec3f(f.width, f.height, 0));
+			vec2f s = vec2f(view * t.model * vec3f((float)f.width, (float)f.height, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
@@ -445,7 +446,7 @@ Entity pickEntity(World &world)
 	if (camera == nullptr)
 		return Entity::null();
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-	const vec2f scale = vec2f(backbuffer->width(), backbuffer->height()) / camera->viewport;
+	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera->viewport;
 	const mat3f cam = mat3f(
 		col3f(1.f, 0.f, 0.f),
 		col3f(0.f, 1.f, 0.f),
@@ -480,7 +481,7 @@ Entity pickEntity(World &world)
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			// local to world to view space (320x180)
 			vec2f p = vec2f(view * t.model * vec3f(0, 0, 1));
-			vec2f s = vec2f(view * t.model * vec3f(f.width, f.height, 0));
+			vec2f s = vec2f(view * t.model * vec3f((float)f.width, (float)f.height, 0));
 			// scale to 1920x1080, bottom left
 			vec2f pos0 = scale * p;
 			vec2f pos1 = scale * (p + s);

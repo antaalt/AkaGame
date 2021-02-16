@@ -22,7 +22,7 @@ private:
 	// UI
 	GUI m_gui;
 	// Rendering
-	uint32_t m_drawCall = 0;
+	bool m_paused;
 	Batch m_batch;
 	Framebuffer::Ptr m_framebuffer;
 	// Entity

@@ -82,10 +82,11 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 			texture = Texture::create(
 				ogmoLayer->tileset->image.width,
 				ogmoLayer->tileset->image.height,
-				Texture::Format::Rgba,
-				ogmoLayer->tileset->image.bytes.data(),
+				Texture::Format::UnsignedByte,
+				Texture::Component::RGBA,
 				sampler
 			);
+			texture->upload(ogmoLayer->tileset->image.bytes.data());
 			atlas.insert(std::make_pair(ogmoLayer->tileset->name, texture));
 		}
 		else
@@ -102,16 +103,34 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 		entity.add<TileLayer>(TileLayer(vec2f(offset), ogmoLayer->gridCellCount, ogmoLayer->gridCellSize, color4f(1.f), ogmoLayer->data, layerDepth));
 		return entity;
 	};
-	// - Layers
-	this->entities.push_back(createTileLayer(this->background, ogmoLevel.getLayer("Background"), -1));
-	this->entities.push_back(createTileLayer(this->playerGround, ogmoLevel.getLayer("Playerground"), 0));
-	this->entities.push_back(createTileLayer(this->foreground, ogmoLevel.getLayer("Foreground"), 1));
+	{
+		// Layers
+		this->entities.push_back(createTileLayer(this->background, ogmoLevel.getLayer("Background"), -1));
+		this->entities.push_back(createTileLayer(this->playerGround, ogmoLevel.getLayer("Playerground"), 0));
+		this->entities.push_back(createTileLayer(this->foreground, ogmoLevel.getLayer("Foreground"), 1));
+	}
 
-	// - Background texture
-	std::vector<uint8_t> data;
-	data.resize(this->size.x * this->size.y * 4);
-	memset(data.data(), 0xffffffff, sizeof(data.size()));
-	this->backgroundTexture = Texture::create(this->size.x, this->size.y, Texture::Format::Rgba, data.data(), sampler);
+	{
+		Image image = Image::load(Asset::path("textures/background/background.png"));
+
+		Sprite::Animation animation;
+		animation.name = "Default";
+		animation.frames.push_back(Sprite::Frame::create(
+			Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, sampler),
+			Time::Unit::milliseconds(500)
+		));
+		animation.frames.back().texture->upload(image.bytes.data());
+		animation.frames.back().width = this->size.x;
+		animation.frames.back().height = this->size.y;
+		Sprite& sprite = SpriteManager::create("Background", Sprite());
+		sprite.animations.push_back(animation);
+
+		Entity e = world.createEntity("");
+		e.add<Transform2D>(Transform2D(Transform2D(vec2f(offset), vec2f(1.f), radianf(0.f))));
+		e.add<Animator>(Animator(&sprite, -2));
+		e.get<Animator>().play("Default");
+		this->entities.push_back(e);
+	}
 
 	{
 		// Audio effect
@@ -120,13 +139,13 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 
 	{
 		// Colliders
-		SpriteManager::create("Collider", Sprite::parse(Asset::path("textures/debug/collider.aseprite")));
+		SpriteManager::create("Collider", Sprite::parse(Asset::path("textures/collider/collider.aseprite")));
 		// Coins
 		SpriteManager::create("Coin", Sprite::parse(Asset::path("textures/interact/interact.aseprite")));
 		// Player
 		SpriteManager::create("Player", Sprite::parse(Asset::path("textures/player/player.aseprite")));
 	}
-	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Colliders");
+	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Entities");
 	auto flipY = [](const vec2u& pos, const vec2u& size, const OgmoLevel::Layer *layer) -> vec2f {
 		return vec2f((float)pos.x, (float)(layer->getHeight() - pos.y - size.y));
 	};
@@ -170,7 +189,6 @@ void Level::destroy(World& world)
 	foreground = Layer{};
 	playerGround = Layer{};
 	background = Layer{};
-	backgroundTexture.reset();
 }
 
 };

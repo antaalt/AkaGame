@@ -222,9 +222,10 @@ void ResourcesWidget::draw(World& world)
 											sampler.wrapS = aka::Sampler::Wrap::Clamp;
 											sampler.wrapT = aka::Sampler::Wrap::Clamp;
 											Sprite::Frame frame = Sprite::Frame::create(
-												Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler),
+												Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, sampler),
 												Time::Unit::milliseconds(500)
 											);
+											frame.texture->upload(image.bytes.data());
 											animation.frames.push_back(frame);
 										}
 									}

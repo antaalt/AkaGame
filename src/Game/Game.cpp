@@ -29,7 +29,8 @@
 
 namespace aka {
 
-Game::Game()
+Game::Game() :
+	m_paused(false)
 {
 }
 void Game::initialize()
@@ -41,11 +42,6 @@ void Game::initialize()
 	Logger::info("Device memory : ", device.memory);
 	Logger::info("Device version : ", device.version);
 
-	Sampler sampler;
-	sampler.filterMag = aka::Sampler::Filter::Nearest;
-	sampler.filterMin = aka::Sampler::Filter::Nearest;
-	sampler.wrapS = aka::Sampler::Wrap::Clamp;
-	sampler.wrapT = aka::Sampler::Wrap::Clamp;
 	{
 		// INIT SYSTEMS
 		m_world.attach<PhysicSystem>();
@@ -71,6 +67,11 @@ void Game::initialize()
 
 	{
 		// INIT FRAMEBUFFER
+		Sampler sampler;
+		sampler.filterMag = aka::Sampler::Filter::Nearest;
+		sampler.filterMin = aka::Sampler::Filter::Nearest;
+		sampler.wrapS = aka::Sampler::Wrap::Clamp;
+		sampler.wrapT = aka::Sampler::Wrap::Clamp;
 		m_framebuffer = Framebuffer::create(320, 180, sampler);
 		PlatformBackend::setLimits(m_framebuffer->width(), m_framebuffer->height(), 0, 0);
 	}
@@ -79,7 +80,7 @@ void Game::initialize()
 		// INIT CAMERA
 		m_cameraEntity = m_world.createEntity("Camera");
 		m_cameraEntity.add<Transform2D>(Transform2D());
-		m_cameraEntity.add<Camera2D>(Camera2D(vec2f(0), vec2f(320, 180) ));
+		m_cameraEntity.add<Camera2D>(Camera2D(vec2f(0), vec2f((float)m_framebuffer->width(), (float)m_framebuffer->height())));
 	}
 
 	{
@@ -103,31 +104,13 @@ void Game::initialize()
 	}
 
 	{
-		// INIT FIXED TEXTURE BACKGROUND
-		Image image = Image::load(Asset::path("textures/background/background.png"));
-		ASSERT(image.width == m_framebuffer->width(), "incorrect width");
-		ASSERT(image.height == m_framebuffer->height(), "incorrect height");
-
-		Sprite::Animation animation;
-		animation.name = "Default";
-		animation.frames.push_back(Sprite::Frame::create(Texture::create(image.width, image.height, Texture::Format::Rgba, image.bytes.data(), sampler), Time::Unit::milliseconds(500)));
-		Sprite &sprite = SpriteManager::create("Background", Sprite());
-		sprite.animations.push_back(animation);
-
-		Entity e = m_world.createEntity("");
-		e.add<Transform2D>(Transform2D());
-		e.add<Animator>(Animator(&sprite, -2));
-		e.get<Animator>().play("Default");
-	}
-
-	{
-		// Set first level
+		// INIT LEVEL
 		m_map.set(0, 0, m_world);
 	}
 
 	{
+		// INIT CHARACTER
 		Level& level = m_map.get();
-		// Init character
 		Sprite& playerSprite = SpriteManager::get("Player");
 		const Sprite::Frame& frame = playerSprite.getFrame(0, 0);
 		Entity e = m_world.createEntity("Character");
@@ -168,17 +151,36 @@ void Game::frame()
 
 void Game::update(Time::Unit deltaTime)
 {
+	// Screenshot
 	if (input::pressed(input::Key::F1))
 	{
 		GraphicBackend::screenshot("./output.jpg");
 		Logger::info("Screenshot taken.");
 	}
+	// Hide the GUI
 	if (!m_gui.focused() && input::down(input::Key::H))
 	{
 		m_gui.setVisible(!m_gui.isVisible());
 	}
-	// Update world after moving manually objects
-	m_world.update(deltaTime);
+	// Pause the game
+	if (input::down(input::Key::F2))
+	{
+		m_paused = !m_paused;
+		if (m_paused)
+		{
+			AudioBackend::stop();
+		}
+		else
+		{
+			AudioBackend::start();
+		}
+	}
+	// Update the game logic
+	if (!m_paused)
+	{
+		// Update world after moving manually objects
+		m_world.update(deltaTime);
+	}
 
 	// Quit the app if requested
 	if (input::down(input::Key::Escape))
@@ -193,15 +195,17 @@ void Game::update(Time::Unit deltaTime)
 		auto view = m_world.registry().view<Transform2D, Player>();
 		// TODO reinstantiate player ?
 		view.each([&](Transform2D& transform, Player& player) {
-			transform.model[2].x = level.spawn.x;
-			transform.model[2].y = level.spawn.y;
+			transform.model[2].x = (float)level.spawn.x;
+			transform.model[2].y = (float)level.spawn.y;
 		});
 	}
+	// Update interface
 	m_gui.update(m_world);
 }
 
 void Game::render()
 {
+	if (!m_paused)
 	{
 		// Render to framebuffer
 		Camera2D& camera = m_cameraEntity.get<Camera2D>();
@@ -215,10 +219,9 @@ void Game::render()
 		m_framebuffer->clear(1.f, 0.63f, 0.f, 1.f); 
 		m_world.draw(m_batch);
 		m_batch.render(m_framebuffer, view, projection);
-		m_drawCall = m_batch.count();
 		m_batch.clear();
 	}
-
+	
 	{
 		// Blit to backbuffer
 		GraphicBackend::backbuffer()->clear(0.f, 0.f, 0.f, 1.f);

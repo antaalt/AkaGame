@@ -32,7 +32,7 @@ public:
 	virtual void update(World& world) {}
 	virtual void draw(World& world) {}
 };
-
+// Rename EditorUI
 class GUI
 {
 public:
@@ -56,9 +56,9 @@ public:
 	void render();
 	bool isVisible() { return m_visible; }
 	void setVisible(bool visible) { m_visible = visible; }
-
-	template <typename T>
-	void add() { m_widgets.push_back(new T); }
+	
+	template <typename T, typename... Args>
+	void add(Args&&... args) { m_widgets.push_back(new T(std::forward<Args>(args)...)); }
 
 	bool focused() const { const ImGuiIO& io = ImGui::GetIO(); return io.WantCaptureMouse; }
 private:

@@ -23,7 +23,6 @@ struct Level
 	Layer foreground;
 	Layer playerGround;
 	Layer background;
-	Texture::Ptr backgroundTexture;
 
 	std::vector<Entity> entities;
 
@@ -71,6 +70,7 @@ private:
 private:
 	vec2u m_currentLevel;
 	Level m_level;
+
 	GridMap m_grid;
 	OgmoWorld m_ogmoWorld;
 };

@@ -45,17 +45,8 @@
       "defaultTileset": "Atlas"
     },
     {
-      "definition": "tile",
-      "name": "BackgroundImage",
-      "gridSize": {"x": 16, "y": 16},
-      "exportID": "26920481",
-      "exportMode": 0,
-      "arrayMode": 0,
-      "defaultTileset": "Atlas"
-    },
-    {
       "definition": "entity",
-      "name": "Colliders",
+      "name": "Entities",
       "gridSize": {"x": 16, "y": 16},
       "exportID": "48518480",
       "requiredTags": [],

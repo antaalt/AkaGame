@@ -31,13 +31,14 @@ void GUI::initialize()
 		ImGui_ImplDX11_Init(GraphicBackend::getD3D11Device(), GraphicBackend::getD3D11DeviceContext());
 #endif
         // --- Font
-        io.Fonts->AddFontDefault();
         ImFontConfig config;
         config.MergeMode = true;
         config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
         static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
         Path asset = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf");
         Path asset2 = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf");
+        Path default = Asset::path("font/OpenSans/OpenSans-Regular.ttf");
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(default.c_str(), 18.0f);
         ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.c_str(), 13.0f, &config, icon_ranges);
         ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.c_str(), 13.0f, &config, icon_ranges);
         ASSERT(iconFont != nullptr, "Icon font not loaded");

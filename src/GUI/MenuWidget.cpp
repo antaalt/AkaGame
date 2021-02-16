@@ -30,6 +30,10 @@ void MenuWidget::draw(World& world)
         {
             // pause update
         }
+        ImGui::Separator();
+        if (ImGui::MenuItem("Another"))
+        {
+        }
 		ImGui::EndMainMenuBar();
 	}
 }
