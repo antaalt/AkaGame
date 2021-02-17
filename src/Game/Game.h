@@ -1,36 +1,36 @@
-#pragma once
+#pragma once 
 
 #include <Aka/Aka.h>
-#include <map>
 
-#include "Resources.h"
-#include "Level.h"
 #include "../GUI/GUINode.h"
 
 namespace aka {
 
+struct Views {
+	static const ViewID menu;
+	static const ViewID game;
+	static const ViewID end;
+};
+
 class Game : public Application
 {
 public:
-	Game();
 	void initialize() override;
 	void destroy() override;
-	void frame() override;
+	void start() override;
 	void update(Time::Unit deltaTime) override;
+	void frame() override;
 	void render() override;
+	void present() override;
+	void end() override;
 private:
 	// UI
 	GUI m_gui;
-	// Rendering
-	bool m_paused;
-	Batch m_batch;
-	Framebuffer::Ptr m_framebuffer;
-	// Entity
+	// ECS
 	World m_world;
-	Entity m_cameraEntity;
-	// Levels
-	WorldMap m_map;
+	// Routing
+	View* current;
+	Router router;
 };
 
-}
-
+};

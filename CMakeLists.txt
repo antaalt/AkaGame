@@ -48,6 +48,12 @@ set(SRC
 	
 	"src/Game/Game.h"
 	"src/Game/Game.cpp"
+	"src/Game/Views/GameView.h"
+	"src/Game/Views/GameView.cpp"
+	"src/Game/Views/EndView.h"
+	"src/Game/Views/EndView.cpp"
+	"src/Game/Views/MenuView.h"
+	"src/Game/Views/MenuView.cpp"
 	"src/Game/Level.h"
 	"src/Game/Level.cpp"
 	"src/Game/Resources.h"
