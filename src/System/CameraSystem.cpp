@@ -23,7 +23,11 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 	auto layerView = world.registry().view<TileLayer>();
 	for (entt::entity cameraEntity : cameraView)
 	{
-		Camera2D &camera = world.registry().get<Camera2D>(cameraEntity);
+		Transform2D& cameraTransform = world.registry().get<Transform2D>(cameraEntity);
+		Camera2D& cameraComponent = world.registry().get<Camera2D>(cameraEntity);
+		if (!cameraComponent.main)
+			continue;
+		CameraOrthographic& camera = cameraComponent.camera;
 		// Track the player
 		for (entt::entity playerEntity : playerView)
 		{
@@ -33,19 +37,19 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 			const float hThreshold = 0.4f * camera.viewport.x;
 			const float vThreshold = 0.2f * camera.viewport.y;
 			const vec2f playerPosition = transform.position;
-			const vec2f playerRelativePosition = playerPosition - camera.position;
+			const vec2f playerRelativePosition = playerPosition - cameraTransform.position;
 			// Horizontal
 			if (playerRelativePosition.x < hThreshold)
 			{
 				float distance = abs<float>(playerRelativePosition.x - hThreshold);
 				if (distance > 1.f)
-					camera.position.x -= pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
+					cameraTransform.position.x -= pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
 			}
 			else if (playerRelativePosition.x > camera.viewport.x - hThreshold)
 			{
 				float distance = playerRelativePosition.x - (camera.viewport.x - hThreshold);
 				if (distance > 1.f)
-					camera.position.x += pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
+					cameraTransform.position.x += pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
 			}
 
 			// Vertical
@@ -65,16 +69,16 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 		}
 
 		// Clamp camera position to the current level bounds.
-		if (camera.clampBorder)
+		if (cameraComponent.clampBorder)
 		{
 			for (entt::entity layerEntity : layerView)
 			{
 				TileLayer& layer = world.registry().get<TileLayer>(layerEntity);
 				vec2f grid = vec2f(layer.gridSize * layer.gridCount) + layer.offset;
-				camera.position.x = max<float>(camera.position.x, layer.offset.x);
-				camera.position.x = min<float>(camera.position.x, grid.x - camera.viewport.x);
-				camera.position.y = max<float>(camera.position.y, layer.offset.y);
-				camera.position.y = min<float>(camera.position.y, grid.y - camera.viewport.y);
+				cameraTransform.position.x = max<float>(cameraTransform.position.x, layer.offset.x);
+				cameraTransform.position.x = min<float>(cameraTransform.position.x, grid.x - camera.viewport.x);
+				cameraTransform.position.y = max<float>(cameraTransform.position.y, layer.offset.y);
+				cameraTransform.position.y = min<float>(cameraTransform.position.y, grid.y - camera.viewport.y);
 				break; // Only first layer encountered
 			}
 		}

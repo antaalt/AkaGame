@@ -128,10 +128,9 @@ bool ComponentNode<RigidBody2D>::draw(RigidBody2D& rigid)
 const char* ComponentNode<Camera2D>::icon() { return ICON_FA_CAMERA; }
 bool ComponentNode<Camera2D>::draw(Camera2D& camera)
 {
-	UniqueID u(&camera);
-	ImGui::InputFloat2(u("Position"), camera.position.data);
-	ImGui::InputFloat2(u("Viewport"), camera.viewport.data);
-	ImGui::Checkbox(u("Clamp"), &camera.clampBorder);
+	ImGui::InputFloat2("Viewport", camera.camera.viewport.data);
+	ImGui::Checkbox("Clamp", &camera.clampBorder);
+	ImGui::Checkbox("Main", &camera.main);
 	return false;
 }
 
@@ -394,20 +393,18 @@ bool filterValid(Entity entity, ComponentID filterComponentID)
 // Draw an overlay over current widget components
 void overlay(World &world, Entity entity)
 {
-	const Camera2D* camera = nullptr;
-	world.each([&camera](Entity entity) {
+	Entity cameraEntity = Entity::null();
+	world.each([&cameraEntity](Entity entity) {
 		if (entity.has<Camera2D>())
-			camera = &entity.get<Camera2D>();
+			cameraEntity = entity;
 	});
-	if (camera != nullptr)
+	if (cameraEntity.valid())
 	{
-		mat3f view = mat3f::inverse(mat3f(
-			col3f(1.f, 0.f, 0.f),
-			col3f(0.f, 1.f, 0.f),
-			col3f(camera->position.x, camera->position.y, 1.f)
-		));
+		Transform2D& cameraTransform = cameraEntity.get<Transform2D>();
+		Camera2D& camera = cameraEntity.get<Camera2D>();
+		mat3f view = mat3f::inverse(cameraTransform.model());
 		Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera->viewport;
+		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f));
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// Animator overlay for current entity
@@ -417,7 +414,7 @@ void overlay(World &world, Entity entity)
 			Animator& a = entity.get<Animator>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
-			p.y = camera->viewport.y - p.y;
+			p.y = camera.camera.viewport.y - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
@@ -429,7 +426,7 @@ void overlay(World &world, Entity entity)
 			Transform2D& t = entity.get<Transform2D>();
 			Collider2D& c = entity.get<Collider2D>();
 			vec2f p = vec2f(view * t.model() * vec3f(c.position, 1));
-			p.y = camera->viewport.y - p.y;
+			p.y = camera.camera.viewport.y - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f(c.size, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
@@ -442,7 +439,7 @@ void overlay(World &world, Entity entity)
 			Text& text = entity.get<Text>();
 			vec2i size = text.font->size(text.text);
 			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
-			p.y = camera->viewport.y - p.y;
+			p.y = camera.camera.viewport.y - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f(vec2f(size), 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
@@ -454,20 +451,18 @@ void overlay(World &world, Entity entity)
 // Return the entity picked on click
 Entity pickEntity(World &world)
 {
-	const Camera2D* camera = nullptr;
-	world.each([&camera](Entity entity) {
+	Entity cameraEntity = Entity::null();
+	world.each([&cameraEntity](Entity entity) {
 		if (entity.has<Camera2D>())
-			camera = &entity.get<Camera2D>();
+			cameraEntity = entity;
 	});
-	if (camera == nullptr)
+	if (!cameraEntity.valid())
 		return Entity::null();
+	Transform2D& cameraTransform = cameraEntity.get<Transform2D>();
+	Camera2D& camera = cameraEntity.get<Camera2D>();
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera->viewport;
-	const mat3f cam = mat3f(
-		col3f(1.f, 0.f, 0.f),
-		col3f(0.f, 1.f, 0.f),
-		col3f(camera->position, 1.f)
-	);
+	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
+	const mat3f cam = cameraTransform.model();
 	const mat3f view = mat3f::inverse(cam);
 	const vec2f screenPos(input::mouse().x, backbuffer->height() - input::mouse().y);
 	bool found = false;
@@ -528,15 +523,12 @@ Entity pickEntity(World &world)
 	return picked;
 }
 
-void EntityWidget::update(World& world)
-{
-	ImGuiIO& io = ImGui::GetIO();
-	if ( ImGui::IsMouseReleased(0) && !io.WantCaptureMouse)
-		m_currentEntity = pickEntity(world);
-}
-
 void EntityWidget::draw(World& world)
 {
+	ImGuiIO& io = ImGui::GetIO();
+	if (ImGui::IsMouseReleased(0) && !io.WantCaptureMouse)
+		m_currentEntity = pickEntity(world);
+
 	if (ImGui::Begin("Entities##window", nullptr, ImGuiWindowFlags_MenuBar))
 	{
 		static ImVec4 color = ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f);

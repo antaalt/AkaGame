@@ -80,7 +80,8 @@ void Game::initialize()
 		// INIT CAMERA
 		m_cameraEntity = m_world.createEntity("Camera");
 		m_cameraEntity.add<Transform2D>(Transform2D());
-		m_cameraEntity.add<Camera2D>(Camera2D(vec2f(0), vec2f((float)m_framebuffer->width(), (float)m_framebuffer->height())));
+		m_cameraEntity.add<Camera2D>(Camera2D(vec2f((float)m_framebuffer->width(), (float)m_framebuffer->height())));
+		m_cameraEntity.get<Camera2D>().main = true;
 	}
 
 	{
@@ -92,7 +93,7 @@ void Game::initialize()
 		e.add<Transform2D>(Transform2D());
 		e.add<Text>(Text());
 
-		Text& text = e.get<Text>();
+		/*Text& text = e.get<Text>();
 		text.offset = vec2f(0.f);
 		text.color = color4f(1.f);
 		text.font = &font;
@@ -100,7 +101,7 @@ void Game::initialize()
 		text.layer = 2;
 		vec2i size = font.size(text.text);
 		Transform2D& transform = e.get<Transform2D>();
-		transform.position += vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50));
+		transform.position += vec2f((float)((int)m_framebuffer->width() / 2 - size.x / 2), (float)((int)m_framebuffer->height() / 2 - size.y / 2 - 50));*/
 	}
 
 	{
@@ -168,10 +169,12 @@ void Game::update(Time::Unit deltaTime)
 		m_paused = !m_paused;
 		if (m_paused)
 		{
+			m_cameraEntity.get<Camera2D>().clampBorder = false;
 			AudioBackend::stop();
 		}
 		else
 		{
+			m_cameraEntity.get<Camera2D>().clampBorder = true;
 			AudioBackend::start();
 		}
 	}
@@ -188,7 +191,7 @@ void Game::update(Time::Unit deltaTime)
 		quit();
 	}
 	// Reset
-	if (input::down(input::Key::LeftCtrl))
+	if (input::down(input::Key::F3))
 	{
 		m_map.set(0, 0, m_world);
 		Level& level = m_map.get();
@@ -205,17 +208,12 @@ void Game::update(Time::Unit deltaTime)
 
 void Game::render()
 {
-	if (!m_paused)
 	{
 		// Render to framebuffer
+		Transform2D& cameraTransform = m_cameraEntity.get<Transform2D>();
 		Camera2D& camera = m_cameraEntity.get<Camera2D>();
-		mat4f view = mat4f::inverse(mat4f(
-			col4f(1.f, 0.f, 0.f, 0.f),
-			col4f(0.f, 1.f, 0.f, 0.f),
-			col4f(0.f, 0.f, 1.f, 0.f),
-			col4f(camera.position.x, camera.position.y, 0.f, 1.f)
-		));
-		mat4f projection = mat4f::orthographic(0.f, static_cast<float>(m_framebuffer->height()), 0.f, static_cast<float>(m_framebuffer->width()));
+		mat4f view = mat4f::inverse(mat4f::from2D(cameraTransform.model()));
+		mat4f projection = camera.camera.perspective();
 		m_framebuffer->clear(1.f, 0.63f, 0.f, 1.f); 
 		m_world.draw(m_batch);
 		m_batch.render(m_framebuffer, view, projection);

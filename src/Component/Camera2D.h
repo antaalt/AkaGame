@@ -2,16 +2,17 @@
 
 #include <Aka/Core/Geometry.h>
 #include <Aka/Scene/Component.h>
+#include <Aka/Scene/Camera.h>
 
 namespace aka {
 
 struct Camera2D
 {
-	Camera2D() : Camera2D(vec2f(0.f), vec2f(1.f)) {}
-	Camera2D(const vec2f position, const vec2f& viewport) : position(position), viewport(viewport), clampBorder(true) {}
+	Camera2D() : Camera2D(vec2f(1.f)) {}
+	Camera2D(const vec2f& viewport) : camera(viewport), clampBorder(true) {}
 
-	vec2f position;
-	vec2f viewport;
+	CameraOrthographic camera;
+	bool main;
 	bool clampBorder;
 };
 template <>
