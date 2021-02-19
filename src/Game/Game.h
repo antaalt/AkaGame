@@ -29,8 +29,8 @@ private:
 	// ECS
 	World m_world;
 	// Routing
-	View* current;
-	Router router;
+	View* m_current;
+	Router m_router;
 };
 
 };

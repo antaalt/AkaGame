@@ -241,15 +241,15 @@ bool ComponentNode<Text>::draw(Text& text)
 
 void keySelector(const char *label, input::Key& currentKey)
 {
-	std::string currentName = input::getKeyName(currentKey);
-	if (ImGui::BeginCombo(label, currentName.c_str()))
+	const char* currentName = input::getKeyName(currentKey);
+	if (ImGui::BeginCombo(label, currentName))
 	{
 		for (uint32_t iKey = 0; iKey < (uint32_t)input::Key::Count; iKey++)
 		{
 			input::Key key = (input::Key)iKey;
 			bool sameKey = key == currentKey;
-			std::string name = input::getKeyName(key);
-			if (ImGui::Selectable(name.c_str(), sameKey))
+			const char* name = input::getKeyName(key);
+			if (ImGui::Selectable(name, sameKey))
 			{
 				if (!sameKey)
 					currentKey = key;

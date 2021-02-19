@@ -15,6 +15,7 @@ public:
 	void onUpdate(Router& router, Time::Unit dt) override;
 	void onRender() override;
 private:
+	bool m_redraw;
 	float m_logoAlpha;
 	Batch m_batch;
 	Time::Unit m_elapsed;

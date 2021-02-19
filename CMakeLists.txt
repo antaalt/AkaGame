@@ -45,6 +45,8 @@ set(SRC
 	"src/GUI/ResourcesWidget.cpp"
 	"src/GUI/MenuWidget.h"
 	"src/GUI/MenuWidget.cpp"
+	"src/GUI/ViewWidget.h"
+	"src/GUI/ViewWidget.cpp"
 	
 	"src/Game/Game.h"
 	"src/Game/Game.cpp"

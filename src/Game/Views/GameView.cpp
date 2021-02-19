@@ -102,7 +102,7 @@ void GameView::onCreate()
 		e.get<Animator>().play("Idle");
 		Player& player = e.get<Player>();
 		player.jump = input::Key::Space;
-		player.left = input::Key::Q;
+		player.left = input::Key::A;
 		player.right = input::Key::D;
 
 		e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));

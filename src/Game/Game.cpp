@@ -7,6 +7,7 @@
 #include "../GUI/InfoWidget.h"
 #include "../GUI/ResourcesWidget.h"
 #include "../GUI/MenuWidget.h"
+#include "../GUI/ViewWidget.h"
 
 namespace aka {
 
@@ -18,12 +19,12 @@ void Game::initialize()
 {
 	{
 		// Initialize Game view
-		router.attach<MenuView>(Views::menu);
-		router.attach<GameView>(Views::game, m_world);
-		router.attach<EndView>(Views::end);
-		router.set(Views::menu);
-		current = &router.get();
-		current->onCreate();
+		m_router.attach<MenuView>(Views::menu);
+		m_router.attach<GameView>(Views::game, m_world);
+		m_router.attach<EndView>(Views::end);
+		m_router.set(Views::menu);
+		m_current = &m_router.get();
+		m_current->onCreate();
 	}
 	{
 		// Load global resources
@@ -37,30 +38,31 @@ void Game::initialize()
 		m_gui.add<EntityWidget>();
 		m_gui.add<ResourcesWidget>();
 		m_gui.add<MenuWidget>();
+		m_gui.add<ViewWidget>(m_router);
 		m_gui.initialize();
 	}
 }
 
 void Game::destroy()
 {
-	current->onDestroy();
+	m_current->onDestroy();
 	m_gui.destroy();
 }
 
 void Game::start()
 {
-	View* newView = &router.get();
-	if (newView != current)
+	View* newView = &m_router.get();
+	if (newView != m_current)
 	{
-		current->onDestroy();
+		m_current->onDestroy();
 		newView->onCreate();
-		current = newView;
+		m_current = newView;
 	}
 }
 
 void Game::update(Time::Unit deltaTime)
 {
-	current->onUpdate(router, deltaTime);
+	m_current->onUpdate(m_router, deltaTime);
 	if (input::pressed(input::Key::Escape))
 		quit();
 	// Hide the GUI
@@ -75,12 +77,12 @@ void Game::update(Time::Unit deltaTime)
 void Game::frame()
 {
 	m_gui.frame();
-	current->onFrame();
+	m_current->onFrame();
 }
 
 void Game::render()
 {
-	current->onRender();
+	m_current->onRender();
 	{
 		// Rendering imgui
 		m_gui.draw(m_world);
@@ -90,7 +92,7 @@ void Game::render()
 
 void Game::present()
 {
-	current->onPresent();
+	m_current->onPresent();
 }
 
 void Game::end()

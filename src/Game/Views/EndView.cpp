@@ -4,7 +4,6 @@ namespace aka {
 
 void EndView::onCreate()
 {
-
 }
 
 void EndView::onDestroy()
@@ -39,11 +38,7 @@ void EndView::onRender()
 		));
 		m_batch.draw(transformText, Batch::Text(txt, &font, color4f(1.f), 0));
 	}
-	m_batch.render(
-		backbuffer,
-		mat4f::identity(),
-		mat4f::orthographic(0.f, (float)backbuffer->height(), 0.f, (float)backbuffer->width())
-	);
+	m_batch.render();
 	m_batch.clear();
 }
 
