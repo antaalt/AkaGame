@@ -17,7 +17,7 @@ Transform2D::Transform2D(const vec2f& position, const vec2f& scale, radianf rota
 mat3f Transform2D::model() const
 {
 	return mat3f::translate(position) * mat3f::rotate(rotation) * mat3f::scale(size);
-	mat3f model = mat4f::identity();
+	/*mat3f model = mat4f::identity();
 	// Translate
 	model *= mat3f::translate(position);
 	// Rotate around center of object
@@ -26,7 +26,7 @@ mat3f Transform2D::model() const
 	model *= mat3f::translate(vec2f(-0.5f * size.x, -0.5f * size.y));
 	// Scale
 	model *= mat3f::scale(size);
-	return model;
+	return model;*/
 }
 
 };

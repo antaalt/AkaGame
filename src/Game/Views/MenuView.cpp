@@ -1,91 +1,178 @@
 #include "MenuView.h"
 
+#include "../../Component/Transform2D.h"
+
 namespace aka {
+
+MenuView::MenuView(World& world, Router& router) :
+	m_world(world),
+	m_router(router)
+{
+}
 
 void MenuView::onCreate()
 {
-	Image image = Image::load(Asset::path("logo/aka.png"));
-	Sprite sprite;
-	sprite.animations.emplace_back();
-	Sprite::Animation& animation = sprite.animations.back();
-	animation.name = "Default";
-	animation.frames.push_back(Sprite::Frame::create(
-		Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{}),
-		Time::Unit::milliseconds(0))
-	);
-	animation.frames.back().texture->upload(image.bytes.data());
+	Font* font = &FontManager::getDefault();
+	float padding = 10.f;
+	vec2f center = vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()) / 2.f;
+	color4f red = color4f(0.93f, 0.04f, 0.26f, 1.f);
+	color4f blue = color4f(0.01f, 0.47f, 0.96f, 1.f);
+	color4f dark = color4f(0.1f, 0.1f, 0.1f, 1.f);
+	color4f light = color4f(0.9f, 0.9f, 0.9f, 1.f);
 
-	SpriteManager::create("Logo", std::move(sprite));
-	m_elapsed = Time::Unit::milliseconds(0);
-	m_redraw = true;
+	{
+		Image img = Image::load(Asset::path("textures/background/background.png"));
+
+		Entity e = m_world.createEntity("Background");
+		e.add<Transform2D>(Transform2D(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), radianf(0.f)));
+		e.add<UIImageComponent>(UIImageComponent());
+		UIImageComponent& image = e.get<UIImageComponent>();
+		image.texture = Texture::create(img.width, img.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{});
+		image.texture->upload(img.bytes.data());
+		image.layer = 0;
+	}
+
+	{
+		std::string text = "Start the game !!!"; // Collect 10 coins to win !
+		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
+
+		Entity e = m_world.createEntity("StartButton");
+		e.add<Transform2D>(Transform2D(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.add<UIButtonComponent>(UIButtonComponent{
+			font,
+			text,
+			padding,
+			color4f(1),
+			red,
+			blue,
+			lerp(red, blue, 0.3f),
+			1,
+			false,
+			false,
+			[&](const input::Position&) {
+				m_router.set(Views::game);
+			}
+		});
+	}
+
+	{
+		std::string text = "Config";
+		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
+
+		Entity e = m_world.createEntity("ConfigButton");
+		e.add<Transform2D>(Transform2D(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.get<Transform2D>().position.y -= 60.f;
+		e.add<UIButtonComponent>(UIButtonComponent{
+			font,
+			text,
+			padding,
+			color4f(1),
+			red,
+			blue,
+			lerp(red, blue, 0.3f),
+			1,
+			false,
+			false,
+			[&](const input::Position&) {
+				Logger::info("Woah, config not implemented !");
+			}
+		});
+	}
+	{
+		std::string text = "Quit";
+		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
+
+		Entity e = m_world.createEntity("QuitButton");
+		e.add<Transform2D>(Transform2D(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.get<Transform2D>().position.y -= 120.f;
+		e.add<UIButtonComponent>(UIButtonComponent{
+			font,
+			text,
+			padding,
+			color4f(1),
+			red,
+			blue,
+			lerp(red, blue, 0.3f),
+			1,
+			false,
+			false,
+			[&](const input::Position&) {
+				quit();
+			}
+		});
+	}
+
+	m_world.attach<UISystem>();
+	m_world.create();
 }
 
 void MenuView::onDestroy()
 {
-	SpriteManager::destroy("Logo");
+	m_world.destroy();
 }
 
 void MenuView::onUpdate(Router& router, Time::Unit dt)
 {
-	Time::Unit fadeInDuration = Time::Unit::milliseconds(1000);
-	Time::Unit stillDuration = Time::Unit::milliseconds(3000);
-	Time::Unit fadeOutDuration = Time::Unit::milliseconds(1000);
-	if (m_elapsed <= fadeInDuration)
-	{
-		m_redraw = true;
-		m_logoAlpha = m_elapsed.seconds() / fadeInDuration.seconds();
-	}
-	else if (m_elapsed > fadeInDuration && m_elapsed <= fadeInDuration + stillDuration)
-	{
-		m_logoAlpha = 1.f;
-		m_redraw = false;
-	}
-	else if (m_elapsed > fadeInDuration + stillDuration && m_elapsed < fadeInDuration + stillDuration + fadeOutDuration)
-	{
-		m_redraw = true;
-		Time::Unit t = m_elapsed - (fadeInDuration + stillDuration);
-		m_logoAlpha = 1.f - t.seconds() / fadeOutDuration.seconds();
-	}
-	else
-	{
-		router.set(Views::game);
-	}
-	m_elapsed += dt;
+	m_world.update(dt);
 }
 
 void MenuView::onRender()
 {
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
 	backbuffer->clear(0.01f, 0.01f, 0.01f, 1.f);
-	if (m_redraw)
-	{
-		m_batch.clear();
+
+	m_world.draw(m_batch);
+
+	m_batch.render();
+	m_batch.clear();
+}
+
+void MenuView::onResize(uint32_t width, uint32_t height)
+{
+	// TODO just loop button and scale position ?
+	onDestroy();
+	onCreate();
+}
+
+void UISystem::update(World& world, Time::Unit deltaTime)
+{
+	auto viewButton = world.registry().view<Transform2D, UIButtonComponent>();
+	viewButton.each([](Transform2D& transform, UIButtonComponent& button) {
+		vec2f s = vec2f(button.font->size(button.text));
+		const input::Position& mouse = input::mouse();
+		// Hovered
+		if ((mouse.x > transform.position.x) && (mouse.x < transform.position.x + s.x + 2 * button.padding) && (mouse.y > transform.position.y) && (mouse.y < transform.position.y + s.y + 2 * button.padding))
+			button.hovered = true;
+		else
+			button.hovered = false;
+		// Active
+		if (button.hovered && input::pressed(input::Button::ButtonLeft))
 		{
-			Font& font = FontManager::getDefault();
-			std::string txt = "Collect 10 coins to win !";
-			vec2i size = font.size(txt);
-			mat3f transformText = mat3f::translate(vec2f(
-				(float)((int)backbuffer->width() / 2 - size.x / 2),
-				(float)((int)backbuffer->height() / 2 - size.y / 2) - 150.f
-			));
-			m_batch.draw(transformText, Batch::Text(txt, &font, color4f(1.f, 1.f, 1.f, m_logoAlpha), 0));
+			button.active = true;
+			button.callback(mouse);
 		}
-		{
-			Sprite& sprite = SpriteManager::get("Logo");
-			const Sprite::Frame& frame = sprite.getFrame(0, 0);
-			vec2f size = vec2f(frame.width, frame.height) * 3.f;
-			mat3f transformLogo = mat3f::translate(vec2f(
-				(float)((int)backbuffer->width() / 2 - size.x / 2),
-				(float)((int)backbuffer->height() / 2 - size.y / 2)
-			));
-			m_batch.draw(transformLogo, Batch::Rect(vec2f(0.f), size, frame.texture, color4f(1.f, 1.f, 1.f, m_logoAlpha), 1));
-		}
-	}
-	m_batch.render(
-		backbuffer,
-		mat4f::identity(), 
-		mat4f::orthographic(0.f, (float)backbuffer->height(), 0.f, (float)backbuffer->width())
-	);
+		else
+			button.active = false;
+	});
+}
+
+void UISystem::draw(World& world, Batch& batch)
+{
+	auto viewButton = world.registry().view<Transform2D, UIButtonComponent>();
+	viewButton.each([&](Transform2D& transform, UIButtonComponent& button) {
+		vec2f s = vec2f(button.font->size(button.text));
+
+		mat3f backgroundTransform = transform.model() * mat3f::scale(vec2f(s.x + 2 * button.padding, s.y + 2 * button.padding));
+		mat3f textTransform = transform.model() * mat3f::translate(vec2f(button.padding, button.padding));
+
+		batch.draw(backgroundTransform, Batch::Rect(vec2f(0.f), vec2f(1), button.active ? button.colorButtonActive : (button.hovered ? button.colorButtonHovered : button.colorButton), button.layer));
+		batch.draw(textTransform, Batch::Text(button.text, button.font, button.colorText, button.layer + 1));
+	});
+
+	auto viewImage = world.registry().view<Transform2D, UIImageComponent>();
+	viewImage.each([&](Transform2D& transform, UIImageComponent& image) {
+		batch.draw(transform.model(), Batch::Rect(vec2f(0.f), vec2f(1.f), image.texture, image.layer));
+	});
 }
 
 };

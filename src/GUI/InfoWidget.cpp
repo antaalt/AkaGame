@@ -30,6 +30,7 @@ void InfoWidget::draw(World& world)
 		};
 		ImGui::Text("Api : %s", apiName[(int)GraphicBackend::api()]);
 		ImGui::Text("Device : %s", device.vendor);
+		ImGui::Text("Renderer : %s", device.renderer);
 	}
 	ImGui::End();
 

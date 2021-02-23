@@ -1,5 +1,7 @@
 #include "EndView.h"
 
+#include "../Game.h"
+
 namespace aka {
 
 void EndView::onCreate()
@@ -12,6 +14,8 @@ void EndView::onDestroy()
 
 void EndView::onUpdate(Router& router, Time::Unit dt)
 {
+	if (input::pressed(input::Key::Space))
+		router.set(Views::menu);
 }
 
 void EndView::onRender()
@@ -30,7 +34,7 @@ void EndView::onRender()
 	}
 	{
 		Font& font = FontManager::get("Espera16");
-		std::string txt = "Press escape to exit...";
+		std::string txt = "Press space to return to menu...";
 		vec2i size = font.size(txt);
 		mat3f transformText = mat3f::translate(vec2f(
 			(float)((int)backbuffer->width() / 2 - size.x / 2),

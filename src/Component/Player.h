@@ -32,11 +32,11 @@ struct Player
 		DoubleJumping,
 		Falling
 	};
-	State state;
+	State state = State::Idle;
 	Speed speed = Speed(6.f);
-	input::Key jump;
-	input::Key left;
-	input::Key right;
+	input::Key jump = input::Key::Space;
+	input::Key left = input::Key::A;
+	input::Key right = input::Key::D;
 };
 template <>
 const char* ComponentHandle<Player>::name = "Player";

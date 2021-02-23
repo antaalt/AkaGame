@@ -56,6 +56,8 @@ set(SRC
 	"src/Game/Views/EndView.cpp"
 	"src/Game/Views/MenuView.h"
 	"src/Game/Views/MenuView.cpp"
+	"src/Game/Views/IntroView.h"
+	"src/Game/Views/IntroView.cpp"
 	"src/Game/Level.h"
 	"src/Game/Level.cpp"
 	"src/Game/Resources.h"

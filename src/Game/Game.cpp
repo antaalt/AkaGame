@@ -1,5 +1,6 @@
 #include "Game.h"
 
+#include "Views/IntroView.h"
 #include "Views/GameView.h"
 #include "Views/MenuView.h"
 #include "Views/EndView.h"
@@ -11,6 +12,7 @@
 
 namespace aka {
 
+const ViewID Views::intro = generate();
 const ViewID Views::menu = generate();
 const ViewID Views::game = generate();
 const ViewID Views::end = generate();
@@ -19,10 +21,11 @@ void Game::initialize()
 {
 	{
 		// Initialize Game view
-		m_router.attach<MenuView>(Views::menu);
+		m_router.attach<IntroView>(Views::intro);
+		m_router.attach<MenuView>(Views::menu, m_world, m_router);
 		m_router.attach<GameView>(Views::game, m_world);
 		m_router.attach<EndView>(Views::end);
-		m_router.set(Views::menu);
+		m_router.set(Views::intro);
 		m_current = &m_router.get();
 		m_current->onCreate();
 	}
@@ -97,7 +100,13 @@ void Game::present()
 
 void Game::end()
 {
+	if (!m_current->running())
+		quit();
+}
 
+void Game::resize(uint32_t width, uint32_t height)
+{
+	m_current->onResize(width, height);
 }
 
 };

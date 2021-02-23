@@ -26,6 +26,9 @@
 
 namespace aka {
 
+static const uint32_t defaultWidth = 320;
+static const uint32_t defaultHeight = 180;
+
 GameView::GameView(World& world) :
 	m_world(world),
 	m_paused(false)
@@ -33,7 +36,6 @@ GameView::GameView(World& world) :
 }
 void GameView::onCreate()
 {
-	Logger::debug.mute();
 	Device device = Device::getDefault();
 	Logger::info("Device vendor : ", device.vendor);
 	Logger::info("Device renderer : ", device.renderer);
@@ -70,7 +72,9 @@ void GameView::onCreate()
 		sampler.filterMin = aka::Sampler::Filter::Nearest;
 		sampler.wrapS = aka::Sampler::Wrap::Clamp;
 		sampler.wrapT = aka::Sampler::Wrap::Clamp;
-		m_framebuffer = Framebuffer::create(320, 180, sampler);
+		uint32_t width = GraphicBackend::backbuffer()->width() * defaultHeight / (float)GraphicBackend::backbuffer()->height();
+		uint32_t height = defaultHeight;
+		m_framebuffer = Framebuffer::create(width, height, sampler);
 		PlatformBackend::setLimits(m_framebuffer->width(), m_framebuffer->height(), 0, 0);
 	}
 
@@ -121,14 +125,8 @@ void GameView::onFrame()
 
 void GameView::onUpdate(Router &router, Time::Unit deltaTime)
 {
-	// Screenshot
-	if (input::pressed(input::Key::F1))
-	{
-		GraphicBackend::screenshot("./output.jpg");
-		Logger::info("Screenshot taken.");
-	}
 	// Pause the GameView
-	if (input::down(input::Key::F2))
+	if (input::down(input::Key::P))
 	{
 		m_paused = !m_paused;
 		if (m_paused)
@@ -150,7 +148,7 @@ void GameView::onUpdate(Router &router, Time::Unit deltaTime)
 	}
 
 	// Reset
-	if (input::down(input::Key::F3))
+	if (input::down(input::Key::R))
 	{
 		m_map.set(0, 0, m_world);
 		Level& level = m_map.get();
@@ -187,13 +185,20 @@ void GameView::onRender()
 		// Blit to backbuffer
 		Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
 		backbuffer->clear(0.f, 0.f, 0.f, 1.f);
-		mat4f view = mat4f::identity();
-		mat4f projection = mat4f::orthographic(0.f, static_cast<float>(backbuffer->height()), 0.f, static_cast<float>(backbuffer->width()));
-		m_batch.draw(mat3f::scale(vec2f((float)backbuffer->width(), (float)backbuffer->height())), Batch::Rect(vec2f(0), vec2f(1.f), m_framebuffer->attachment(Framebuffer::AttachmentType::Color0), 0));
-		m_batch.render(GraphicBackend::backbuffer(), view, projection);
+		m_batch.draw(mat3f::identity(), Batch::Rect(vec2f(0), vec2f(backbuffer->width(), backbuffer->height()), m_framebuffer->attachment(Framebuffer::AttachmentType::Color0), 0));
+		m_batch.render();
 		m_batch.clear();
 	}
 
+}
+
+void GameView::onResize(uint32_t width, uint32_t height)
+{
+	uint32_t newWidth = width * defaultHeight / (float)height;
+	uint32_t newHeight = defaultHeight;
+
+	m_framebuffer->resize(newWidth, newHeight);
+	m_cameraEntity.get<Camera2D>().camera.viewport = vec2f(newWidth, newHeight);
 }
 
 }

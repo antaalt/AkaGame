@@ -7,6 +7,7 @@
 namespace aka {
 
 struct Views {
+	static const ViewID intro;
 	static const ViewID menu;
 	static const ViewID game;
 	static const ViewID end;
@@ -23,6 +24,7 @@ public:
 	void render() override;
 	void present() override;
 	void end() override;
+	void resize(uint32_t width, uint32_t height) override;
 private:
 	// UI
 	GUI m_gui;

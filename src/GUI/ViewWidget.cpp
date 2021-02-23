@@ -12,6 +12,7 @@ void ViewWidget::draw(World& world)
 	if (ImGui::Begin("View"))
 	{
 		std::map<ViewID, std::string> views;
+		views.insert(std::make_pair(Views::intro, "Intro"));
 		views.insert(std::make_pair(Views::menu, "Menu"));
 		views.insert(std::make_pair(Views::game, "Game"));
 		views.insert(std::make_pair(Views::end, "End"));
@@ -20,8 +21,8 @@ void ViewWidget::draw(World& world)
 			for (auto it : views)
 				if (ImGui::Selectable(it.second.c_str(), it.first == m_router.current()))
 					m_router.set(it.first);
-			ImGui::EndChild();
 		}
+		ImGui::EndChild();
 	}
 	ImGui::End();
 }

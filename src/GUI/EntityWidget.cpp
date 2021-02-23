@@ -464,7 +464,7 @@ Entity pickEntity(World &world)
 	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
 	const mat3f cam = cameraTransform.model();
 	const mat3f view = mat3f::inverse(cam);
-	const vec2f screenPos(input::mouse().x, backbuffer->height() - input::mouse().y);
+	const vec2f screenPos(input::mouse().x, input::mouse().y);
 	bool found = false;
 	int32_t layer = -100;
 	Entity picked = Entity::null();
@@ -490,7 +490,7 @@ Entity pickEntity(World &world)
 			Transform2D& t = entity.get<Transform2D>();
 			Animator& a = entity.get<Animator>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
-			// local to world to view space (320x180)
+			// local to world to view space
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
 			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
 			// scale to 1920x1080, bottom left
@@ -507,7 +507,7 @@ Entity pickEntity(World &world)
 			Transform2D& t = entity.get<Transform2D>();
 			Text& text = entity.get<Text>();
 			vec2i size = text.font->size(text.text);
-			// local to world to view space (320x180)
+			// local to world to view space
 			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
 			vec2f s = vec2f(view * t.model() * vec3f(vec2f(size), 0));
 			// scale to 1920x1080, bottom left

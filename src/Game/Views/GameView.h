@@ -17,6 +17,7 @@ public:
 	void onFrame() override;
 	void onUpdate(Router &router, Time::Unit deltaTime) override;
 	void onRender() override;
+	void onResize(uint32_t width, uint32_t height) override;
 private:
 	// Rendering
 	bool m_paused;
