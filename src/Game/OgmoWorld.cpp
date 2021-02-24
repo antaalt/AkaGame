@@ -17,7 +17,7 @@ const OgmoLevel::Layer* OgmoLevel::getLayer(const std::string& name) const
 OgmoLevel OgmoLevel::load(const OgmoWorld &world, const Path& path)
 {
 	OgmoLevel level;
-	const nlohmann::json json = nlohmann::json::parse(TextFile::load(path));
+	const nlohmann::json json = nlohmann::json::parse(File::readString(path));
 	level.size.x = json["width"];
 	level.size.y = json["height"];
 	level.offset.x = json["offsetX"];
@@ -89,7 +89,7 @@ OgmoWorld OgmoWorld::load(const Path& path)
 {
 	OgmoWorld world;
 	const std::string relativePath = path.str().substr(0, path.str().find_last_of('/') + 1);
-	const nlohmann::json json = nlohmann::json::parse(TextFile::load(path));
+	const nlohmann::json json = nlohmann::json::parse(File::readString(path));
 	const nlohmann::json& jsonTilesets = json["tilesets"];
 	for (const nlohmann::json& jsonTileset : jsonTilesets)
 	{

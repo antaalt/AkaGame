@@ -126,7 +126,7 @@ void ResourcesWidget::draw(World& world)
 						{
 							try
 							{
-								FontManager::create(Path::name(path), Font(path, height));
+								FontManager::create(file::name(path), Font(path, height));
 								STR_CPY(bufferPath, 256, path.c_str());
 								height = 48;
 								path = "";
@@ -288,7 +288,8 @@ void ResourcesWidget::draw(World& world)
 						{
 							try
 							{
-								SpriteManager::create(Path::name(bufferPath), Sprite::parse(path));
+								FileStream stream(path, FileMode::ReadOnly);
+								SpriteManager::create(file::name(bufferPath), Sprite::parse(stream));
 								STR_CPY(bufferPath, 256, path.c_str());
 								path = "";
 								ImGui::CloseCurrentPopup();
@@ -361,7 +362,7 @@ void ResourcesWidget::draw(World& world)
 								error = "Could not load audio";
 							else
 							{
-								AudioManager::create(Path::name(path), std::move(stream));
+								AudioManager::create(file::name(path), std::move(stream));
 								STR_CPY(bufferPath, 256, path.c_str());
 								path = "";
 								memory = false;
