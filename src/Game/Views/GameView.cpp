@@ -72,7 +72,7 @@ void GameView::onCreate()
 		sampler.filterMin = aka::Sampler::Filter::Nearest;
 		sampler.wrapS = aka::Sampler::Wrap::Clamp;
 		sampler.wrapT = aka::Sampler::Wrap::Clamp;
-		uint32_t width = GraphicBackend::backbuffer()->width() * defaultHeight / (float)GraphicBackend::backbuffer()->height();
+		uint32_t width = (uint32_t)(GraphicBackend::backbuffer()->width() * defaultHeight / (float)GraphicBackend::backbuffer()->height());
 		uint32_t height = defaultHeight;
 		m_framebuffer = Framebuffer::create(width, height, sampler);
 		PlatformBackend::setLimits(m_framebuffer->width(), m_framebuffer->height(), 0, 0);
@@ -194,7 +194,7 @@ void GameView::onRender()
 
 void GameView::onResize(uint32_t width, uint32_t height)
 {
-	uint32_t newWidth = width * defaultHeight / (float)height;
+	uint32_t newWidth = (uint32_t)(width * defaultHeight / (float)height);
 	uint32_t newHeight = defaultHeight;
 
 	m_framebuffer->resize(newWidth, newHeight);

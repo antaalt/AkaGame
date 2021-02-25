@@ -9,7 +9,7 @@ namespace aka {
 struct Camera2D
 {
 	Camera2D() : Camera2D(vec2f(1.f)) {}
-	Camera2D(const vec2f& viewport) : camera(viewport), clampBorder(true) {}
+	Camera2D(const vec2f& viewport) : camera(viewport), main(false), clampBorder(true) {}
 
 	CameraOrthographic camera;
 	bool main;

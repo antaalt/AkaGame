@@ -132,7 +132,7 @@ void ResourcesWidget::draw(World& world)
 								path = "";
 								ImGui::CloseCurrentPopup();
 							}
-							catch (const std::exception& e)
+							catch (const std::exception&)
 							{
 								error = "Failed loading font.";
 							}

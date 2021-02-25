@@ -12,7 +12,7 @@ void InfoWidget::draw(World& world)
 	uint32_t width, height;
 	PlatformBackend::getSize(&width, &height);
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
-	ImGui::SetNextWindowPos(ImVec2(width - 5, 25), ImGuiCond_Always, ImVec2(1.f, 0.f));
+	ImGui::SetNextWindowPos(ImVec2((float)(width - 5), 25.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
 	if (ImGui::Begin("Info", nullptr, flags))
 	{
 		static Device device = Device::getDefault();
