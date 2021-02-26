@@ -49,7 +49,7 @@ void GameView::onCreate()
 		m_world.attach<TileSystem>();
 		m_world.attach<TileMapSystem>();
 		m_world.attach<AnimatorSystem>();
-		m_world.attach<CameraSystem>();
+		m_world.attach<CameraSystem>(m_map);
 		m_world.attach<TextRenderSystem>();
 		m_world.attach<PlayerSystem>();
 		m_world.attach<CoinSystem>();
@@ -160,11 +160,11 @@ void GameView::onUpdate(Router &router, Time::Unit deltaTime)
 		});
 	}
 	// Check if game finished
-	auto view = m_world.registry().view<Player>();
+	/*auto view = m_world.registry().view<Player>();
 	view.each([&](Player& player) {
 		if (player.coin >= 10)
 			router.set(Views::end);
-	});
+	});*/
 }
 
 void GameView::onRender()

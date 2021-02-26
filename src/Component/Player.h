@@ -32,6 +32,7 @@ struct Player
 		DoubleJumping,
 		Falling
 	};
+	bool controllable = true; // Is the player reacting to user input
 	State state = State::Idle;
 	Speed speed = Speed(6.f);
 	input::Key jump = input::Key::Space;

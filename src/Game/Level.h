@@ -33,7 +33,7 @@ struct Level
 struct GridMap
 {
 	static constexpr size_t rowCount = 2;
-	static constexpr size_t colCount = 3;
+	static constexpr size_t colCount = 4;
 
 	using Row = std::array<std::string, colCount>;
 	using Col = std::array<Row, rowCount>;
@@ -48,8 +48,8 @@ struct GridMap
 
 private:
 	const Col m_grid = {{
-		{{ "level0", "level1", "level2" }},
-		{{ "level1", "level2", "level0"}}
+		{{ "level0", "level1", "level2", "level3" }},
+		{{ "", "", "", "" }}
 	}};
 };
 
@@ -58,18 +58,22 @@ class WorldMap
 public:
 	WorldMap();
 
-	// Set the current level and retrieve it
+	// Set the current level, load it and create it
 	void set(uint32_t x, uint32_t y, World &world);
-	// Set the next level by offseting the current one if there is one
+	// Set the next level relative to the current one.
 	void next(int32_t xOffset, int32_t yOffset, World& world);
+	// Destroy the level
+	void destroy(uint32_t x, uint32_t y);
 	// Get the current level
 	Level& get();
+	// Get the current level id
+	vec2u current() const;
 private:
 	// Get the level from the grid
 	const std::string& getLevelFromGrid(uint32_t x, uint32_t y);
 private:
 	vec2u m_currentLevel;
-	Level m_level;
+	std::map<vec2u, Level> m_levels; // All loaded levels
 
 	GridMap m_grid;
 	OgmoWorld m_ogmoWorld;

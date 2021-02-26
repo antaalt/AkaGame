@@ -54,7 +54,13 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 	world.dispatcher().update<CollisionEvent>();
 	auto view = world.registry().view<Player, Transform2D, RigidBody2D, Animator>();
 	view.each([&](Player& player, Transform2D& transform, RigidBody2D& rigid, Animator& animator) {
-
+		if (!player.controllable)
+		{
+			animator.play("Idle");
+			rigid.velocity = vec2f(0.f);
+			rigid.acceleration = vec2f(0.f);
+			return;
+		}
 		if (player.state == Player::State::Jumping || player.state == Player::State::DoubleJumping)
 		{
 			if (input::pressed(player.left))
@@ -117,24 +123,6 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 				rigid.velocity.y = 16.f;
 			}
 		}
-		/*switch (player.state)
-		{
-		case Player::State::Idle:
-			Logger::info("Idle");
-			break;
-		case Player::State::Walking:
-			Logger::info("Walking");
-			break;
-		case Player::State::Falling:
-			Logger::info("Falling");
-			break;
-		case Player::State::Jumping:
-			Logger::info("Jumping");
-			break;
-		case Player::State::DoubleJumping:
-			Logger::info("DoubleJumping");
-			break;
-		}*/
 	});
 }
 

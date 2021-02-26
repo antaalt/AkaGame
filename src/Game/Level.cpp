@@ -27,9 +27,10 @@ WorldMap::WorldMap() :
 
 void WorldMap::set(uint32_t x, uint32_t y, World& world)
 {
+	Level level;
+	level.load(getLevelFromGrid(x, y), m_ogmoWorld, world);
 	m_currentLevel = vec2u(x, y);
-	m_level.destroy(world);
-	m_level.load(getLevelFromGrid(x, y), m_ogmoWorld, world);
+	m_levels.insert(std::make_pair(m_currentLevel, level));
 }
 
 void WorldMap::next(int32_t xOffset, int32_t yOffset, World& world)
@@ -41,9 +42,21 @@ void WorldMap::next(int32_t xOffset, int32_t yOffset, World& world)
 	set(x, y, world);
 }
 
+void WorldMap::destroy(uint32_t x, uint32_t y)
+{
+	auto it = m_levels.find(vec2u(x, y));
+	if (it != m_levels.end())
+		m_levels.erase(it);
+}
+
 Level& WorldMap::get()
 {
-	return m_level;
+	return m_levels.find(m_currentLevel)->second;
+}
+
+vec2u WorldMap::current() const
+{
+	return m_currentLevel;
 }
 
 const std::string& WorldMap::getLevelFromGrid(uint32_t x, uint32_t y)
@@ -170,7 +183,7 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 			e.get<Animator>().play("Idle");
 			this->entities.push_back(e);
 		}
-		else if (entity.entity->name == "Character")
+		else if (entity.entity->name == "Spawn")
 		{
 			this->spawn = vec2u(vec2f(offset) + flipY(entity.position, entity.size, layer));
 		}

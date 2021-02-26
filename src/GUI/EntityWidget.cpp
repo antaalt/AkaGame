@@ -130,6 +130,7 @@ bool ComponentNode<Camera2D>::draw(Camera2D& camera)
 {
 	ImGui::InputFloat2("Viewport", camera.camera.viewport.data);
 	ImGui::Checkbox("Clamp", &camera.clampBorder);
+	ImGui::Checkbox("Tracking", &camera.tracking);
 	ImGui::Checkbox("Main", &camera.main);
 	return false;
 }
@@ -264,10 +265,10 @@ void keySelector(const char *label, input::Key& currentKey)
 const char* ComponentNode<Player>::icon() { return ICON_FA_RUNNING; }
 bool ComponentNode<Player>::draw(Player& player)
 {
-	UniqueID u(&player);
-	ImGui::SliderInt(u("Coin"), &player.coin, 0, 50);
+	ImGui::SliderInt("Coin", &player.coin, 0, 50);
+	ImGui::Checkbox("Controllable", &player.controllable);
 	float metric = player.speed.metric();
-	if (ImGui::SliderFloat(u("Speed"), &metric, 0.f, 50.f))
+	if (ImGui::SliderFloat("Speed", &metric, 0.f, 50.f))
 		player.speed = Speed(metric);
 	keySelector("Jump", player.jump);
 	keySelector("Left", player.left);

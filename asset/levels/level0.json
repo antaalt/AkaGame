@@ -73,7 +73,6 @@
         {"name": "Collider", "id": 14, "_eid": "48420629", "x": 128, "y": 32, "width": 96, "height": 16, "originX": 0, "originY": 0},
         {"name": "Collider", "id": 15, "_eid": "48420629", "x": 80, "y": 0, "width": 16, "height": 16, "originX": 0, "originY": 0},
         {"name": "Collider", "id": 16, "_eid": "48420629", "x": 224, "y": 0, "width": 288, "height": 16, "originX": 0, "originY": 0},
-        {"name": "Character", "id": 17, "_eid": "87164600", "x": 80, "y": 16, "originX": 0, "originY": 0},
         {"name": "Coin", "id": 18, "_eid": "87172475", "x": 16, "y": 80, "originX": 0, "originY": 0},
         {"name": "Coin", "id": 19, "_eid": "87172475", "x": 16, "y": 112, "originX": 0, "originY": 0},
         {"name": "Coin", "id": 20, "_eid": "87172475", "x": 16, "y": 144, "originX": 0, "originY": 0},
@@ -87,7 +86,8 @@
         {"name": "Coin", "id": 28, "_eid": "87172475", "x": 336, "y": 128, "originX": 0, "originY": 0},
         {"name": "Coin", "id": 29, "_eid": "87172475", "x": 416, "y": 144, "originX": 0, "originY": 0},
         {"name": "Coin", "id": 30, "_eid": "87172475", "x": 464, "y": 160, "originX": 0, "originY": 0},
-        {"name": "Coin", "id": 31, "_eid": "87172475", "x": 128, "y": 80, "originX": 0, "originY": 0}
+        {"name": "Coin", "id": 31, "_eid": "87172475", "x": 128, "y": 80, "originX": 0, "originY": 0},
+        {"name": "Spawn", "id": 32, "_eid": "87164600", "x": 80, "y": 16, "originX": 0, "originY": 0}
       ]
     }
   ]
