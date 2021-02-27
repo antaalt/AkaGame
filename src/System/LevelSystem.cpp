@@ -111,7 +111,7 @@ void LevelSystem::update(World& world, Time::Unit deltaTime)
 				});
 				cameraComponent.tracking = true;
 				m_transition = false;
-				//m_map.destroy(previous.x, previous.y);
+				m_map.destroy(previous.x, previous.y, world);
 			}
 			else
 			{

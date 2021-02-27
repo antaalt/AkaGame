@@ -42,11 +42,14 @@ void WorldMap::next(int32_t xOffset, int32_t yOffset, World& world)
 	set(x, y, world);
 }
 
-void WorldMap::destroy(uint32_t x, uint32_t y)
+void WorldMap::destroy(uint32_t x, uint32_t y, World& world)
 {
 	auto it = m_levels.find(vec2u(x, y));
 	if (it != m_levels.end())
+	{
+		it->second.destroy(world);
 		m_levels.erase(it);
+	}
 }
 
 Level& WorldMap::get()
@@ -199,6 +202,7 @@ void Level::destroy(World& world)
 	for (Entity& e : entities)
 		if (e.valid())
 			e.destroy();
+	entities.clear();
 	size = vec2u(0);
 	offset = vec2i(0);
 	foreground = Layer{};

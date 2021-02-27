@@ -63,7 +63,7 @@ public:
 	// Set the next level relative to the current one.
 	void next(int32_t xOffset, int32_t yOffset, World& world);
 	// Destroy the level
-	void destroy(uint32_t x, uint32_t y);
+	void destroy(uint32_t x, uint32_t y, World& world);
 	// Get the current level
 	Level& get();
 	// Get the current level id
