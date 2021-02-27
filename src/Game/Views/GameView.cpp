@@ -88,7 +88,7 @@ void GameView::onCreate()
 
 	{
 		// INIT LEVEL
-		m_map.set(0, 0, m_world);
+		m_map.set(3, 0, m_world);
 	}
 
 	{

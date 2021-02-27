@@ -62,7 +62,7 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 		// Jump
 		const float initialJumpVelocity = 16.f;
 		const float initialDoubleJumpVelocity = 12.f;
-		const float jumpLateralAcceleration = 10.f;
+		const float jumpLateralAcceleration = 20.f;
 		const float jumpLateralFriction = 10.f;
 		const float maxJumpLateralAcceleration = 10.f;
 

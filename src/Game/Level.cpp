@@ -137,14 +137,13 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 			Time::Unit::milliseconds(500)
 		));
 		animation.frames.back().texture->upload(image.bytes.data());
-		animation.frames.back().width = this->size.x;
-		animation.frames.back().height = this->size.y;
+		vec2f scale = vec2f(this->size) / vec2f(animation.frames.back().width, animation.frames.back().height);
 		Sprite s;
 		s.animations.push_back(animation);
 		Sprite& sprite = SpriteManager::create("Background", std::move(s));
 
-		Entity e = world.createEntity("");
-		e.add<Transform2D>(Transform2D(Transform2D(vec2f(offset), vec2f(1.f), radianf(0.f))));
+		Entity e = world.createEntity("Background");
+		e.add<Transform2D>(Transform2D(Transform2D(vec2f(offset), scale, radianf(0.f))));
 		e.add<Animator>(Animator(&sprite, -2));
 		e.get<Animator>().play("Default");
 		this->entities.push_back(e);

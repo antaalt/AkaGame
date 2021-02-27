@@ -25,9 +25,7 @@ void Game::initialize()
 		m_router.attach<MenuView>(Views::menu, m_world, m_router);
 		m_router.attach<GameView>(Views::game, m_world);
 		m_router.attach<EndView>(Views::end);
-		m_router.set(Views::intro);
-		m_current = &m_router.get();
-		m_current->onCreate();
+		m_router.set(Views::game);
 	}
 	{
 		// Load global resources
@@ -43,6 +41,10 @@ void Game::initialize()
 		m_gui.add<MenuWidget>();
 		m_gui.add<ViewWidget>(m_router);
 		m_gui.initialize();
+	}
+	{
+		m_current = &m_router.get();
+		m_current->onCreate(); 
 	}
 }
 
