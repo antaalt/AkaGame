@@ -7,10 +7,11 @@
 
 namespace aka {
 
-CollisionEvent::CollisionEvent(Entity d, Entity s, CollisionType type) :
+CollisionEvent::CollisionEvent(Entity d, Entity s, CollisionType type, CollisionFace face) :
 	staticEntity(s),
 	dynamicEntity(d),
-	staticType(type)
+	staticType(type),
+	face(face)
 {
 }
 
@@ -45,11 +46,32 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 			Collision2D c = overlap(rectDynamic, rectStatic);
 			if (c.collided)
 			{
+				CollisionFace face = CollisionFace::None;
 				if (colliderStatic.is(CollisionType::Solid))
 				{
 					// Adjust velocity
 					// Get normal 
 					vec2f normal = vec2f::normalize(c.separation);
+					if (normal.x > 0.f && normal.y > 0.f)
+					{
+						if (normal.x > normal.y) face = CollisionFace::Left;
+						else face = CollisionFace::Bottom;
+					}
+					else if (normal.x > 0.f)
+					{
+						if (normal.x > -normal.y) face = CollisionFace::Left;
+						else face = CollisionFace::Top;
+					}
+					else if (normal.y > 0.f)
+					{
+						if (-normal.x > normal.y) face = CollisionFace::Right;
+						else face = CollisionFace::Bottom;
+					}
+					else
+					{
+						if (-normal.x > -normal.y) face = CollisionFace::Right;
+						else face = CollisionFace::Top;
+					}
 					// Get relative velocity
 					vec2f v = rigidBodyDynamic.velocity; // substract by second object velocity if it has one
 					// Get penetration speed
@@ -76,7 +98,12 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 					// Move the rigid & its collider to avoid overlapping.
 					transformDynamic.position += c.separation;
 				}
-				world.emit<CollisionEvent>(CollisionEvent(Entity(entityDynamic, &world), Entity(entityStatic, &world), colliderStatic.type));
+				world.emit<CollisionEvent>(CollisionEvent(
+					Entity(entityDynamic, &world), 
+					Entity(entityStatic, &world), 
+					colliderStatic.type,
+					face
+				));
 			}
 		}
 	}

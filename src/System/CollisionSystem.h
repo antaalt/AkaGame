@@ -5,12 +5,22 @@
 
 namespace aka {
 
+// Which face is the collision
+enum class CollisionFace {
+	None,
+	Top,
+	Bottom,
+	Right,
+	Left,
+};
+
 struct CollisionEvent {
-	CollisionEvent(Entity s, Entity d, CollisionType type);
+	CollisionEvent(Entity s, Entity d, CollisionType type, CollisionFace face);
 
 	Entity staticEntity;
 	Entity dynamicEntity;
 	CollisionType staticType;
+	CollisionFace face;
 };
 
 class CollisionSystem : public System

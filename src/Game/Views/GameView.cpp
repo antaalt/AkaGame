@@ -99,7 +99,7 @@ void GameView::onCreate()
 		Entity e = m_world.createEntity("Character");
 		e.add<Transform2D>(Transform2D(vec2f(level.spawn), vec2f(1.f), radianf(0)));
 		e.add<Animator>(Animator(&playerSprite, 1));
-		e.add<RigidBody2D>(RigidBody2D(1.f));
+		e.add<RigidBody2D>(RigidBody2D(0.2f));
 		e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)frame.width, (float)frame.height), CollisionType::Solid, 0.1f, 0.1f));
 		e.add<Player>(Player());
 

@@ -48,14 +48,12 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 				if (playerRelativePosition.x < hThreshold)
 				{
 					float distance = abs<float>(playerRelativePosition.x - hThreshold);
-					if (distance > 1.f)
-						cameraTransform.position.x -= pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
+					cameraTransform.position.x = cameraTransform.position.x - distance;
 				}
 				else if (playerRelativePosition.x > camera.viewport.x - hThreshold)
 				{
 					float distance = playerRelativePosition.x - (camera.viewport.x - hThreshold);
-					if (distance > 1.f)
-						cameraTransform.position.x += pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
+					cameraTransform.position.x = cameraTransform.position.x + distance;
 				}
 			}
 			else
@@ -64,14 +62,12 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 				if (playerRelativePosition.y < vThreshold)
 				{
 					float distance = abs<float>(playerRelativePosition.y - vThreshold);
-					if (distance > 1.f)
-						cameraTransform.position.y -= pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
+					cameraTransform.position.y = cameraTransform.position.y - distance;
 				}
 				else if (playerRelativePosition.y > camera.viewport.y - vThreshold)
 				{
 					float distance = playerRelativePosition.y - (camera.viewport.y - vThreshold);
-					if (distance > 1.f)
-						cameraTransform.position.y += pow<float>(distance * 10.f * deltaTime.seconds(), 2.f);
+					cameraTransform.position.y = cameraTransform.position.y + distance;
 				}
 			}
 			break; // Only track first player encountered.
@@ -82,10 +78,10 @@ void CameraSystem::update(World& world, Time::Unit deltaTime)
 		{
 			Level& level = m_map.get();
 			vec2f grid = vec2f(level.size) + vec2f(level.offset);
-			cameraTransform.position.x = max<float>(cameraTransform.position.x, level.offset.x);
-			cameraTransform.position.x = min<float>(cameraTransform.position.x, grid.x - camera.viewport.x);
-			cameraTransform.position.y = max<float>(cameraTransform.position.y, level.offset.y);
-			cameraTransform.position.y = min<float>(cameraTransform.position.y, grid.y - camera.viewport.y);
+			cameraTransform.position.x = max(cameraTransform.position.x, (float)level.offset.x);
+			cameraTransform.position.x = min(cameraTransform.position.x, grid.x - camera.viewport.x);
+			cameraTransform.position.y = max(cameraTransform.position.y, (float)level.offset.y);
+			cameraTransform.position.y = min(cameraTransform.position.y, grid.y - camera.viewport.y);
 		}
 	}
 }
