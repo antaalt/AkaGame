@@ -20,6 +20,7 @@ struct Animator
 	int32_t layer;
 	bool flipU, flipV;
 
+	const Sprite::Animation& getCurrentSpriteAnimation() const;
 	const Sprite::Frame& getCurrentSpriteFrame() const;
 
 	void play(const std::string& animation);

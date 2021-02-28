@@ -21,6 +21,11 @@ Animator::Animator(Sprite* sprite, int32_t layer) :
 {
 }
 
+const Sprite::Animation& Animator::getCurrentSpriteAnimation() const
+{
+	return sprite->animations[currentAnimation];
+}
+
 const Sprite::Frame& Animator::getCurrentSpriteFrame() const
 {
     return sprite->getFrame(currentAnimation, currentFrame);

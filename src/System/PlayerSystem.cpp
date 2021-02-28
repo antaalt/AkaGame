@@ -46,6 +46,7 @@ void PlayerSystem::receive(const CollisionEvent& event)
 	else if (CollisionFace::Bottom == event.face)
 	{
 		player.state = Player::State::Idle;
+		//playerEntity.get<Animator>().play("Idle");
 	}
 }
 
@@ -141,7 +142,7 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 				else
 					rigid.velocity.x = min(rigid.velocity.x + runFriction * deltaTime.seconds(), 0.f);
 			}
-			else
+			else if (animator.getCurrentSpriteAnimation().name != "Idle")
 			{
 				animator.play("Idle");
 				player.state = Player::State::Idle;

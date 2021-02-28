@@ -150,7 +150,9 @@ void GameView::onUpdate(Router &router, Time::Unit deltaTime)
 	// Reset
 	if (input::down(input::Key::R))
 	{
+		vec2u current = m_map.current();
 		m_map.set(0, 0, m_world);
+		m_map.destroy(current.x, current.y, m_world);
 		Level& level = m_map.get();
 		auto view = m_world.registry().view<Transform2D, Player>();
 		// TODO reinstantiate player ?
