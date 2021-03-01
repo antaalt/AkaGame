@@ -10,10 +10,12 @@
 #include "../Component/Text.h"
 #include "../Component/Player.h"
 #include "../Component/Door.h"
+#include "../Component/Particle.h"
 #include "../System/SoundSystem.h"
+
 #include <cstddef>
 #include <cstring>
-
+#include <random>
 
 #include <Aka/Core/Sprite.h>
 #include <Aka/Scene/World.h>
@@ -168,6 +170,7 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 	};
 	for (const OgmoLevel::Entity& entity : layer->entities)
 	{
+		// Entities
 		if (entity.entity->name == "Collider")
 		{
 			Entity e = world.createEntity("Collider");
@@ -192,6 +195,26 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 		else
 		{
 			Logger::warn("Ogmo entity not supported : ", entity.entity->name);
+		}
+	}
+
+	{
+		// Leaves Particles
+		std::default_random_engine g;
+		std::uniform_real_distribution<float> dr(0.f, 2.f * pi<float>());
+		std::uniform_real_distribution<float> dx(0.f, offset.x + size.x);
+		std::uniform_real_distribution<float> dy(0.f, offset.y + size.y);
+		float area = size.x / 16.f * size.y / 16.f;
+		size_t particleCount = area / 10.f;
+		//color4f color = color4f(1.f, 0.75f, 0.80f, 1.f);
+		color4f color = color4f(1.f, 0.75f, 0.80f, 1.f);
+		for (size_t i = 0; i < particleCount; i++)
+		{
+			Entity e = world.createEntity("Particle");
+			// Generate random coordinates / rotation in level space ?
+			e.add<Transform2D>(Transform2D(vec2f(dx(g), dy(g)), vec2f(3.f), radianf(dr(g))));
+			e.add<Particle2D>(Particle2D{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), color, 10 });
+			this->entities.push_back(e);
 		}
 	}
 }

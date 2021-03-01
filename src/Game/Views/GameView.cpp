@@ -9,6 +9,7 @@
 #include "../../Component/Player.h"
 #include "../../Component/SoundInstance.h"
 #include "../../Component/Coin.h"
+#include "../../Component/Particle.h"
 #include "../../System/PhysicSystem.h"
 #include "../../System/AnimatorSystem.h"
 #include "../../System/TileMapSystem.h"
@@ -20,6 +21,7 @@
 #include "../../System/CoinSystem.h"
 #include "../../System/SoundSystem.h"
 #include "../../System/LevelSystem.h"
+#include "../../System/ParticleSystem.h"
 #include "../Game.h"
 #include "../OgmoWorld.h"
 
@@ -55,6 +57,7 @@ void GameView::onCreate()
 		m_world.attach<CoinSystem>();
 		m_world.attach<SoundSystem>();
 		m_world.attach<LevelSystem>(m_map);
+		m_world.attach<ParticleSystem>();
 		m_world.create();
 	}
 
@@ -88,7 +91,7 @@ void GameView::onCreate()
 
 	{
 		// INIT LEVEL
-		m_map.set(3, 0, m_world);
+		m_map.set(0, 0, m_world);
 	}
 
 	{
@@ -111,7 +114,6 @@ void GameView::onCreate()
 
 		e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
 	}
-
 }
 
 void GameView::onDestroy()

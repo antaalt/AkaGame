@@ -32,6 +32,7 @@ set(SRC
 	"src/System/TileRenderSystem.cpp"
 	"src/System/LevelSystem.h"
 	"src/System/LevelSystem.cpp"
+	"src/System/ParticleSystem.cpp"
 	
 	"src/GUI/EntityWidget.h"
 	"src/GUI/EntityWidget.cpp"
