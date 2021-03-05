@@ -58,6 +58,8 @@ class WorldMap
 public:
 	WorldMap();
 
+	void destroy(World& world);
+
 	// Set the current level, load it and create it
 	void set(uint32_t x, uint32_t y, World &world);
 	// Set the next level relative to the current one.

@@ -15,7 +15,6 @@
 
 #include <cstddef>
 #include <cstring>
-#include <random>
 
 #include <Aka/Core/Sprite.h>
 #include <Aka/Scene/World.h>
@@ -25,6 +24,13 @@ namespace aka {
 WorldMap::WorldMap() :
 	m_ogmoWorld(OgmoWorld::load(Asset::path("levels/world.ogmo")))
 {
+}
+
+void WorldMap::destroy(World& world)
+{
+	for (auto& level : m_levels)
+		level.second.destroy(world);
+	m_levels.clear();
 }
 
 void WorldMap::set(uint32_t x, uint32_t y, World& world)
@@ -200,20 +206,21 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 
 	{
 		// Leaves Particles
-		std::default_random_engine g;
-		std::uniform_real_distribution<float> dr(0.f, 2.f * pi<float>());
-		std::uniform_real_distribution<float> dx(0.f, offset.x + size.x);
-		std::uniform_real_distribution<float> dy(0.f, offset.y + size.y);
 		float area = size.x / 16.f * size.y / 16.f;
 		size_t particleCount = area / 10.f;
 		//color4f color = color4f(1.f, 0.75f, 0.80f, 1.f);
 		color4f color = color4f(1.f, 0.75f, 0.80f, 1.f);
+
 		for (size_t i = 0; i < particleCount; i++)
 		{
 			Entity e = world.createEntity("Particle");
 			// Generate random coordinates / rotation in level space ?
-			e.add<Transform2D>(Transform2D(vec2f(dx(g), dy(g)), vec2f(3.f), radianf(dr(g))));
-			e.add<Particle2D>(Particle2D{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), color, 10 });
+			e.add<Transform2D>(Transform2D(
+				vec2f(offset.x + random<float>(0.f, size.x), offset.y + random<float>(0.f, size.y)), 
+				vec2f(3.f), 
+				radianf(random<float>(0.f, 2.f * pi<float>()))
+			));
+			e.add<Particle2D>(Particle2D{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), radianf(0.f), vec2f(0.f), color, 10 });
 			this->entities.push_back(e);
 		}
 	}

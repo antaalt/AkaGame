@@ -9,6 +9,7 @@
 #include "../Component/Text.h"
 #include "../Component/Door.h"
 #include "../Component/SoundInstance.h"
+#include "../Component/Particle.h"
 #include "../Game/Resources.h"
 
 namespace aka {
@@ -50,9 +51,25 @@ void PlayerSystem::receive(const CollisionEvent& event)
 	}
 }
 
+void emitJumpParticles(Transform2D& transform, float velocity, World& world)
+{
+	color4f color = color4f(0.8f);
+	Time::Unit duration = Time::Unit::milliseconds(500);
+	Entity e = world.createEntity("Particle");
+	e.add<Transform2D>(Transform2D(transform.position, vec2f(4.f), radianf(0.f)));
+	e.add<Particle2D>(Particle2D{ Time::now(), duration, vec2f::normalize(vec2f(0.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+
+	e = world.createEntity("Particle");
+	e.add<Transform2D>(Transform2D(transform.position, vec2f(4.f), radianf(0.f)));
+	e.add<Particle2D>(Particle2D{ Time::now(), duration, vec2f::normalize(vec2f(1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+
+	e = world.createEntity("Particle");
+	e.add<Transform2D>(Transform2D(transform.position, vec2f(4.f), radianf(0.f)));
+	e.add<Particle2D>(Particle2D{ Time::now(), duration, vec2f::normalize(vec2f(-1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+}
+
 void PlayerSystem::update(World& world, Time::Unit deltaTime)
 {
-
 	world.dispatcher().update<CollisionEvent>();
 	auto view = world.registry().view<Player, Transform2D, RigidBody2D, Animator>();
 	view.each([&](Player& player, Transform2D& transform, RigidBody2D& rigid, Animator& animator) {
@@ -114,6 +131,7 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
 				{
 					rigid.velocity.x = initialDoubleJumpVelocity;
 				}
+				emitJumpParticles(transform, initialJumpVelocity, world);
 			}
 		}
 		else
@@ -153,6 +171,7 @@ void PlayerSystem::update(World& world, Time::Unit deltaTime)
  				world.createEntity("JumpFX").add<SoundInstance>(SoundInstance(AudioManager::get("Jump"), 1.f));
 				player.state = Player::State::Jumping;
 				rigid.velocity.y = initialJumpVelocity;
+				emitJumpParticles(transform, initialJumpVelocity, world);
 			}
 		}
 	});
