@@ -14,14 +14,9 @@
 
 namespace aka {
 
-void PlayerSystem::create(World& world)
+PlayerSystem::PlayerSystem(World& world) :
+	WorldEventListener<CollisionEvent>(world)
 {
-	world.dispatcher().sink<CollisionEvent>().connect<&PlayerSystem::receive>(*this);
-}
-
-void PlayerSystem::destroy(World& world)
-{
-	world.dispatcher().sink<CollisionEvent>().disconnect<&PlayerSystem::receive>(*this);
 }
 
 void PlayerSystem::receive(const CollisionEvent& event)
@@ -70,7 +65,7 @@ void emitJumpParticles(Transform2D& transform, float velocity, World& world)
 
 void PlayerSystem::update(World& world, Time::Unit deltaTime)
 {
-	world.dispatcher().update<CollisionEvent>();
+	world.dispatch<CollisionEvent>();
 	auto view = world.registry().view<Player, Transform2D, RigidBody2D, Animator>();
 	view.each([&](Player& player, Transform2D& transform, RigidBody2D& rigid, Animator& animator) {
 

@@ -62,14 +62,14 @@ bool ComponentNode<Animator>::draw(Animator& animator)
 	Sprite* currentSprite = animator.sprite;
 	for (auto& sprite : SpriteManager::iterator)
 		if (currentSprite == &sprite.second)
-			STR_CPY(currentSpriteName, 256, sprite.first.c_str());
+			String::copy(currentSpriteName, 256, sprite.first.cstr());
 	snprintf(buffer, 256, "%s", currentSpriteName);
 	if (ImGui::BeginCombo("Sprite", buffer))
 	{
 		for (auto& sprite : SpriteManager::iterator)
 		{
 			bool sameSprite = (currentSprite == &sprite.second);
-			snprintf(buffer, 256, "%s", sprite.first.c_str());
+			snprintf(buffer, 256, "%s", sprite.first.cstr());
 			if (ImGui::Selectable(buffer, sameSprite))
 			{
 				if (!sameSprite)
@@ -78,7 +78,7 @@ bool ComponentNode<Animator>::draw(Animator& animator)
 					animator.currentAnimation = 0;
 					animator.currentFrame = 0;
 					animator.update();
-					STR_CPY(currentSpriteName, 256, sprite.first.c_str());
+					String::copy(currentSpriteName, 256, sprite.first.cstr());
 				}
 			}
 			if (sameSprite)
@@ -89,7 +89,7 @@ bool ComponentNode<Animator>::draw(Animator& animator)
 	uint32_t i = 0;
 	for (Sprite::Animation& anim : animator.sprite->animations)
 	{
-		snprintf(buffer, 256, "%s (%" PRIu64 " ms)", anim.name.c_str(), anim.duration().milliseconds());
+		snprintf(buffer, 256, "%s (%" PRIu64 " ms)", anim.name.cstr(), anim.duration().milliseconds());
 		bool currentAnimation = animator.currentAnimation == i;
 		if (ImGui::RadioButton(buffer, currentAnimation))
 		{
@@ -143,13 +143,13 @@ bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 	char currentAudio[256] = "None";
 	for (auto& a : AudioManager::iterator)
 		if (audio.audio == a.second)
-			STR_CPY(currentAudio, 256, a.first.c_str());
+			String::copy(currentAudio, 256, a.first.cstr());
 	if (ImGui::BeginCombo("Audio", currentAudio))
 	{
 		for (auto& it : AudioManager::iterator)
 		{
 			bool same = (audio.audio == it.second);
-			if (ImGui::Selectable(it.first.c_str(), same))
+			if (ImGui::Selectable(it.first.cstr(), same))
 			{
 				if (!same)
 				{
@@ -211,17 +211,17 @@ bool ComponentNode<Text>::draw(Text& text)
 	ImGui::SliderInt(u("Layer"), &text.layer, -20, 20);
 
 	uint32_t currentHeight = text.font->height();
-	const char* currentFont = text.font->family().c_str();
+	const char* currentFont = text.font->family().cstr();
 	static char buffer[256];
-	snprintf(buffer, 256, "%s (%u)", text.font->family().c_str(), text.font->height());
+	snprintf(buffer, 256, "%s (%u)", text.font->family().cstr(), text.font->height());
 	if (ImGui::BeginCombo("Font", buffer))
 	{
 		for (auto& font : FontManager::iterator)
 		{
 			bool sameHeight = (currentHeight == font.second.height());
-			bool sameFamily = (currentFont == font.second.family().c_str());
+			bool sameFamily = (currentFont == font.second.family().cstr());
 			bool sameFont = sameHeight && sameFamily;
-			snprintf(buffer, 256, "%s (%u)", font.second.family().c_str(), font.second.height());
+			snprintf(buffer, 256, "%s (%u)", font.second.family().cstr(), font.second.height());
 			if (ImGui::Selectable(buffer, sameFont))
 			{
 				if (!sameFont)
@@ -234,7 +234,7 @@ bool ComponentNode<Text>::draw(Text& text)
 	}
 
 	char t[256];
-	STR_CPY(t, 256, text.text.c_str());
+	String::copy(t, 256, text.text.c_str());
 	if (ImGui::InputTextWithHint(u("Text"), "Text to display", t, 256))
 		text.text = t;
 	return false;
@@ -560,7 +560,7 @@ void EntityWidget::draw(World& world)
 					if (ImGui::BeginMenu(ComponentHandle<Animator>::name, !m_currentEntity.has<Animator>()))
 					{
 						for (auto &it : SpriteManager::iterator)
-							if (ImGui::MenuItem(it.first.c_str(), nullptr, nullptr, true))
+							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
 								m_currentEntity.add<Animator>(Animator(&it.second, 0));
 						ImGui::EndMenu();
 					}
@@ -571,7 +571,7 @@ void EntityWidget::draw(World& world)
 					if (ImGui::BeginMenu(ComponentHandle<Text>::name, !m_currentEntity.has<Text>()))
 					{
 						for (auto &it : FontManager::iterator)
-							if (ImGui::MenuItem(it.first.c_str(), nullptr, nullptr, true))
+							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
 								m_currentEntity.add<Text>(Text(vec2f(0.f), &it.second, "", color4f(1.f), 0));
 						ImGui::EndMenu();
 					}
@@ -588,7 +588,7 @@ void EntityWidget::draw(World& world)
 					if (ImGui::BeginMenu(ComponentHandle<SoundInstance>::name, !m_currentEntity.has<SoundInstance>()))
 					{
 						for (auto &it : AudioManager::iterator)
-							if (ImGui::MenuItem(it.first.c_str(), nullptr, nullptr, true))
+							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
 								m_currentEntity.add<SoundInstance>(SoundInstance(it.second, 1.f, false));
 						ImGui::EndMenu();
 					}

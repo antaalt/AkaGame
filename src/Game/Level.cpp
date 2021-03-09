@@ -70,14 +70,14 @@ vec2u WorldMap::current() const
 	return m_currentLevel;
 }
 
-const std::string& WorldMap::getLevelFromGrid(uint32_t x, uint32_t y)
+const String& WorldMap::getLevelFromGrid(uint32_t x, uint32_t y)
 {
 	ASSERT(y < m_grid.rows(), "Not enough rows");
 	ASSERT(x < m_grid.cols(), "Not enough cols");
 	return m_grid[y][x];
 }
 
-void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
+void Level::load(const String& level, OgmoWorld& ogmoWorld, World& world)
 {
 	// Load Ogmo level
 	Path path = Asset::path("levels/" + level + ".json");
@@ -207,7 +207,7 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 	{
 		// Leaves Particles
 		float area = size.x / 16.f * size.y / 16.f;
-		size_t particleCount = area / 10.f;
+		size_t particleCount = (size_t)(area / 10.f);
 		//color4f color = color4f(1.f, 0.75f, 0.80f, 1.f);
 		color4f color = color4f(1.f, 0.75f, 0.80f, 1.f);
 
@@ -216,7 +216,7 @@ void Level::load(const std::string& level, OgmoWorld& ogmoWorld, World& world)
 			Entity e = world.createEntity("Particle");
 			// Generate random coordinates / rotation in level space ?
 			e.add<Transform2D>(Transform2D(
-				vec2f(offset.x + random<float>(0.f, size.x), offset.y + random<float>(0.f, size.y)), 
+				vec2f((float)offset.x + random<float>(0.f, (float)size.x), (float)offset.y + random<float>(0.f, (float)size.y)),
 				vec2f(3.f), 
 				radianf(random<float>(0.f, 2.f * pi<float>()))
 			));

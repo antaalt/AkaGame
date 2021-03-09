@@ -1,4 +1,4 @@
-#include "GUINode.h"
+#include "EditorUI.h"
 
 #include "IconsFontAwesome5.h"
 
@@ -7,11 +7,19 @@
 
 namespace aka {
 
-void GUI::initialize()
+EditorUI::EditorUI() 
 {
-#if defined(USE_IMGUI)
+}
+
+EditorUI::~EditorUI() 
+{
+	for (Widget* widget : m_widgets)
+		delete widget;
+}
+
+void EditorUI::initialize()
+{
 	{
-		// IMGUI
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -38,9 +46,9 @@ void GUI::initialize()
         Path asset = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf");
         Path asset2 = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf");
         Path default = Asset::path("font/OpenSans/OpenSans-Regular.ttf");
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(default.c_str(), 18.0f);
-        ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.c_str(), 13.0f, &config, icon_ranges);
-        ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.c_str(), 13.0f, &config, icon_ranges);
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(default.cstr(), 18.0f);
+        ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.cstr(), 13.0f, &config, icon_ranges);
+        ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.cstr(), 13.0f, &config, icon_ranges);
         ASSERT(iconFont != nullptr, "Icon font not loaded");
         ASSERT(iconFont2 != nullptr, "Icon font not loaded");
 
@@ -129,16 +137,14 @@ void GUI::initialize()
         style.WindowBorderSize = 1.f;
         style.PopupBorderSize = 1.f;
 	}
-#endif
-    for (GUIWidget* widget : m_widgets)
+    for (Widget* widget : m_widgets)
         widget->initialize();
 }
 
-void GUI::destroy()
+void EditorUI::destroy()
 {
-    for (GUIWidget* widget : m_widgets)
+    for (Widget* widget : m_widgets)
         widget->destroy();
-#if defined(USE_IMGUI)
 #if defined(AKA_USE_OPENGL)
 	ImGui_ImplOpenGL3_Shutdown();
 #else
@@ -146,12 +152,23 @@ void GUI::destroy()
 #endif
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
-#endif
 }
 
-void GUI::frame()
+void EditorUI::update(World& world) 
 {
-#if defined(USE_IMGUI)
+	for (Widget* widget : m_widgets)
+		widget->update(world);
+}
+
+void EditorUI::draw(World& world) 
+{
+	if (m_visible)
+		for (Widget* widget : m_widgets)
+			widget->draw(world);
+}
+
+void EditorUI::frame()
+{
 	// Start the Dear ImGui frame
 #if defined(AKA_USE_OPENGL)
 	ImGui_ImplOpenGL3_NewFrame();
@@ -160,18 +177,15 @@ void GUI::frame()
 #endif
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-#endif
 }
 
-void GUI::render()
+void EditorUI::render()
 {
-#if defined(USE_IMGUI)
 	ImGui::Render();
 #if defined(AKA_USE_OPENGL)
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #else
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-#endif
 #endif
 }
 

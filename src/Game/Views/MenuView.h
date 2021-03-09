@@ -4,7 +4,6 @@
 
 #include "../Resources.h"
 #include "../Level.h"
-#include "../Game.h"
 
 namespace aka {
 
@@ -42,16 +41,13 @@ public:
 
 class MenuView : public View {
 public:
-	MenuView(World& world, Router& router);
-
 	void onCreate() override;
 	void onDestroy() override;
-	void onUpdate(Router& router, Time::Unit dt) override;
+	void onUpdate(Time::Unit dt) override;
 	void onRender() override;
 	void onResize(uint32_t width, uint32_t height) override;
 private:
-	World& m_world;
-	Router& m_router;
+	World m_world;
 	Batch m_batch;
 };
 

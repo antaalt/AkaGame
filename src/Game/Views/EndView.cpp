@@ -1,21 +1,32 @@
 #include "EndView.h"
 
-#include "../Game.h"
+#include "MenuView.h"
 
 namespace aka {
 
 void EndView::onCreate()
 {
+	{
+		// INIT fonts
+		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
+		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
+		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
+	}
 }
 
 void EndView::onDestroy()
 {
+	{
+		FontManager::destroy("Espera48");
+		FontManager::destroy("Espera16");
+		FontManager::destroy("BoldFont48");
+	}
 }
 
-void EndView::onUpdate(Router& router, Time::Unit dt)
+void EndView::onUpdate(Time::Unit dt)
 {
 	if (input::pressed(input::Key::Space))
-		router.set(Views::menu);
+		EventDispatcher<ViewChangedEvent>::emit(ViewChangedEvent{ View::create<MenuView>() });
 }
 
 void EndView::onRender()

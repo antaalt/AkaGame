@@ -7,14 +7,9 @@
 
 namespace aka {
 
-void CoinSystem::create(World& world)
+CoinSystem::CoinSystem(World& world) :
+	WorldEventListener<AnimationFinishedEvent>(world)
 {
-	world.dispatcher().sink<AnimationFinishedEvent>().connect<&CoinSystem::receive>(*this);
-}
-
-void CoinSystem::destroy(World& world)
-{
-	world.dispatcher().sink<AnimationFinishedEvent>().disconnect<&CoinSystem::receive>(*this);
 }
 
 void CoinSystem::receive(const AnimationFinishedEvent& event)

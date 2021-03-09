@@ -22,8 +22,13 @@
 #include "../../System/SoundSystem.h"
 #include "../../System/LevelSystem.h"
 #include "../../System/ParticleSystem.h"
-#include "../Game.h"
+#include "EndView.h"
 #include "../OgmoWorld.h"
+#include "../../GUI/EntityWidget.h"
+#include "../../GUI/InfoWidget.h"
+#include "../../GUI/ResourcesWidget.h"
+#include "../../GUI/MenuWidget.h"
+#include "../../GUI/ViewWidget.h"
 
 
 namespace aka {
@@ -31,8 +36,7 @@ namespace aka {
 static const uint32_t defaultWidth = 320;
 static const uint32_t defaultHeight = 180;
 
-GameView::GameView(World& world) :
-	m_world(world),
+GameView::GameView() :
 	m_paused(false)
 {
 }
@@ -53,8 +57,8 @@ void GameView::onCreate()
 		m_world.attach<AnimatorSystem>();
 		m_world.attach<CameraSystem>(m_map);
 		m_world.attach<TextRenderSystem>();
-		m_world.attach<PlayerSystem>();
-		m_world.attach<CoinSystem>();
+		m_world.attach<PlayerSystem>(m_world);
+		m_world.attach<CoinSystem>(m_world);
 		m_world.attach<SoundSystem>();
 		m_world.attach<LevelSystem>(m_map);
 		m_world.attach<ParticleSystem>();
@@ -66,6 +70,13 @@ void GameView::onCreate()
 		Entity e = m_world.createEntity("BackgroundMusic");
 		AudioStream::Ptr audio = AudioManager::create("Forest", AudioStream::openStream(Asset::path("sounds/forest.mp3")));
 		e.add<SoundInstance>(SoundInstance(audio, true));
+	}
+
+	{
+		// INIT fonts
+		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
+		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
+		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
 	}
 
 	{
@@ -115,18 +126,33 @@ void GameView::onCreate()
 
 		e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
 	}
+	{
+		m_gui.attach<InfoWidget>();
+		m_gui.attach<EntityWidget>();
+		m_gui.attach<ResourcesWidget>();
+		m_gui.attach<MenuWidget>();
+		m_gui.attach<ViewWidget>();
+		m_gui.initialize();
+	}
 }
 
 void GameView::onDestroy()
 {
+	m_gui.destroy();
 	m_world.destroy();
+	{
+		FontManager::destroy("Espera48");
+		FontManager::destroy("Espera16");
+		FontManager::destroy("BoldFont48");
+	}
 }
 
 void GameView::onFrame()
 {
+	m_gui.frame();
 }
 
-void GameView::onUpdate(Router &router, Time::Unit deltaTime)
+void GameView::onUpdate(Time::Unit deltaTime)
 {
 	// Pause the GameView
 	if (input::down(input::Key::P))
@@ -164,11 +190,20 @@ void GameView::onUpdate(Router &router, Time::Unit deltaTime)
 			transform.position.y = (float)level.spawn.y;
 		});
 	}
+	if (input::pressed(input::Key::Escape))
+		EventDispatcher<QuitEvent>::emit(QuitEvent());
+	// Hide the GUI
+	if (!m_gui.focused() && input::down(input::Key::H))
+	{
+		m_gui.setVisible(!m_gui.isVisible());
+	}
+	// Update interface
+	m_gui.update(m_world);
 	// Check if game finished
 	/*auto view = m_world.registry().view<Player>();
 	view.each([&](Player& player) {
 		if (player.coin >= 10)
-			router.set(Views::end);
+		EventDispatcher<ViewChangedEvent>::emit(ViewChangedEvent{View::create<EndView>()});
 	});*/
 }
 
@@ -194,7 +229,11 @@ void GameView::onRender()
 		m_batch.render();
 		m_batch.clear();
 	}
-
+	{
+		// Rendering imgui
+		m_gui.draw(m_world);
+		m_gui.render();
+	}
 }
 
 void GameView::onResize(uint32_t width, uint32_t height)

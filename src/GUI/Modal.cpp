@@ -1,7 +1,7 @@
 #include "Modal.h"
 
 #include <IconsFontAwesome5.h>
-#include "GUINode.h"
+#include "EditorUI.h"
 
 #include <algorithm>
 
@@ -18,7 +18,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 	{
 		ImGui::OpenPopup(buffer);
 		currentPath = Asset::path("");
-		STR_CPY(currentPathBuffer, 256, currentPath.c_str());
+		String::copy(currentPathBuffer, 256, currentPath.cstr());
 		selectedPath = nullptr;
 		paths = Path::enumerate(currentPath);
 	}
@@ -51,10 +51,10 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 			for (Path& path : paths)
 			{
 				bool selected = (&path == selectedPath);
-				bool isFolder = (path.str().back() == '/');
+				bool isFolder = (path.str().last() == '/');
 				if (isFolder)
 				{
-					int err = snprintf(buffer, 256, "%s %s", ICON_FA_FOLDER, path.c_str());
+					int err = snprintf(buffer, 256, "%s %s", ICON_FA_FOLDER, path.cstr());
 					if (ImGui::Selectable(buffer, &selected))
 					{
 						selectedPath = &path;
@@ -67,7 +67,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 				}
 				else
 				{
-					int err = snprintf(buffer, 256, "%s %s", ICON_FA_FILE, path.c_str());
+					int err = snprintf(buffer, 256, "%s %s", ICON_FA_FILE, path.cstr());
 					if (ImGui::Selectable(buffer, &selected))
 					{
 						selectedPath = &path;
@@ -84,7 +84,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		ImGui::EndChild();
 		if (updatedList)
 		{
-			STR_CPY(currentPathBuffer, 256, currentPath.c_str());
+			String::copy(currentPathBuffer, 256, currentPath.cstr());
 			paths = Path::enumerate(currentPath);
 			selectedPath = nullptr;
 		}
@@ -104,7 +104,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		}
 		ImGui::EndPopup();
 	}
-	return (loading && resultPath->str().size() > 0 && file::exist(Path(*resultPath)));
+	return (loading && resultPath->str().length() > 0 && file::exist(Path(*resultPath)));
 }
 
 bool Modal::Error(const char* label, std::string& error)

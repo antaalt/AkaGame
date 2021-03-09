@@ -1,20 +1,25 @@
 #pragma	once
-#include "GUINode.h"
-
-#include "../Game/Game.h"
-#include <Aka/Core/Router.h>
+#include "EditorUI.h"
 
 namespace aka {
 
-class ViewWidget : public GUIWidget
+class ViewWidget : public EditorUI::Widget, EventListener<ViewChangedEvent>
 {
 public:
-	ViewWidget(Router& router);
-	//void update() override;
 	void draw(World& world) override;
+	void onReceive(const ViewChangedEvent& event);
+	template <typename T>
+	void selectable(const char* name);
 private:
-	Router& m_router;
+	View::Ptr m_currentView;
 };
 
+
+template <typename T>
+void ViewWidget::selectable(const char* name)
+{
+	if (ImGui::Selectable(name, dynamic_cast<T*>(m_currentView.get()) != nullptr))
+		EventDispatcher<ViewChangedEvent>::emit(ViewChangedEvent{ View::create<T>() });
+}
 
 };

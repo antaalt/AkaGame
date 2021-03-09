@@ -26,7 +26,7 @@ struct Level
 
 	std::vector<Entity> entities;
 
-	void load(const std::string& level, OgmoWorld &ogmoWorld, World& world);
+	void load(const String& level, OgmoWorld &ogmoWorld, World& world);
 	void destroy(World& world);
 };
 
@@ -35,7 +35,7 @@ struct GridMap
 	static constexpr size_t rowCount = 2;
 	static constexpr size_t colCount = 4;
 
-	using Row = std::array<std::string, colCount>;
+	using Row = std::array<String, colCount>;
 	using Col = std::array<Row, rowCount>;
 
 	// Get the number of columns in the grid
@@ -72,7 +72,7 @@ public:
 	vec2u current() const;
 private:
 	// Get the level from the grid
-	const std::string& getLevelFromGrid(uint32_t x, uint32_t y);
+	const String& getLevelFromGrid(uint32_t x, uint32_t y);
 private:
 	vec2u m_currentLevel;
 	std::map<vec2u, Level> m_levels; // All loaded levels

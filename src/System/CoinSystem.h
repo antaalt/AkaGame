@@ -5,12 +5,11 @@
 
 namespace aka {
 
-class CoinSystem : public System
+class CoinSystem : public System, WorldEventListener<AnimationFinishedEvent>
 {
 public:
-	void create(World& world) override;
-	void destroy(World& world) override;
-	void receive(const AnimationFinishedEvent& event);
+	CoinSystem(World& world);
+	void receive(const AnimationFinishedEvent& event) override;
 };
 
 

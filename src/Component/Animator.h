@@ -23,7 +23,7 @@ struct Animator
 	const Sprite::Animation& getCurrentSpriteAnimation() const;
 	const Sprite::Frame& getCurrentSpriteFrame() const;
 
-	void play(const std::string& animation);
+	void play(const String& animation);
 	void update();
 private:
 	Time::Unit animationTimer;

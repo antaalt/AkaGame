@@ -1,9 +1,9 @@
 #pragma once 
-#include "GUINode.h"
+#include "EditorUI.h"
 
 namespace aka {
 
-class MenuWidget : public GUIWidget
+class MenuWidget : public EditorUI::Widget
 {
 public:
 	MenuWidget();

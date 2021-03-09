@@ -1,30 +1,32 @@
 #include "ViewWidget.h"
 
-namespace aka {
+#include "../Game/Views/IntroView.h"
+#include "../Game/Views/MenuView.h"
+#include "../Game/Views/GameView.h"
+#include "../Game/Views/EndView.h"
 
-ViewWidget::ViewWidget(Router& router) :
-	m_router(router)
-{
-}
+namespace aka {
 
 void ViewWidget::draw(World& world)
 {
 	if (ImGui::Begin("View"))
 	{
-		std::map<ViewID, std::string> views;
-		views.insert(std::make_pair(Views::intro, "Intro"));
-		views.insert(std::make_pair(Views::menu, "Menu"));
-		views.insert(std::make_pair(Views::game, "Game"));
-		views.insert(std::make_pair(Views::end, "End"));
 		if (ImGui::BeginChild("Views", ImVec2(0,0), true))
 		{
-			for (auto it : views)
-				if (ImGui::Selectable(it.second.c_str(), it.first == m_router.current()))
-					m_router.set(it.first);
+			selectable<IntroView>("Intro");
+			selectable<MenuView>("Menu");
+			selectable<GameView>("Game");
+			selectable<EndView>("End");
 		}
 		ImGui::EndChild();
 	}
 	ImGui::End();
+}
+
+void ViewWidget::onReceive(const ViewChangedEvent& event)
+{
+	// TODO get view type in a way
+	m_currentView = event.view;
 }
 
 }

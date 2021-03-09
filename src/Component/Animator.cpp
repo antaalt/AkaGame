@@ -31,7 +31,7 @@ const Sprite::Frame& Animator::getCurrentSpriteFrame() const
     return sprite->getFrame(currentAnimation, currentFrame);
 }
 
-void Animator::play(const std::string& animation)
+void Animator::play(const String& animation)
 {
     Sprite::Animation* a = sprite->getAnimation(animation);
     ASSERT(a != nullptr, "No valid animation");

@@ -36,8 +36,8 @@ set(SRC
 	
 	"src/GUI/EntityWidget.h"
 	"src/GUI/EntityWidget.cpp"
-	"src/GUI/GUINode.h"
-	"src/GUI/GUINode.cpp"
+	"src/GUI/EditorUI.h"
+	"src/GUI/EditorUI.cpp"
 	"src/GUI/InfoWidget.h"
 	"src/GUI/InfoWidget.cpp"
 	"src/GUI/Modal.h"
@@ -49,8 +49,6 @@ set(SRC
 	"src/GUI/ViewWidget.h"
 	"src/GUI/ViewWidget.cpp"
 	
-	"src/Game/Game.h"
-	"src/Game/Game.cpp"
 	"src/Game/Views/GameView.h"
 	"src/Game/Views/GameView.cpp"
 	"src/Game/Views/EndView.h"

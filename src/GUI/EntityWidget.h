@@ -1,11 +1,11 @@
 #pragma once
-#include "GUINode.h"
+#include "EditorUI.h"
 
 #include <Aka/Aka.h>
 
 namespace aka {
 
-class EntityWidget : public GUIWidget
+class EntityWidget : public EditorUI::Widget
 {
 public:
 	void draw(World& world) override;

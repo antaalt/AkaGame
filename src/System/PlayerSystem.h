@@ -5,12 +5,11 @@
 
 namespace aka {
 
-class PlayerSystem : public System
+class PlayerSystem : public System, WorldEventListener<CollisionEvent>
 {
 public:
-	void create(World& world) override;
-	void destroy(World& world) override;
-	void receive(const CollisionEvent& event);
+	PlayerSystem(World& world);
+	void receive(const CollisionEvent& event) override;
 	void update(World& world, Time::Unit deltaTime) override;
 };
 

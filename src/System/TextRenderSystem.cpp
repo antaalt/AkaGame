@@ -2,11 +2,10 @@
 
 #include <Aka/Scene/World.h>
 #include <Aka/Core/Font.h>
+#include <Aka/OS/Logger.h>
 
 #include "../Component/Text.h"
 #include "../Component/Transform2D.h"
-
-#include <utf8.h>
 
 namespace aka {
 

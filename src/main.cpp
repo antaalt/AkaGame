@@ -1,16 +1,14 @@
-#include "Game/Game.h"
+#include "Game/Views/GameView.h"
 
 int main()
 {
-	aka::Game app;
-
 	aka::Config cfg;
 	cfg.width = 1280;
 	cfg.height = 720;
 	cfg.name = "Game";
-	cfg.app = &app;
+	cfg.view = aka::View::create<aka::GameView>();
 
-	aka::Game::run(cfg);
+	aka::Application::run(cfg);
 
 	return 0;
 }

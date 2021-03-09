@@ -81,6 +81,7 @@ void LevelSystem::update(World& world, Time::Unit deltaTime)
 				previous = m_map.current();
 				m_map.next(xOffset, yOffset, world);
 				transitionStartedTime = Time::now();
+				// TODO add disabled component ?
 			}
 		});
 	}

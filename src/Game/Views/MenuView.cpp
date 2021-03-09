@@ -1,17 +1,18 @@
 #include "MenuView.h"
 
 #include "../../Component/Transform2D.h"
+#include "./GameView.h"
 
 namespace aka {
 
-MenuView::MenuView(World& world, Router& router) :
-	m_world(world),
-	m_router(router)
-{
-}
-
 void MenuView::onCreate()
 {
+	{
+		// INIT fonts
+		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
+		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
+		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
+	}
 	Font* font = &FontManager::getDefault();
 	float padding = 10.f;
 	vec2f center = vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()) / 2.f;
@@ -50,7 +51,7 @@ void MenuView::onCreate()
 			false,
 			false,
 			[&](const input::Position&) {
-				m_router.set(Views::game);
+				EventDispatcher<ViewChangedEvent>::emit(ViewChangedEvent{ View::create<GameView>()});
 			}
 		});
 	}
@@ -97,7 +98,7 @@ void MenuView::onCreate()
 			false,
 			false,
 			[&](const input::Position&) {
-				quit();
+				EventDispatcher<QuitEvent>::emit(QuitEvent());
 			}
 		});
 	}
@@ -108,10 +109,15 @@ void MenuView::onCreate()
 
 void MenuView::onDestroy()
 {
+	{
+		FontManager::destroy("Espera48");
+		FontManager::destroy("Espera16");
+		FontManager::destroy("BoldFont48");
+	}
 	m_world.destroy();
 }
 
-void MenuView::onUpdate(Router& router, Time::Unit dt)
+void MenuView::onUpdate(Time::Unit dt)
 {
 	m_world.update(dt);
 }

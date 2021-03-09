@@ -1,12 +1,11 @@
 #pragma once
-#include "GUINode.h"
+#include "EditorUI.h"
 
 namespace aka {
 
-class InfoWidget : public GUIWidget
+class InfoWidget : public EditorUI::Widget
 {
 public:
-	//void update() override;
 	void draw(World& world) override;
 };
 

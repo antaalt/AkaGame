@@ -43,8 +43,8 @@ void ResourcesWidget::draw(World& world)
 						Font& font = it.second;
 						if (ImGui::TreeNode(name.c_str()))
 						{
-							ImGui::Text("Family : %s", font.family().c_str());
-							ImGui::Text("Style : %s", font.style().c_str());
+							ImGui::Text("Family : %s", font.family().cstr());
+							ImGui::Text("Style : %s", font.style().cstr());
 							ImGui::Text("Height : %upx", font.height());
 
 							Texture::Ptr atlas = font.getCharacter(0).texture.texture;
@@ -113,7 +113,7 @@ void ResourcesWidget::draw(World& world)
 						path = bufferPath;
 					ImGui::SameLine();
 					if (Modal::LoadButton("Browse", &path))
-						STR_CPY(bufferPath, 256, path.c_str());
+						String::copy(bufferPath, 256, path.cstr());
 					ImGui::SliderInt("Height##Font", &height, 1, 200);
 
 					if (ImGui::Button("OK"))
@@ -127,7 +127,7 @@ void ResourcesWidget::draw(World& world)
 							try
 							{
 								FontManager::create(file::name(path), Font(path, height));
-								STR_CPY(bufferPath, 256, path.c_str());
+								String::copy(bufferPath, 256, path.cstr());
 								height = 48;
 								path = "";
 								ImGui::CloseCurrentPopup();
@@ -160,10 +160,10 @@ void ResourcesWidget::draw(World& world)
 						{
 							for (Sprite::Animation& animation : sprite->animations)
 							{
-								if (ImGui::TreeNodeEx(animation.name.c_str()))
+								if (ImGui::TreeNodeEx(animation.name.cstr()))
 								{
 									char buffer[256];
-									STR_CPY(buffer, 256, animation.name.c_str());
+									String::copy(buffer, 256, animation.name.cstr());
 									if (ImGui::InputText("Name", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue))
 										animation.name = buffer;
 									uint32_t frameID = 0;
@@ -277,7 +277,7 @@ void ResourcesWidget::draw(World& world)
 						path = bufferPath;
 					ImGui::SameLine();
 					if (Modal::LoadButton("Browse##SpriteLoader", &path))
-						STR_CPY(bufferPath, 512, path.c_str());
+						String::copy(bufferPath, 512, path.cstr());
 					if (ImGui::Button("OK##SpriteLoader"))
 					{
 						if (strlen(bufferPath) == 0)
@@ -290,7 +290,7 @@ void ResourcesWidget::draw(World& world)
 							{
 								FileStream stream(path, FileMode::ReadOnly);
 								SpriteManager::create(file::name(bufferPath), Sprite::parse(stream));
-								STR_CPY(bufferPath, 256, path.c_str());
+								String::copy(bufferPath, 256, path.cstr());
 								path = "";
 								ImGui::CloseCurrentPopup();
 							}
@@ -342,7 +342,7 @@ void ResourcesWidget::draw(World& world)
 						path = bufferPath;
 					ImGui::SameLine();
 					if (Modal::LoadButton("Browse", &path))
-						STR_CPY(bufferPath, 256, path.c_str());
+						String::copy(bufferPath, 256, path.cstr());
 					ImGui::Checkbox("Memory", &memory);
 
 					if (ImGui::Button("OK"))
@@ -363,7 +363,7 @@ void ResourcesWidget::draw(World& world)
 							else
 							{
 								AudioManager::create(file::name(path), std::move(stream));
-								STR_CPY(bufferPath, 256, path.c_str());
+								String::copy(bufferPath, 256, path.cstr());
 								path = "";
 								memory = false;
 								ImGui::CloseCurrentPopup();

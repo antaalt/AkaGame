@@ -27,9 +27,9 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 		RigidBody2D& rigidBodyDynamic = world.registry().get<RigidBody2D>(entityDynamic);
 		Collider2D& colliderDynamic = world.registry().get<Collider2D>(entityDynamic);
 
-		Rect2D rectDynamic;
-		rectDynamic.pos = transformDynamic.model().multiplyPoint(colliderDynamic.position);
-		rectDynamic.size = transformDynamic.model().multiplyVector(colliderDynamic.size);
+		AABB2D rectDynamic;
+		rectDynamic.min = transformDynamic.model().multiplyPoint(colliderDynamic.position);
+		rectDynamic.max = rectDynamic.min + transformDynamic.model().multiplyVector(colliderDynamic.size);
 
 		for (entt::entity entityStatic : viewStatic)
 		{
@@ -40,11 +40,11 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 			if (entityDynamic == entityStatic)
 				continue;
 
-			Rect2D rectStatic;
-			rectStatic.pos = transformStatic.model().multiplyPoint(colliderStatic.position);
-			rectStatic.size = transformStatic.model().multiplyVector(colliderStatic.size);
-			Collision2D c = overlap(rectDynamic, rectStatic);
-			if (c.collided)
+			AABB2D rectStatic;
+			rectStatic.min = transformStatic.model().multiplyPoint(colliderStatic.position);
+			rectStatic.max = rectStatic.min + transformStatic.model().multiplyVector(colliderStatic.size);
+			Collision2D c;
+			if (Collision2D::overlap(rectDynamic, rectStatic, &c))
 			{
 				CollisionFace face = CollisionFace::None;
 				if (colliderStatic.is(CollisionType::Solid))

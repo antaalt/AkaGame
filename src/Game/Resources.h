@@ -9,18 +9,18 @@ namespace aka {
 template <typename T>
 class ResourceManager
 {
-	using map = std::map<std::string, T>;
+	using map = std::map<String, T>;
 public:
-	static T& create(const std::string& str, T&& data);
-	static bool has(const std::string& str);
-	static T& get(const std::string& str);
+	static T& create(const String& str, T&& data);
+	static bool has(const String& str);
+	static T& get(const String& str);
 	static T& getDefault();
-	static void destroy(const std::string& str);
+	static void destroy(const String& str);
 	static size_t count() { return m_data.size(); }
 
 	struct Iterator
 	{
-		using map = std::map<std::string, T>;
+		using map = std::map<String, T>;
 		typename map::iterator begin() { return ResourceManager<T>::m_data.begin(); }
 		typename map::iterator end() { return ResourceManager<T>::m_data.end(); }
 		typename map::const_iterator begin()const { return ResourceManager<T>::m_data.begin(); }
@@ -35,7 +35,7 @@ private:
 template <typename T>
 std::mutex ResourceManager<T>::m_lock;
 template <typename T>
-std::map<std::string, T> ResourceManager<T>::m_data;
+std::map<String, T> ResourceManager<T>::m_data;
 template <typename T>
 typename ResourceManager<T>::Iterator ResourceManager<T>::iterator;
 
@@ -44,7 +44,7 @@ using SpriteManager = ResourceManager<Sprite>;
 using AudioManager = ResourceManager<AudioStream::Ptr>;
 
 template <typename T>
-T& ResourceManager<T>::create(const std::string& str, T&& data)
+T& ResourceManager<T>::create(const String& str, T&& data)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.insert(std::make_pair(str, std::move(data)));
@@ -54,7 +54,7 @@ T& ResourceManager<T>::create(const std::string& str, T&& data)
 }
 
 template<typename T>
-inline bool ResourceManager<T>::has(const std::string& str)
+inline bool ResourceManager<T>::has(const String& str)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
@@ -62,7 +62,7 @@ inline bool ResourceManager<T>::has(const std::string& str)
 }
 
 template <typename T>
-T& ResourceManager<T>::get(const std::string& str)
+T& ResourceManager<T>::get(const String& str)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
@@ -77,7 +77,7 @@ T& ResourceManager<T>::getDefault()
 }
 
 template <typename T>
-void ResourceManager<T>::destroy(const std::string& str)
+void ResourceManager<T>::destroy(const String& str)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);

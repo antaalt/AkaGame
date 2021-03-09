@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Aka/Aka.h>
-#include "GUINode.h"
 
 namespace aka {
 
