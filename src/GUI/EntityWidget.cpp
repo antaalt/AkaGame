@@ -139,7 +139,6 @@ const char* ComponentNode<SoundInstance>::icon() { return ICON_FA_MUSIC; }
 bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 {
 	bool needUpdate = false;
-	UniqueID u(&audio);
 	char currentAudio[256] = "None";
 	for (auto& a : AudioManager::iterator)
 		if (audio.audio == a.second)
@@ -155,7 +154,7 @@ bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 				{
 					AudioBackend::close(audio.audio);
 					audio.audio = it.second;
-					AudioBackend::play(audio.audio, audio.volume, audio.loop);
+					AudioBackend::play(audio.audio);
 					needUpdate = true;
 				}
 			}
@@ -178,17 +177,21 @@ bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 	ImGui::SameLine();
 	if (ImGui::Button(ICON_FA_PAUSE))
 	{
-
+		if (AudioBackend::playing(audio.audio))
+			AudioBackend::close(audio.audio);
+		else
+			AudioBackend::play(audio.audio);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button(ICON_FA_FORWARD))
 		audio.audio->seek((uint64_t)min(current + 10.f, duration) * audio.audio->frequency());
-	
-	if (ImGui::SliderFloat(u("Volume"), &audio.volume, 0.f, 2.f))
+	float volume = audio.audio->volume();
+	if (ImGui::SliderFloat("Volume", &volume, 0.f, 2.f))
 	{
+		audio.audio->setVolume(volume);
 		needUpdate = true;
 	}
-	if (ImGui::Checkbox(u("Loop"), &audio.loop))
+	if (ImGui::Checkbox("Loop", &audio.loop))
 	{
 		needUpdate = true;
 	}

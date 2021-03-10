@@ -11,7 +11,7 @@ void onAudioAdd(entt::registry& registry, entt::entity entity)
 {
 	SoundInstance& sound = registry.get<SoundInstance>(entity);
 	sound.audio->seek(0);
-	AudioBackend::play(sound.audio, sound.volume, sound.loop);
+	AudioBackend::play(sound.audio);
 }
 
 void onAudioRemove(entt::registry& registry, entt::entity entity)
@@ -23,7 +23,7 @@ void onAudioRemove(entt::registry& registry, entt::entity entity)
 void onAudioUpdate(entt::registry& registry, entt::entity entity)
 {
 	SoundInstance& sound = registry.get<SoundInstance>(entity);
-	AudioBackend::play(sound.audio, sound.volume, sound.loop);
+	AudioBackend::play(sound.audio);
 }
 
 void SoundSystem::create(World& world)
@@ -47,7 +47,13 @@ void SoundSystem::update(World& world, Time::Unit deltaTime)
  		SoundInstance& sound = world.registry().get<SoundInstance>(entity);
 		if (!sound.audio->playing())
 		{
-			world.registry().destroy(entity);
+			if (sound.loop)
+			{
+				sound.audio->seek(0);
+				AudioBackend::play(sound.audio);
+			}
+			else
+				world.registry().destroy(entity);
 			// TODO do not destroy entity, destroy only component.
 			//world.registry().remove<SoundInstance>(entity);
 		}
