@@ -45,8 +45,8 @@ void EditorUI::initialize()
         static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
         Path asset = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf");
         Path asset2 = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf");
-        Path default = Asset::path("font/OpenSans/OpenSans-Regular.ttf");
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(default.cstr(), 18.0f);
+        Path assetDefault = Asset::path("font/OpenSans/OpenSans-Regular.ttf");
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(assetDefault.cstr(), 18.0f);
         ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.cstr(), 13.0f, &config, icon_ranges);
         ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.cstr(), 13.0f, &config, icon_ranges);
         ASSERT(iconFont != nullptr, "Icon font not loaded");

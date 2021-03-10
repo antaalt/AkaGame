@@ -20,8 +20,6 @@ struct TileLayer
 	std::vector<int> tileID;
 	int32_t layer;
 };
-template <>
-const char* ComponentHandle<TileLayer>::name = "TileLayer";
 
 };
 

@@ -164,11 +164,18 @@ void Level::load(const String& level, OgmoWorld& ogmoWorld, World& world)
 
 	{
 		// Colliders
-		SpriteManager::create("Collider", Sprite::parse(FileStream(Asset::path("textures/collider/collider.aseprite"), FileMode::ReadOnly)));
+		FileStream fs(Asset::path("textures/collider/collider.aseprite"), FileMode::ReadOnly);
+		SpriteManager::create("Collider", Sprite::parse(fs));
+	}
+	{
 		// Coins
-		SpriteManager::create("Coin", Sprite::parse(FileStream(Asset::path("textures/interact/interact.aseprite"), FileMode::ReadOnly)));
+		FileStream fs(Asset::path("textures/interact/interact.aseprite"), FileMode::ReadOnly);
+		SpriteManager::create("Coin", Sprite::parse(fs));
+	}
+	{
 		// Player
-		SpriteManager::create("Player", Sprite::parse(FileStream(Asset::path("textures/player/player.aseprite"), FileMode::ReadOnly)));
+		FileStream fs(Asset::path("textures/player/player.aseprite"), FileMode::ReadOnly);
+		SpriteManager::create("Player", Sprite::parse(fs));
 	}
 	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Entities");
 	auto flipY = [](const vec2u& pos, const vec2u& size, const OgmoLevel::Layer *layer) -> vec2f {

@@ -7,8 +7,6 @@ namespace aka {
 struct Door {
 
 };
-template <>
-const char* ComponentHandle<Door>::name = "Door";
 
 
 }

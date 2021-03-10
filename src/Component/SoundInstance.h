@@ -13,8 +13,5 @@ struct SoundInstance {
 	bool loop;
 };
 
-template <>
-const char* ComponentHandle<SoundInstance>::name = "SoundInstance";
-
 }
 

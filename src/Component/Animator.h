@@ -29,8 +29,6 @@ private:
 	Time::Unit animationTimer;
 	Time::Unit currentAnimationDuration;
 };
-template <>
-const char* ComponentHandle<Animator>::name = "Animator";
 
 };
 

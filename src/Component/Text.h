@@ -18,8 +18,6 @@ struct Text
 	color4f color;
 	int32_t layer;
 };
-template <>
-const char* ComponentHandle<Text>::name = "Text";
 
 }
 

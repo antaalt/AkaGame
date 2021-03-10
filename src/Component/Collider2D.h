@@ -39,9 +39,4 @@ struct RigidBody2D
 	float mass; // kg
 };
 
-template <>
-const char* ComponentHandle<Collider2D>::name = "Collider2D";
-template <>
-const char* ComponentHandle<RigidBody2D>::name = "RigidBody2D";
-
 }

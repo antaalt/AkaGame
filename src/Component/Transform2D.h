@@ -16,7 +16,5 @@ struct Transform2D
 
 	mat3f model() const;
 };
-template <>
-const char* ComponentHandle<Transform2D>::name = "Transform2D";
 
 }

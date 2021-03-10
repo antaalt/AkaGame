@@ -39,7 +39,5 @@ struct Player
 	input::Key left = input::Key::A;
 	input::Key right = input::Key::D;
 };
-template <>
-const char* ComponentHandle<Player>::name = "Player";
 
 }

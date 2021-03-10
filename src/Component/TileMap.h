@@ -15,7 +15,5 @@ struct TileMap
 	vec2u gridSize;
 	Texture::Ptr texture;
 };
-template <>
-const char* ComponentHandle<TileMap>::name = "TileMap";
 
 }

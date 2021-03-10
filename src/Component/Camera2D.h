@@ -27,8 +27,5 @@ inline Entity getMainCamera2DEntity(World& world)
 	throw std::runtime_error("No main camera in scene");
 }
 
-template <>
-const char* ComponentHandle<Camera2D>::name = "Camera2D";
-
 }
 
