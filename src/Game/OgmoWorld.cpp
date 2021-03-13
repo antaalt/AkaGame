@@ -108,8 +108,11 @@ OgmoWorld OgmoWorld::load(const Path& path)
 	{
 		Entity entity;
 		entity.name = jsonEntity["name"];
-		String imagePath = std::string(jsonEntity["texture"]);
-		entity.image = Image::load(Path(relativePath + imagePath));
+		if (jsonEntity.contains("texture"))
+		{
+			String imagePath = std::string(jsonEntity["texture"]);
+			entity.image = Image::load(Path(relativePath + imagePath));
+		}
 		entity.origin = vec2u(jsonEntity["origin"]["x"], jsonEntity["origin"]["y"]);
 		entity.size = vec2u(jsonEntity["size"]["x"], jsonEntity["size"]["y"]);
 		world.entities.push_back(entity);

@@ -4,7 +4,7 @@
 
 namespace aka {
 
-struct Coin
+struct CoinComponent
 {
 	bool picked = false;
 };

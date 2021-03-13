@@ -9,12 +9,10 @@ namespace aka {
 struct Camera2D
 {
 	Camera2D() : Camera2D(vec2f(1.f)) {}
-	Camera2D(const vec2f& viewport) : camera(viewport), main(false), tracking(true), clampBorder(true) {}
+	Camera2D(const vec2f& viewport) : camera(viewport), main(false) {}
 
 	CameraOrthographic camera;
 	bool main; // Is it the main camera in the scene ?
-	bool tracking; // Is the camera tracking player ?
-	bool clampBorder; // Do we prevent camera from exiting level bound ?
 };
 
 // TODO handle this in world directly.

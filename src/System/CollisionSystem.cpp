@@ -107,6 +107,7 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 			}
 		}
 	}
+	world.dispatch<CollisionEvent>();
 }
 
 };

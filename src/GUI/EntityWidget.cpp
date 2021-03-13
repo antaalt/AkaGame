@@ -17,6 +17,8 @@
 #include "../Component/Animator.h"
 #include "../Component/Coin.h"
 #include "../Component/SoundInstance.h"
+#include "../Component/Hurtable.h"
+#include "../Component/Particle.h"
 
 #include "../System/SoundSystem.h"
 
@@ -135,8 +137,8 @@ template <> const char* ComponentNode<Camera2D>::icon() { return ICON_FA_CAMERA;
 template <> bool ComponentNode<Camera2D>::draw(Camera2D& camera)
 {
 	ImGui::InputFloat2("Viewport", camera.camera.viewport.data);
-	ImGui::Checkbox("Clamp", &camera.clampBorder);
-	ImGui::Checkbox("Tracking", &camera.tracking);
+	//ImGui::Checkbox("Clamp", &camera.clampBorder);
+	//ImGui::Checkbox("Tracking", &camera.tracking);
 	ImGui::Checkbox("Main", &camera.main);
 	return false;
 }
@@ -205,9 +207,9 @@ template <> bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 	return needUpdate;
 }
 
-template <> const char* ComponentNode<Coin>::name() { return "Coin"; }
-template <> const char* ComponentNode<Coin>::icon() { return ICON_FA_COINS; }
-template <> bool ComponentNode<Coin>::draw(Coin& coin)
+template <> const char* ComponentNode<CoinComponent>::name() { return "Coin"; }
+template <> const char* ComponentNode<CoinComponent>::icon() { return ICON_FA_COINS; }
+template <> bool ComponentNode<CoinComponent>::draw(CoinComponent& coin)
 {
 	UniqueID u(&coin);
 	ImGui::Checkbox(u("Picked"), &coin.picked);
@@ -274,15 +276,12 @@ void keySelector(const char *label, input::Key& currentKey)
 	}
 }
 
-template <> const char* ComponentNode<Player>::name() { return "Player"; }
-template <> const char* ComponentNode<Player>::icon() { return ICON_FA_RUNNING; }
-template <> bool ComponentNode<Player>::draw(Player& player)
+template <> const char* ComponentNode<PlayerComponent>::name() { return "PlayerComponent"; }
+template <> const char* ComponentNode<PlayerComponent>::icon() { return ICON_FA_RUNNING; }
+template <> bool ComponentNode<PlayerComponent>::draw(PlayerComponent& player)
 {
 	ImGui::SliderInt("Coin", &player.coin, 0, 50);
-	ImGui::Checkbox("Controllable", &player.controllable);
-	float metric = player.speed.metric();
-	if (ImGui::SliderFloat("Speed", &metric, 0.f, 50.f))
-		player.speed = Speed(metric);
+	ImGui::SliderFloat("Speed", &player.speed, 0.f, 50.f);
 	keySelector("Jump", player.jump);
 	keySelector("Left", player.left);
 	keySelector("Right", player.right);
@@ -351,6 +350,32 @@ template <> bool ComponentNode<TileMap>::draw(TileMap& map)
 	return false;
 }
 
+template <> const char* ComponentNode<Particle2D>::name() { return "Particle2D"; }
+template <> const char* ComponentNode<Particle2D>::icon() { return ICON_FA_SMOG; }
+template <> bool ComponentNode<Particle2D>::draw(Particle2D& particle)
+{
+	int birthTime = (int)particle.birthTime.milliseconds();
+	if (ImGui::InputInt("Birth Time", &birthTime))
+		particle.birthTime = Time::Unit::milliseconds(birthTime);
+	int lifeTime = (int)particle.lifeTime.milliseconds();
+	if (ImGui::InputInt("Life time", &lifeTime))
+		particle.lifeTime = Time::Unit::milliseconds(lifeTime);
+	ImGui::InputFloat2("Velocity", particle.velocity.data);
+	ImGui::SliderAngle("Angular velocity", &(particle.angularVelocity()));
+	ImGui::InputFloat2("Scale velocity", particle.scaleVelocity.data);
+	ImGui::ColorEdit4("Color", particle.color.data, ImGuiColorEditFlags_Float);
+	ImGui::SliderInt("Layer", &particle.layer, -20, 20);
+	return false;
+}
+
+template <> const char* ComponentNode<HurtComponent>::name() { return "HurtComponent"; }
+template <> const char* ComponentNode<HurtComponent>::icon() { return ICON_FA_HEART_BROKEN; }
+template <> bool ComponentNode<HurtComponent>::draw(HurtComponent& hurt)
+{
+	return false;
+}
+
+
 template <typename T>
 void component(World &world, Entity entity)
 {
@@ -395,13 +420,17 @@ bool filterValid(Entity entity, ComponentID filterComponentID)
 		return true;
 	if (ComponentType::get<TileLayer>() == filterComponentID && entity.has<TileLayer>())
 		return true;
-	if (ComponentType::get<Coin>() == filterComponentID && entity.has<Coin>())
+	if (ComponentType::get<CoinComponent>() == filterComponentID && entity.has<CoinComponent>())
 		return true;
-	if (ComponentType::get<Player>() == filterComponentID && entity.has<Player>())
+	if (ComponentType::get<PlayerComponent>() == filterComponentID && entity.has<PlayerComponent>())
 		return true;
 	if (ComponentType::get<Camera2D>() == filterComponentID && entity.has<Camera2D>())
 		return true;
 	if (ComponentType::get<SoundInstance>() == filterComponentID && entity.has<SoundInstance>())
+		return true;
+	if (ComponentType::get<Particle2D>() == filterComponentID && entity.has<Particle2D>())
+		return true;
+	if (ComponentType::get<HurtComponent>() == filterComponentID && entity.has<HurtComponent>())
 		return true;
 	return false;
 }
@@ -594,10 +623,10 @@ void EntityWidget::draw(World& world)
 						m_currentEntity.add<TileMap>(TileMap());
 					if (ImGui::MenuItem(ComponentNode<TileLayer>::name(), nullptr, nullptr, !m_currentEntity.has<TileLayer>()))
 						m_currentEntity.add<TileLayer>(TileLayer());
-					if (ImGui::MenuItem(ComponentNode<Coin>::name(), nullptr, nullptr, !m_currentEntity.has<Coin>()))
-						m_currentEntity.add<Coin>(Coin());
-					if (ImGui::MenuItem(ComponentNode<Player>::name(), nullptr, nullptr, !m_currentEntity.has<Player>()))
-						m_currentEntity.add<Player>(Player());
+					if (ImGui::MenuItem(ComponentNode<CoinComponent>::name(), nullptr, nullptr, !m_currentEntity.has<CoinComponent>()))
+						m_currentEntity.add<CoinComponent>(CoinComponent());
+					if (ImGui::MenuItem(ComponentNode<PlayerComponent>::name(), nullptr, nullptr, !m_currentEntity.has<PlayerComponent>()))
+						m_currentEntity.add<PlayerComponent>(PlayerComponent());
 					if (ImGui::MenuItem(ComponentNode<Camera2D>::name(), nullptr, nullptr, !m_currentEntity.has<Camera2D>()))
 						m_currentEntity.add<Camera2D>(Camera2D());
 					if (ImGui::BeginMenu(ComponentNode<SoundInstance>::name(), !m_currentEntity.has<SoundInstance>()))
@@ -607,6 +636,10 @@ void EntityWidget::draw(World& world)
 								m_currentEntity.add<SoundInstance>(SoundInstance(it.second, 1.f, false));
 						ImGui::EndMenu();
 					}
+					if (ImGui::MenuItem(ComponentNode<Particle2D>::name(), nullptr, nullptr, !m_currentEntity.has<Particle2D>()))
+						m_currentEntity.add<Particle2D>();
+					if (ImGui::MenuItem(ComponentNode<HurtComponent>::name(), nullptr, nullptr, !m_currentEntity.has<HurtComponent>()))
+						m_currentEntity.add<HurtComponent>();
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Remove", m_currentEntity.valid())) {
@@ -624,14 +657,18 @@ void EntityWidget::draw(World& world)
 						m_currentEntity.remove<TileMap>();
 					if (ImGui::MenuItem(ComponentNode<TileLayer>::name(), nullptr, nullptr, m_currentEntity.has<TileLayer>()))
 						m_currentEntity.remove<TileLayer>();
-					if (ImGui::MenuItem(ComponentNode<Coin>::name(), nullptr, nullptr, m_currentEntity.has<Coin>()))
-						m_currentEntity.remove<Coin>();
-					if (ImGui::MenuItem(ComponentNode<Player>::name(), nullptr, nullptr, m_currentEntity.has<Player>()))
-						m_currentEntity.remove<Player>();
+					if (ImGui::MenuItem(ComponentNode<CoinComponent>::name(), nullptr, nullptr, m_currentEntity.has<CoinComponent>()))
+						m_currentEntity.remove<CoinComponent>();
+					if (ImGui::MenuItem(ComponentNode<PlayerComponent>::name(), nullptr, nullptr, m_currentEntity.has<PlayerComponent>()))
+						m_currentEntity.remove<PlayerComponent>();
 					if (ImGui::MenuItem(ComponentNode<Camera2D>::name(), nullptr, nullptr, m_currentEntity.has<Camera2D>()))
 						m_currentEntity.remove<Camera2D>();
 					if (ImGui::MenuItem(ComponentNode<SoundInstance>::name(), nullptr, nullptr, m_currentEntity.has<SoundInstance>()))
 						m_currentEntity.remove<SoundInstance>();
+					if (ImGui::MenuItem(ComponentNode<Particle2D>::name(), nullptr, nullptr, m_currentEntity.has<Particle2D>()))
+						m_currentEntity.remove<Particle2D>();
+					if (ImGui::MenuItem(ComponentNode<HurtComponent>::name(), nullptr, nullptr, m_currentEntity.has<HurtComponent>()))
+						m_currentEntity.remove<HurtComponent>();
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
@@ -645,15 +682,17 @@ void EntityWidget::draw(World& world)
 		static std::map<ComponentID, const char*> items;
 		items[ComponentType::get<Transform2D>()] = ComponentNode<Transform2D>::name();
 		items[ComponentType::get<Animator>()] = ComponentNode<Animator>::name();
-		items[ComponentType::get<Player>()] = ComponentNode<Player>::name();
+		items[ComponentType::get<PlayerComponent>()] = ComponentNode<PlayerComponent>::name();
 		items[ComponentType::get<Collider2D>()] = ComponentNode<Collider2D>::name();
 		items[ComponentType::get<RigidBody2D>()] = ComponentNode<RigidBody2D>::name();
 		items[ComponentType::get<Camera2D>()] = ComponentNode<Camera2D>::name();
 		items[ComponentType::get<SoundInstance>()] = ComponentNode<SoundInstance>::name();
-		items[ComponentType::get<Coin>()] = ComponentNode<Coin>::name();
+		items[ComponentType::get<CoinComponent>()] = ComponentNode<CoinComponent>::name();
 		items[ComponentType::get<Text>()] = ComponentNode<Text>::name();
 		items[ComponentType::get<TileLayer>()] = ComponentNode<TileLayer>::name();
 		items[ComponentType::get<TileMap>()] = ComponentNode<TileMap>::name();
+		items[ComponentType::get<Particle2D>()] = ComponentNode<Particle2D>::name();
+		items[ComponentType::get<HurtComponent>()] = ComponentNode<HurtComponent>::name();
 
 		ImGui::Checkbox("##EnableFilter", &filterEntities);
 		ImGui::SameLine();
@@ -681,35 +720,40 @@ void EntityWidget::draw(World& world)
 				if (filterEntities && !filterValid(entity, componentID))
 					return;
 				char buffer[256];
+				snprintf(buffer, 256, "Entity %02u", index);
 				bool selected = m_currentEntity == entity;
 				// ---
 				if (entity.valid())
 				{
 					if (entity.has<Transform2D>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Transform2D>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Transform2D>::icon());
 					if (entity.has<Camera2D>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Camera2D>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Camera2D>::icon());
 					if (entity.has<SoundInstance>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<SoundInstance>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<SoundInstance>::icon());
 					if (entity.has<Animator>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Animator>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Animator>::icon());
 					if (entity.has<Collider2D>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Collider2D>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Collider2D>::icon());
 					if (entity.has<RigidBody2D>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<RigidBody2D>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<RigidBody2D>::icon());
 					if (entity.has<Text>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Text>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Text>::icon());
 					if (entity.has<TileMap>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<TileMap>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<TileMap>::icon());
 					if (entity.has<TileLayer>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<TileLayer>::icon());
-					if (entity.has<Coin>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Coin>::icon());
-					if (entity.has<Player>())
-						snprintf(buffer, 256, "Entity %02u %s", index, ComponentNode<Player>::icon());
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<TileLayer>::icon());
+					if (entity.has<CoinComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<CoinComponent>::icon());
+					if (entity.has<PlayerComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<PlayerComponent>::icon());
+					if (entity.has<Particle2D>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Particle2D>::icon());
+					if (entity.has<HurtComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<HurtComponent>::icon());
 				}
 				else
-					snprintf(buffer, 256, "Entity %02u %s", index, ICON_FA_TIMES);
+					snprintf(buffer, 256, "%s %s", buffer, ICON_FA_TIMES);
 				// ---
 				if (ImGui::Selectable(buffer, &selected))
 					m_currentEntity = entity;
@@ -754,8 +798,10 @@ void EntityWidget::draw(World& world)
 				component<TileLayer>(world, m_currentEntity);
 				component<TileMap>(world, m_currentEntity);
 				component<Text>(world, m_currentEntity);
-				component<Player>(world, m_currentEntity);
-				component<Coin>(world, m_currentEntity);
+				component<PlayerComponent>(world, m_currentEntity);
+				component<CoinComponent>(world, m_currentEntity);
+				component<Particle2D>(world, m_currentEntity);
+				component<HurtComponent>(world, m_currentEntity);
 				// Draw an overlay for current entity
 				overlay(world, m_currentEntity);
 			}

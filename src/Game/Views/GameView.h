@@ -5,7 +5,7 @@
 
 #include "../../GUI/EditorUI.h"
 #include "../Resources.h"
-#include "../Level.h"
+#include "../Game.h"
 
 namespace aka {
 
@@ -26,10 +26,7 @@ private:
 	Batch m_batch;
 	Framebuffer::Ptr m_framebuffer;
 	// Entity
-	World m_world;
-	Entity m_cameraEntity;
-	// Levels
-	WorldMap m_map;
+	Game m_game;
 };
 
 }

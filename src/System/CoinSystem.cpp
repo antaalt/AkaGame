@@ -15,9 +15,9 @@ CoinSystem::CoinSystem(World& world) :
 void CoinSystem::receive(const AnimationFinishedEvent& event)
 {
 	Entity entity = event.entity;
-	if (entity.valid() && entity.has<Coin>())
+	if (entity.valid() && entity.has<CoinComponent>())
 	{
-		const Coin& coin = entity.get<Coin>();
+		const CoinComponent& coin = entity.get<CoinComponent>();
 		if (coin.picked)
 		{
 			entity.destroy();

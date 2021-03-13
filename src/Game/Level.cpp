@@ -9,8 +9,8 @@
 #include "../Component/Coin.h"
 #include "../Component/Text.h"
 #include "../Component/Player.h"
-#include "../Component/Door.h"
 #include "../Component/Particle.h"
+#include "../Component/Hurtable.h"
 #include "../System/SoundSystem.h"
 
 #include <cstddef>
@@ -172,11 +172,6 @@ void Level::load(const String& level, OgmoWorld& ogmoWorld, World& world)
 		FileStream fs(Asset::path("textures/interact/interact.aseprite"), FileMode::ReadOnly);
 		SpriteManager::create("Coin", Sprite::parse(fs));
 	}
-	{
-		// Player
-		FileStream fs(Asset::path("textures/player/player.aseprite"), FileMode::ReadOnly);
-		SpriteManager::create("Player", Sprite::parse(fs));
-	}
 	const OgmoLevel::Layer* layer = ogmoLevel.getLayer("Entities");
 	auto flipY = [](const vec2u& pos, const vec2u& size, const OgmoLevel::Layer *layer) -> vec2f {
 		return vec2f((float)pos.x, (float)(layer->getHeight() - pos.y - size.y));
@@ -197,13 +192,21 @@ void Level::load(const String& level, OgmoWorld& ogmoWorld, World& world)
 			e.add<Transform2D>(Transform2D(vec2f(offset) + flipY(entity.position, entity.size, layer), vec2f(entity.size) / 16.f, radianf(0)));
 			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
 			e.add<Animator>(Animator(&SpriteManager::get("Coin"), 1));
-			e.add<Coin>(Coin());
+			e.add<CoinComponent>();
 			e.get<Animator>().play("Idle");
 			this->entities.push_back(e);
 		}
 		else if (entity.entity->name == "Spawn")
 		{
 			this->spawn = vec2u(vec2f(offset) + flipY(entity.position, entity.size, layer));
+		}
+		else if (entity.entity->name == "Spike")
+		{
+			Entity e = world.createEntity("Spike");
+			e.add<Transform2D>(Transform2D(vec2f(offset) + flipY(entity.position, entity.size, layer), vec2f(entity.size), radianf(0)));
+			e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(1.f), CollisionType::Event));
+			e.add<HurtComponent>();
+			this->entities.push_back(e);
 		}
 		else
 		{
