@@ -40,10 +40,6 @@ public:
 	void draw(World& world);
 	void frame();
 	void render();
-	bool isVisible() { return m_visible; }
-	void setVisible(bool visible) { m_visible = visible; }
-
-	bool focused() const { const ImGuiIO& io = ImGui::GetIO(); return io.WantCaptureMouse; }
 private:
 	bool m_visible = true;
 	std::vector<Widget*> m_widgets;

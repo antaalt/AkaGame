@@ -5,7 +5,7 @@
 
 namespace aka {
 
-class TileSystem : public System
+class TileMapRenderSystem : public System
 {
 public:
 	void draw(World& world, Batch &batch) override;

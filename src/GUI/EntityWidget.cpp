@@ -14,7 +14,7 @@
 #include "../Component/TileMap.h"
 #include "../Component/TileLayer.h"
 #include "../Component/Player.h"
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 #include "../Component/Coin.h"
 #include "../Component/SoundInstance.h"
 #include "../Component/Hurtable.h"
@@ -34,33 +34,21 @@ struct ComponentNode {
 	static bool draw(T& component) { Logger::error("Trying to draw an undefined component"); return false; }
 };
 
-// Avoid conflict of ID uniqueness
-struct UniqueID {
-	UniqueID(const void* data) : data(data) {}
-
-	const char* operator()(const char* label) {
-		static char buffer[256];
-		int err = snprintf(buffer, 256, "%s##%p", label, data);
-		return buffer;
-	}
-	const void* data;
-};
-
-template <> const char* ComponentNode<Transform2D>::name() { return "Transform2D"; }
-template <> const char* ComponentNode<Transform2D>::icon() { return ICON_FA_ARROWS_ALT; }
-template <> bool ComponentNode<Transform2D>::draw(Transform2D& transform)
+template <> const char* ComponentNode<Transform2DComponent>::name() { return "Transform2DComponent"; }
+template <> const char* ComponentNode<Transform2DComponent>::icon() { return ICON_FA_ARROWS_ALT; }
+template <> bool ComponentNode<Transform2DComponent>::draw(Transform2DComponent& transform)
 {
 	ImGui::InputFloat2("Position", transform.position.data);
 	ImGui::InputFloat2("Size", transform.size.data);
+	ImGui::InputFloat2("Pivot", transform.pivot.data);
 	ImGui::SliderAngle("Rotation", &transform.rotation());
 	return false;
 }
 
-template <> const char* ComponentNode<Animator>::name() { return "Animator"; }
-template <> const char* ComponentNode<Animator>::icon() { return ICON_FA_PLAY; }
-template <> bool ComponentNode<Animator>::draw(Animator& animator)
+template <> const char* ComponentNode<SpriteAnimatorComponent>::name() { return "SpriteAnimator"; }
+template <> const char* ComponentNode<SpriteAnimatorComponent>::icon() { return ICON_FA_PLAY; }
+template <> bool ComponentNode<SpriteAnimatorComponent>::draw(SpriteAnimatorComponent& animator)
 {
-	UniqueID u(&animator);
 	char buffer[256];
 	// Set the name of the current sprite
 	char currentSpriteName[256] = "None";
@@ -104,41 +92,37 @@ template <> bool ComponentNode<Animator>::draw(Animator& animator)
 		}
 		i++;
 	}
-	ImGui::SliderInt(u("Frame"), reinterpret_cast<int*>(&animator.currentFrame), 0, (int)animator.sprite->animations[animator.currentAnimation].frames.size() - 1);
-	ImGui::SliderInt(u("Layer"), &animator.layer, -20, 20);
+	ImGui::SliderInt("Frame", reinterpret_cast<int*>(&animator.currentFrame), 0, (int)animator.sprite->animations[animator.currentAnimation].frames.size() - 1);
+	ImGui::SliderInt("Layer", &animator.layer, -20, 20);
 	return false;
 }
 
-template <> const char* ComponentNode<Collider2D>::name() { return "Collider2D"; }
-template <> const char* ComponentNode<Collider2D>::icon() { return ICON_FA_SQUARE; }
-template <> bool ComponentNode<Collider2D>::draw(Collider2D& collider)
+template <> const char* ComponentNode<Collider2DComponent>::name() { return "Collider2D"; }
+template <> const char* ComponentNode<Collider2DComponent>::icon() { return ICON_FA_SQUARE; }
+template <> bool ComponentNode<Collider2DComponent>::draw(Collider2DComponent& collider)
 {
-	UniqueID u(&collider);
-	ImGui::InputFloat2(u("Position"), collider.position.data);
-	ImGui::InputFloat2(u("Size"), collider.size.data);
-	ImGui::InputFloat(u("Bouncing"), &collider.bouncing, 0.1f, 1.f);
-	ImGui::InputFloat(u("Friction"), &collider.friction, 0.1f, 1.f);
+	ImGui::InputFloat2("Position", collider.position.data);
+	ImGui::InputFloat2("Size", collider.size.data);
+	ImGui::InputFloat("Bouncing", &collider.bouncing, 0.1f, 1.f);
+	ImGui::InputFloat("Friction", &collider.friction, 0.1f, 1.f);
 	return false;
 }
 
-template <> const char* ComponentNode<RigidBody2D>::name() { return "RigidBody2D"; }
-template <> const char* ComponentNode<RigidBody2D>::icon() { return ICON_FA_APPLE_ALT; }
-template <> bool ComponentNode<RigidBody2D>::draw(RigidBody2D& rigid)
+template <> const char* ComponentNode<RigidBody2DComponent>::name() { return "RigidBody2D"; }
+template <> const char* ComponentNode<RigidBody2DComponent>::icon() { return ICON_FA_APPLE_ALT; }
+template <> bool ComponentNode<RigidBody2DComponent>::draw(RigidBody2DComponent& rigid)
 {
-	UniqueID u(&rigid);
-	ImGui::InputFloat(u("Mass"), &rigid.mass, 0.1f, 1.f);
-	ImGui::InputFloat2(u("Acceleration"), rigid.acceleration.data);
-	ImGui::InputFloat2(u("Velocity"), rigid.velocity.data);
+	ImGui::InputFloat("Mass", &rigid.mass, 0.1f, 1.f);
+	ImGui::InputFloat2("Acceleration", rigid.acceleration.data);
+	ImGui::InputFloat2("Velocity", rigid.velocity.data);
 	return false;
 }
 
-template <> const char* ComponentNode<Camera2D>::name() { return "Camera2D"; }
-template <> const char* ComponentNode<Camera2D>::icon() { return ICON_FA_CAMERA; }
-template <> bool ComponentNode<Camera2D>::draw(Camera2D& camera)
+template <> const char* ComponentNode<Camera2DComponent>::name() { return "Camera2D"; }
+template <> const char* ComponentNode<Camera2DComponent>::icon() { return ICON_FA_CAMERA; }
+template <> bool ComponentNode<Camera2DComponent>::draw(Camera2DComponent& camera)
 {
 	ImGui::InputFloat2("Viewport", camera.camera.viewport.data);
-	//ImGui::Checkbox("Clamp", &camera.clampBorder);
-	//ImGui::Checkbox("Tracking", &camera.tracking);
 	ImGui::Checkbox("Main", &camera.main);
 	return false;
 }
@@ -179,7 +163,7 @@ template <> bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
 	ImGui::Text("Channels : %u", audio.audio->channels());
 	char buffer[10];
 	int error = snprintf(buffer, 10, "%02u:%02u.%03u", (uint32_t)(current / 60), (uint32_t)(current) % 60, (uint32_t)(current * 1000.f) % 1000);
-	ASSERT(error > 0, "");
+	AKA_ASSERT(error > 0, "");
 	ImGui::ProgressBar(current / duration, ImVec2(0.f, 0.f), buffer);
 	if (ImGui::Button(ICON_FA_BACKWARD))
 		audio.audio->seek((uint64_t)max(current - 10.f, 0.f) * audio.audio->frequency());
@@ -211,18 +195,16 @@ template <> const char* ComponentNode<CoinComponent>::name() { return "Coin"; }
 template <> const char* ComponentNode<CoinComponent>::icon() { return ICON_FA_COINS; }
 template <> bool ComponentNode<CoinComponent>::draw(CoinComponent& coin)
 {
-	UniqueID u(&coin);
-	ImGui::Checkbox(u("Picked"), &coin.picked);
+	ImGui::Checkbox("Picked", &coin.picked);
 	return false;
 }
 
-template <> const char* ComponentNode<Text>::name() { return "Text"; }
-template <> const char* ComponentNode<Text>::icon() { return ICON_FA_FONT; }
-template <> bool ComponentNode<Text>::draw(Text& text)
+template <> const char* ComponentNode<Text2DComponent>::name() { return "Text2D"; }
+template <> const char* ComponentNode<Text2DComponent>::icon() { return ICON_FA_FONT; }
+template <> bool ComponentNode<Text2DComponent>::draw(Text2DComponent& text)
 {
-	UniqueID u(&text);
-	ImGui::ColorEdit4(u("Color"), text.color.data);
-	ImGui::SliderInt(u("Layer"), &text.layer, -20, 20);
+	ImGui::ColorEdit4("Color", text.color.data);
+	ImGui::SliderInt("Layer", &text.layer, -20, 20);
 
 	uint32_t currentHeight = text.font->height();
 	const char* currentFont = text.font->family().cstr();
@@ -249,7 +231,7 @@ template <> bool ComponentNode<Text>::draw(Text& text)
 
 	char t[256];
 	String::copy(t, 256, text.text.c_str());
-	if (ImGui::InputTextWithHint(u("Text"), "Text to display", t, 256))
+	if (ImGui::InputTextWithHint("Text", "Text to display", t, 256))
 		text.text = t;
 	return false;
 }
@@ -289,44 +271,42 @@ template <> bool ComponentNode<PlayerComponent>::draw(PlayerComponent& player)
 	return false;
 }
 
-template <> const char* ComponentNode<TileLayer>::name() { return "TileLayer"; }
-template <> const char* ComponentNode<TileLayer>::icon() { return ICON_FA_LAYER_GROUP; }
-template <> bool ComponentNode<TileLayer>::draw(TileLayer& layer)
+template <> const char* ComponentNode<TileLayerComponent>::name() { return "TileLayer"; }
+template <> const char* ComponentNode<TileLayerComponent>::icon() { return ICON_FA_LAYER_GROUP; }
+template <> bool ComponentNode<TileLayerComponent>::draw(TileLayerComponent& layer)
 {
-	UniqueID u(&layer);
 	vec2i gridCount = vec2i(layer.gridCount);
 	vec2i gridSize = vec2i(layer.gridSize);
-	if (ImGui::InputInt2(u("Grid count"), gridCount.data))
+	if (ImGui::InputInt2("Grid count", gridCount.data))
 		layer.gridCount = vec2u(gridCount);
-	if (ImGui::InputInt2(u("Grid size"), gridSize.data))
+	if (ImGui::InputInt2("Grid size", gridSize.data))
 		layer.gridSize = vec2u(gridSize);
 
 	static int id = 0;
 	if (layer.tileID.size() >= 4)
 	{
-		ImGui::SliderInt(u("Index"), &id, 0, (int)layer.tileID.size() - 4);
-		ImGui::InputInt4(u("TileID"), layer.tileID.data() + id);
+		ImGui::SliderInt("Index", &id, 0, (int)layer.tileID.size() - 4);
+		ImGui::InputInt4("TileID", layer.tileID.data() + id);
 	}
-	ImGui::SliderInt(u("Layer"), &layer.layer, -20, 20);
-	ImGui::ColorEdit4(u("Color"), layer.color.data, ImGuiColorEditFlags_Float);
+	ImGui::SliderInt("Layer", &layer.layer, -20, 20);
+	ImGui::ColorEdit4("Color", layer.color.data, ImGuiColorEditFlags_Float);
 	return false;
 }
 
-template <> const char* ComponentNode<TileMap>::name() { return "TileMap"; }
-template <> const char* ComponentNode<TileMap>::icon() { return ICON_FA_ATLAS; }
-template <> bool ComponentNode<TileMap>::draw(TileMap& map)
+template <> const char* ComponentNode<TileMapComponent>::name() { return "TileMap"; }
+template <> const char* ComponentNode<TileMapComponent>::icon() { return ICON_FA_ATLAS; }
+template <> bool ComponentNode<TileMapComponent>::draw(TileMapComponent& map)
 {
-	UniqueID u(&map);
 	vec2i gridCount = vec2i(map.gridCount);
 	vec2i gridSize = vec2i(map.gridSize);
-	if (ImGui::InputInt2(u("Grid count"), gridCount.data))
+	if (ImGui::InputInt2("Grid count", gridCount.data))
 		map.gridCount = vec2u(gridCount);
-	if (ImGui::InputInt2(u("Grid size"), gridSize.data))
+	if (ImGui::InputInt2("Grid size", gridSize.data))
 		map.gridSize = vec2u(gridSize);
 	if (map.texture == nullptr)
 	{
 		Path path;
-		if (Modal::LoadButton(u("Load image"), &path))
+		if (Modal::LoadButton("Load image", &path))
 		{
 			try
 			{
@@ -350,9 +330,9 @@ template <> bool ComponentNode<TileMap>::draw(TileMap& map)
 	return false;
 }
 
-template <> const char* ComponentNode<Particle2D>::name() { return "Particle2D"; }
-template <> const char* ComponentNode<Particle2D>::icon() { return ICON_FA_SMOG; }
-template <> bool ComponentNode<Particle2D>::draw(Particle2D& particle)
+template <> const char* ComponentNode<Particle2DComponent>::name() { return "Particle2D"; }
+template <> const char* ComponentNode<Particle2DComponent>::icon() { return ICON_FA_SMOG; }
+template <> bool ComponentNode<Particle2DComponent>::draw(Particle2DComponent& particle)
 {
 	int birthTime = (int)particle.birthTime.milliseconds();
 	if (ImGui::InputInt("Birth Time", &birthTime))
@@ -406,29 +386,29 @@ void component(World &world, Entity entity)
 
 bool filterValid(Entity entity, ComponentID filterComponentID)
 {
-	if (ComponentType::get<Transform2D>() == filterComponentID && entity.has<Transform2D>())
+	if (ComponentType::get<Transform2DComponent>() == filterComponentID && entity.has<Transform2DComponent>())
 		return true;
-	if (ComponentType::get<Animator>() == filterComponentID && entity.has<Animator>())
+	if (ComponentType::get<SpriteAnimatorComponent>() == filterComponentID && entity.has<SpriteAnimatorComponent>())
 		return true;
-	if (ComponentType::get<Collider2D>() == filterComponentID && entity.has<Collider2D>())
+	if (ComponentType::get<Collider2DComponent>() == filterComponentID && entity.has<Collider2DComponent>())
 		return true;
-	if (ComponentType::get<RigidBody2D>() == filterComponentID && entity.has<RigidBody2D>())
+	if (ComponentType::get<RigidBody2DComponent>() == filterComponentID && entity.has<RigidBody2DComponent>())
 		return true;
-	if (ComponentType::get<Text>() == filterComponentID && entity.has<Text>())
+	if (ComponentType::get<Text2DComponent>() == filterComponentID && entity.has<Text2DComponent>())
 		return true;
-	if (ComponentType::get<TileMap>() == filterComponentID && entity.has<TileMap>())
+	if (ComponentType::get<TileMapComponent>() == filterComponentID && entity.has<TileMapComponent>())
 		return true;
-	if (ComponentType::get<TileLayer>() == filterComponentID && entity.has<TileLayer>())
+	if (ComponentType::get<TileLayerComponent>() == filterComponentID && entity.has<TileLayerComponent>())
 		return true;
 	if (ComponentType::get<CoinComponent>() == filterComponentID && entity.has<CoinComponent>())
 		return true;
 	if (ComponentType::get<PlayerComponent>() == filterComponentID && entity.has<PlayerComponent>())
 		return true;
-	if (ComponentType::get<Camera2D>() == filterComponentID && entity.has<Camera2D>())
+	if (ComponentType::get<Camera2DComponent>() == filterComponentID && entity.has<Camera2DComponent>())
 		return true;
 	if (ComponentType::get<SoundInstance>() == filterComponentID && entity.has<SoundInstance>())
 		return true;
-	if (ComponentType::get<Particle2D>() == filterComponentID && entity.has<Particle2D>())
+	if (ComponentType::get<Particle2DComponent>() == filterComponentID && entity.has<Particle2DComponent>())
 		return true;
 	if (ComponentType::get<HurtComponent>() == filterComponentID && entity.has<HurtComponent>())
 		return true;
@@ -440,23 +420,23 @@ void overlay(World &world, Entity entity)
 {
 	Entity cameraEntity = Entity::null();
 	world.each([&cameraEntity](Entity entity) {
-		if (entity.has<Camera2D>())
+		if (entity.has<Camera2DComponent>())
 			cameraEntity = entity;
 	});
 	if (cameraEntity.valid())
 	{
-		Transform2D& cameraTransform = cameraEntity.get<Transform2D>();
-		Camera2D& camera = cameraEntity.get<Camera2D>();
+		Transform2DComponent& cameraTransform = cameraEntity.get<Transform2DComponent>();
+		Camera2DComponent& camera = cameraEntity.get<Camera2DComponent>();
 		mat3f view = mat3f::inverse(cameraTransform.model());
 		Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
 		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f));
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// Animator overlay for current entity
-		if (entity.has<Transform2D>() && entity.has<Animator>())
+		if (entity.has<Transform2DComponent>() && entity.has<SpriteAnimatorComponent>())
 		{
-			Transform2D& t = entity.get<Transform2D>();
-			Animator& a = entity.get<Animator>();
+			Transform2DComponent& t = entity.get<Transform2DComponent>();
+			SpriteAnimatorComponent& a = entity.get<SpriteAnimatorComponent>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
 			p.y = camera.camera.viewport.y - p.y;
@@ -466,10 +446,10 @@ void overlay(World &world, Entity entity)
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
 		}
 		// Collider overlay for current entity
-		else if (entity.has<Transform2D>() && entity.has<Collider2D>())
+		else if (entity.has<Transform2DComponent>() && entity.has<Collider2DComponent>())
 		{
-			Transform2D& t = entity.get<Transform2D>();
-			Collider2D& c = entity.get<Collider2D>();
+			Transform2DComponent& t = entity.get<Transform2DComponent>();
+			Collider2DComponent& c = entity.get<Collider2DComponent>();
 			vec2f p = vec2f(view * t.model() * vec3f(c.position, 1));
 			p.y = camera.camera.viewport.y - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f(c.size, 0));
@@ -478,10 +458,10 @@ void overlay(World &world, Entity entity)
 			drawList->AddRect(pos0, pos1, color, 0.f, ImDrawCornerFlags_All, 2.f);
 		}
 		// Text overlay for current entity
-		else if (entity.has<Text>())
+		else if (entity.has<Text2DComponent>())
 		{
-			Transform2D& t = entity.get<Transform2D>();
-			Text& text = entity.get<Text>();
+			Transform2DComponent& t = entity.get<Transform2DComponent>();
+			Text2DComponent& text = entity.get<Text2DComponent>();
 			vec2i size = text.font->size(text.text);
 			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
 			p.y = camera.camera.viewport.y - p.y;
@@ -498,13 +478,13 @@ Entity pickEntity(World &world)
 {
 	Entity cameraEntity = Entity::null();
 	world.each([&cameraEntity](Entity entity) {
-		if (entity.has<Camera2D>())
+		if (entity.has<Camera2DComponent>())
 			cameraEntity = entity;
 	});
 	if (!cameraEntity.valid())
 		return Entity::null();
-	Transform2D& cameraTransform = cameraEntity.get<Transform2D>();
-	Camera2D& camera = cameraEntity.get<Camera2D>();
+	Transform2DComponent& cameraTransform = cameraEntity.get<Transform2DComponent>();
+	Camera2DComponent& camera = cameraEntity.get<Camera2DComponent>();
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
 	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
 	const mat3f cam = cameraTransform.model();
@@ -514,12 +494,12 @@ Entity pickEntity(World &world)
 	int32_t layer = -100;
 	Entity picked = Entity::null();
 	world.each([&](Entity entity) {
-		if (!entity.has<Transform2D>() || found)
+		if (!entity.has<Transform2DComponent>() || found)
 			return;
-		if (entity.has<Collider2D>())
+		if (entity.has<Collider2DComponent>())
 		{
-			Transform2D& t = entity.get<Transform2D>();
-			Collider2D& c = entity.get<Collider2D>();
+			Transform2DComponent& t = entity.get<Transform2DComponent>();
+			Collider2DComponent& c = entity.get<Collider2DComponent>();
 			vec2f p = vec2f(view * t.model() * vec3f(c.position, 1));
 			vec2f s = vec2f(view * t.model() * vec3f(c.size, 0));
 			vec2f pos0 = scale * p;
@@ -530,10 +510,10 @@ Entity pickEntity(World &world)
 				picked = entity;
 			}
 		}
-		else if (entity.has<Animator>())
+		else if (entity.has<SpriteAnimatorComponent>())
 		{
-			Transform2D& t = entity.get<Transform2D>();
-			Animator& a = entity.get<Animator>();
+			Transform2DComponent& t = entity.get<Transform2DComponent>();
+			SpriteAnimatorComponent& a = entity.get<SpriteAnimatorComponent>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			// local to world to view space
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
@@ -547,10 +527,10 @@ Entity pickEntity(World &world)
 				picked = entity;
 			}
 		}
-		else if (entity.has<Text>())
+		else if (entity.has<Text2DComponent>())
 		{
-			Transform2D& t = entity.get<Transform2D>();
-			Text& text = entity.get<Text>();
+			Transform2DComponent& t = entity.get<Transform2DComponent>();
+			Text2DComponent& text = entity.get<Text2DComponent>();
 			vec2i size = text.font->size(text.text);
 			// local to world to view space
 			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
@@ -599,36 +579,36 @@ void EntityWidget::draw(World& world)
 			if (ImGui::BeginMenu("Component", m_currentEntity.valid()))
 			{
 				if (ImGui::BeginMenu("Add", m_currentEntity.valid())) {
-					if (ImGui::MenuItem(ComponentNode<Transform2D>::name(), nullptr, nullptr, !m_currentEntity.has<Transform2D>()))
-						m_currentEntity.add<Transform2D>(Transform2D());
-					if (ImGui::BeginMenu(ComponentNode<Animator>::name(), !m_currentEntity.has<Animator>()))
+					if (ImGui::MenuItem(ComponentNode<Transform2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<Transform2DComponent>()))
+						m_currentEntity.add<Transform2DComponent>(Transform2DComponent());
+					if (ImGui::BeginMenu(ComponentNode<SpriteAnimatorComponent>::name(), !m_currentEntity.has<SpriteAnimatorComponent>()))
 					{
 						for (auto &it : SpriteManager::iterator)
 							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
-								m_currentEntity.add<Animator>(Animator(&it.second, 0));
+								m_currentEntity.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&it.second, 0));
 						ImGui::EndMenu();
 					}
-					if (ImGui::MenuItem(ComponentNode<Collider2D>::name(), nullptr, nullptr, !m_currentEntity.has<Collider2D>()))
-						m_currentEntity.add<Collider2D>(Collider2D());
-					if (ImGui::MenuItem(ComponentNode<RigidBody2D>::name(), nullptr, nullptr, !m_currentEntity.has<RigidBody2D>()))
-						m_currentEntity.add<RigidBody2D>(RigidBody2D());
-					if (ImGui::BeginMenu(ComponentNode<Text>::name(), !m_currentEntity.has<Text>()))
+					if (ImGui::MenuItem(ComponentNode<Collider2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<Collider2DComponent>()))
+						m_currentEntity.add<Collider2DComponent>(Collider2DComponent());
+					if (ImGui::MenuItem(ComponentNode<RigidBody2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<RigidBody2DComponent>()))
+						m_currentEntity.add<RigidBody2DComponent>(RigidBody2DComponent());
+					if (ImGui::BeginMenu(ComponentNode<Text2DComponent>::name(), !m_currentEntity.has<Text2DComponent>()))
 					{
 						for (auto &it : FontManager::iterator)
 							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
-								m_currentEntity.add<Text>(Text(vec2f(0.f), &it.second, "", color4f(1.f), 0));
+								m_currentEntity.add<Text2DComponent>(Text2DComponent(vec2f(0.f), &it.second, "", color4f(1.f), 0));
 						ImGui::EndMenu();
 					}
-					if (ImGui::MenuItem(ComponentNode<TileMap>::name(), nullptr, nullptr, !m_currentEntity.has<TileMap>()))
-						m_currentEntity.add<TileMap>(TileMap());
-					if (ImGui::MenuItem(ComponentNode<TileLayer>::name(), nullptr, nullptr, !m_currentEntity.has<TileLayer>()))
-						m_currentEntity.add<TileLayer>(TileLayer());
+					if (ImGui::MenuItem(ComponentNode<TileMapComponent>::name(), nullptr, nullptr, !m_currentEntity.has<TileMapComponent>()))
+						m_currentEntity.add<TileMapComponent>(TileMapComponent());
+					if (ImGui::MenuItem(ComponentNode<TileLayerComponent>::name(), nullptr, nullptr, !m_currentEntity.has<TileLayerComponent>()))
+						m_currentEntity.add<TileLayerComponent>(TileLayerComponent());
 					if (ImGui::MenuItem(ComponentNode<CoinComponent>::name(), nullptr, nullptr, !m_currentEntity.has<CoinComponent>()))
 						m_currentEntity.add<CoinComponent>(CoinComponent());
 					if (ImGui::MenuItem(ComponentNode<PlayerComponent>::name(), nullptr, nullptr, !m_currentEntity.has<PlayerComponent>()))
 						m_currentEntity.add<PlayerComponent>(PlayerComponent());
-					if (ImGui::MenuItem(ComponentNode<Camera2D>::name(), nullptr, nullptr, !m_currentEntity.has<Camera2D>()))
-						m_currentEntity.add<Camera2D>(Camera2D());
+					if (ImGui::MenuItem(ComponentNode<Camera2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<Camera2DComponent>()))
+						m_currentEntity.add<Camera2DComponent>(Camera2DComponent());
 					if (ImGui::BeginMenu(ComponentNode<SoundInstance>::name(), !m_currentEntity.has<SoundInstance>()))
 					{
 						for (auto &it : AudioManager::iterator)
@@ -636,37 +616,37 @@ void EntityWidget::draw(World& world)
 								m_currentEntity.add<SoundInstance>(SoundInstance(it.second, 1.f, false));
 						ImGui::EndMenu();
 					}
-					if (ImGui::MenuItem(ComponentNode<Particle2D>::name(), nullptr, nullptr, !m_currentEntity.has<Particle2D>()))
-						m_currentEntity.add<Particle2D>();
+					if (ImGui::MenuItem(ComponentNode<Particle2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<Particle2DComponent>()))
+						m_currentEntity.add<Particle2DComponent>();
 					if (ImGui::MenuItem(ComponentNode<HurtComponent>::name(), nullptr, nullptr, !m_currentEntity.has<HurtComponent>()))
 						m_currentEntity.add<HurtComponent>();
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Remove", m_currentEntity.valid())) {
-					if (ImGui::MenuItem(ComponentNode<Transform2D>::name(), nullptr, nullptr, m_currentEntity.has<Transform2D>()))
-						m_currentEntity.remove<Transform2D>();
-					if (ImGui::MenuItem(ComponentNode<Animator>::name(), nullptr, nullptr, m_currentEntity.has<Animator>()))
-						m_currentEntity.remove<Animator>();
-					if (ImGui::MenuItem(ComponentNode<Collider2D>::name(), nullptr, nullptr, m_currentEntity.has<Collider2D>()))
-						m_currentEntity.remove<Collider2D>();
-					if (ImGui::MenuItem(ComponentNode<RigidBody2D>::name(), nullptr, nullptr, m_currentEntity.has<RigidBody2D>()))
-						m_currentEntity.remove<RigidBody2D>();
-					if (ImGui::MenuItem(ComponentNode<Text>::name(), nullptr, nullptr, m_currentEntity.has<Text>()))
-						m_currentEntity.remove<Text>();
-					if (ImGui::MenuItem(ComponentNode<TileMap>::name(), nullptr, nullptr, m_currentEntity.has<TileMap>()))
-						m_currentEntity.remove<TileMap>();
-					if (ImGui::MenuItem(ComponentNode<TileLayer>::name(), nullptr, nullptr, m_currentEntity.has<TileLayer>()))
-						m_currentEntity.remove<TileLayer>();
+					if (ImGui::MenuItem(ComponentNode<Transform2DComponent>::name(), nullptr, nullptr, m_currentEntity.has<Transform2DComponent>()))
+						m_currentEntity.remove<Transform2DComponent>();
+					if (ImGui::MenuItem(ComponentNode<SpriteAnimatorComponent>::name(), nullptr, nullptr, m_currentEntity.has<SpriteAnimatorComponent>()))
+						m_currentEntity.remove<SpriteAnimatorComponent>();
+					if (ImGui::MenuItem(ComponentNode<Collider2DComponent>::name(), nullptr, nullptr, m_currentEntity.has<Collider2DComponent>()))
+						m_currentEntity.remove<Collider2DComponent>();
+					if (ImGui::MenuItem(ComponentNode<RigidBody2DComponent>::name(), nullptr, nullptr, m_currentEntity.has<RigidBody2DComponent>()))
+						m_currentEntity.remove<RigidBody2DComponent>();
+					if (ImGui::MenuItem(ComponentNode<Text2DComponent>::name(), nullptr, nullptr, m_currentEntity.has<Text2DComponent>()))
+						m_currentEntity.remove<Text2DComponent>();
+					if (ImGui::MenuItem(ComponentNode<TileMapComponent>::name(), nullptr, nullptr, m_currentEntity.has<TileMapComponent>()))
+						m_currentEntity.remove<TileMapComponent>();
+					if (ImGui::MenuItem(ComponentNode<TileLayerComponent>::name(), nullptr, nullptr, m_currentEntity.has<TileLayerComponent>()))
+						m_currentEntity.remove<TileLayerComponent>();
 					if (ImGui::MenuItem(ComponentNode<CoinComponent>::name(), nullptr, nullptr, m_currentEntity.has<CoinComponent>()))
 						m_currentEntity.remove<CoinComponent>();
 					if (ImGui::MenuItem(ComponentNode<PlayerComponent>::name(), nullptr, nullptr, m_currentEntity.has<PlayerComponent>()))
 						m_currentEntity.remove<PlayerComponent>();
-					if (ImGui::MenuItem(ComponentNode<Camera2D>::name(), nullptr, nullptr, m_currentEntity.has<Camera2D>()))
-						m_currentEntity.remove<Camera2D>();
+					if (ImGui::MenuItem(ComponentNode<Camera2DComponent>::name(), nullptr, nullptr, m_currentEntity.has<Camera2DComponent>()))
+						m_currentEntity.remove<Camera2DComponent>();
 					if (ImGui::MenuItem(ComponentNode<SoundInstance>::name(), nullptr, nullptr, m_currentEntity.has<SoundInstance>()))
 						m_currentEntity.remove<SoundInstance>();
-					if (ImGui::MenuItem(ComponentNode<Particle2D>::name(), nullptr, nullptr, m_currentEntity.has<Particle2D>()))
-						m_currentEntity.remove<Particle2D>();
+					if (ImGui::MenuItem(ComponentNode<Particle2DComponent>::name(), nullptr, nullptr, m_currentEntity.has<Particle2DComponent>()))
+						m_currentEntity.remove<Particle2DComponent>();
 					if (ImGui::MenuItem(ComponentNode<HurtComponent>::name(), nullptr, nullptr, m_currentEntity.has<HurtComponent>()))
 						m_currentEntity.remove<HurtComponent>();
 					ImGui::EndMenu();
@@ -680,18 +660,18 @@ void EntityWidget::draw(World& world)
 		static const char noItem[256] = "All";
 		static ComponentID componentID{};
 		static std::map<ComponentID, const char*> items;
-		items[ComponentType::get<Transform2D>()] = ComponentNode<Transform2D>::name();
-		items[ComponentType::get<Animator>()] = ComponentNode<Animator>::name();
+		items[ComponentType::get<Transform2DComponent>()] = ComponentNode<Transform2DComponent>::name();
+		items[ComponentType::get<SpriteAnimatorComponent>()] = ComponentNode<SpriteAnimatorComponent>::name();
 		items[ComponentType::get<PlayerComponent>()] = ComponentNode<PlayerComponent>::name();
-		items[ComponentType::get<Collider2D>()] = ComponentNode<Collider2D>::name();
-		items[ComponentType::get<RigidBody2D>()] = ComponentNode<RigidBody2D>::name();
-		items[ComponentType::get<Camera2D>()] = ComponentNode<Camera2D>::name();
+		items[ComponentType::get<Collider2DComponent>()] = ComponentNode<Collider2DComponent>::name();
+		items[ComponentType::get<RigidBody2DComponent>()] = ComponentNode<RigidBody2DComponent>::name();
+		items[ComponentType::get<Camera2DComponent>()] = ComponentNode<Camera2DComponent>::name();
 		items[ComponentType::get<SoundInstance>()] = ComponentNode<SoundInstance>::name();
 		items[ComponentType::get<CoinComponent>()] = ComponentNode<CoinComponent>::name();
-		items[ComponentType::get<Text>()] = ComponentNode<Text>::name();
-		items[ComponentType::get<TileLayer>()] = ComponentNode<TileLayer>::name();
-		items[ComponentType::get<TileMap>()] = ComponentNode<TileMap>::name();
-		items[ComponentType::get<Particle2D>()] = ComponentNode<Particle2D>::name();
+		items[ComponentType::get<Text2DComponent>()] = ComponentNode<Text2DComponent>::name();
+		items[ComponentType::get<TileLayerComponent>()] = ComponentNode<TileLayerComponent>::name();
+		items[ComponentType::get<TileMapComponent>()] = ComponentNode<TileMapComponent>::name();
+		items[ComponentType::get<Particle2DComponent>()] = ComponentNode<Particle2DComponent>::name();
 		items[ComponentType::get<HurtComponent>()] = ComponentNode<HurtComponent>::name();
 
 		ImGui::Checkbox("##EnableFilter", &filterEntities);
@@ -715,7 +695,6 @@ void EntityWidget::draw(World& world)
 		{
 			uint32_t index = 0;
 			world.each([&](Entity entity) {
-				UniqueID u((void*)entity.handle());
 				index++;
 				if (filterEntities && !filterValid(entity, componentID))
 					return;
@@ -725,30 +704,30 @@ void EntityWidget::draw(World& world)
 				// ---
 				if (entity.valid())
 				{
-					if (entity.has<Transform2D>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Transform2D>::icon());
-					if (entity.has<Camera2D>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Camera2D>::icon());
+					if (entity.has<Transform2DComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Transform2DComponent>::icon());
+					if (entity.has<Camera2DComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Camera2DComponent>::icon());
 					if (entity.has<SoundInstance>())
 						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<SoundInstance>::icon());
-					if (entity.has<Animator>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Animator>::icon());
-					if (entity.has<Collider2D>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Collider2D>::icon());
-					if (entity.has<RigidBody2D>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<RigidBody2D>::icon());
-					if (entity.has<Text>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Text>::icon());
-					if (entity.has<TileMap>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<TileMap>::icon());
-					if (entity.has<TileLayer>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<TileLayer>::icon());
+					if (entity.has<SpriteAnimatorComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<SpriteAnimatorComponent>::icon());
+					if (entity.has<Collider2DComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Collider2DComponent>::icon());
+					if (entity.has<RigidBody2DComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<RigidBody2DComponent>::icon());
+					if (entity.has<Text2DComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Text2DComponent>::icon());
+					if (entity.has<TileMapComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<TileMapComponent>::icon());
+					if (entity.has<TileLayerComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<TileLayerComponent>::icon());
 					if (entity.has<CoinComponent>())
 						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<CoinComponent>::icon());
 					if (entity.has<PlayerComponent>())
 						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<PlayerComponent>::icon());
-					if (entity.has<Particle2D>())
-						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Particle2D>::icon());
+					if (entity.has<Particle2DComponent>())
+						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<Particle2DComponent>::icon());
 					if (entity.has<HurtComponent>())
 						snprintf(buffer, 256, "%s %s", buffer, ComponentNode<HurtComponent>::icon());
 				}
@@ -758,10 +737,10 @@ void EntityWidget::draw(World& world)
 				if (ImGui::Selectable(buffer, &selected))
 					m_currentEntity = entity;
 				if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
-					ImGui::OpenPopup(u("ClosePopup"));
-				if (ImGui::BeginPopupContextItem(u("ClosePopup")))
+					ImGui::OpenPopup("ClosePopup");
+				if (ImGui::BeginPopupContextItem("ClosePopup"))
 				{
-					if (ImGui::MenuItem(u("Delete entity")))
+					if (ImGui::MenuItem("Delete entity"))
 						m_currentEntity.destroy();
 					ImGui::EndPopup();
 				}
@@ -789,18 +768,18 @@ void EntityWidget::draw(World& world)
 			}
 			else
 			{
-				component<Transform2D>(world, m_currentEntity);
+				component<Transform2DComponent>(world, m_currentEntity);
 				component<SoundInstance>(world, m_currentEntity);
-				component<Collider2D>(world, m_currentEntity);
-				component<RigidBody2D>(world, m_currentEntity);
-				component<Camera2D>(world, m_currentEntity);
-				component<Animator>(world, m_currentEntity);
-				component<TileLayer>(world, m_currentEntity);
-				component<TileMap>(world, m_currentEntity);
-				component<Text>(world, m_currentEntity);
+				component<Collider2DComponent>(world, m_currentEntity);
+				component<RigidBody2DComponent>(world, m_currentEntity);
+				component<Camera2DComponent>(world, m_currentEntity);
+				component<SpriteAnimatorComponent>(world, m_currentEntity);
+				component<TileLayerComponent>(world, m_currentEntity);
+				component<TileMapComponent>(world, m_currentEntity);
+				component<Text2DComponent>(world, m_currentEntity);
 				component<PlayerComponent>(world, m_currentEntity);
 				component<CoinComponent>(world, m_currentEntity);
-				component<Particle2D>(world, m_currentEntity);
+				component<Particle2DComponent>(world, m_currentEntity);
 				component<HurtComponent>(world, m_currentEntity);
 				// Draw an overlay for current entity
 				overlay(world, m_currentEntity);

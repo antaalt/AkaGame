@@ -1,25 +1,8 @@
 #include "GameView.h"
 
 #include "../../Component/Transform2D.h"
-#include "../../Component/Collider2D.h"
 #include "../../Component/Camera2D.h"
-#include "../../Component/Text.h"
-#include "../../Component/TileMap.h"
-#include "../../Component/TileLayer.h"
-#include "../../Component/Player.h"
-#include "../../Component/SoundInstance.h"
-#include "../../Component/Coin.h"
-#include "../../Component/Particle.h"
-#include "../../Component/Hurtable.h"
-#include "../../System/PhysicSystem.h"
-#include "../../System/AnimatorSystem.h"
-#include "../../System/TileMapSystem.h"
-#include "../../System/TileRenderSystem.h"
-#include "../../System/TextRenderSystem.h"
-#include "../../System/CollisionSystem.h"
-#include "../../System/CoinSystem.h"
-#include "../../System/SoundSystem.h"
-#include "../../System/ParticleSystem.h"
+
 #include "EndView.h"
 #include "../OgmoWorld.h"
 #include "../../GUI/EntityWidget.h"
@@ -93,20 +76,18 @@ void GameView::onFrame()
 
 void GameView::onUpdate(Time::Unit deltaTime)
 {
-	// Pause the GameView
-	if (input::down(input::Key::P))
-	{
-		m_paused = !m_paused;
-		if (m_paused)
-			AudioBackend::stop();
-		else
-			AudioBackend::start();
-	}
+	EventDispatcher<PauseGameEvent>::dispatch();
 	// Update the game logic
 	if (!m_paused)
 	{
 		// Update world after moving manually objects
 		m_game.update(deltaTime);
+	}
+	else
+	{
+		Transform2DComponent& t = m_game.camera.entity.get<Transform2DComponent>();
+		t.position.x += (input::pressed(input::Key::ArrowRight) - input::pressed(input::Key::ArrowLeft)) * deltaTime.seconds() * 50;
+		t.position.y += (input::pressed(input::Key::ArrowUp) - input::pressed(input::Key::ArrowDown)) * deltaTime.seconds() * 50;
 	}
 
 	// Reset
@@ -117,11 +98,6 @@ void GameView::onUpdate(Time::Unit deltaTime)
 	}
 	if (input::pressed(input::Key::Escape))
 		EventDispatcher<QuitEvent>::emit(QuitEvent());
-	// Hide the GUI
-	if (!m_gui.focused() && input::down(input::Key::H))
-	{
-		m_gui.setVisible(!m_gui.isVisible());
-	}
 	// Update interface
 	m_gui.update(m_game.world);
 }
@@ -130,8 +106,8 @@ void GameView::onRender()
 {
 	{
 		// Render to framebuffer
-		Transform2D& cameraTransform = m_game.camera.entity.get<Transform2D>();
-		Camera2D& camera = m_game.camera.entity.get<Camera2D>();
+		Transform2DComponent& cameraTransform = m_game.camera.entity.get<Transform2DComponent>();
+		Camera2DComponent& camera = m_game.camera.entity.get<Camera2DComponent>();
 		mat4f view = mat4f::inverse(mat4f::from2D(cameraTransform.model()));
 		mat4f projection = camera.camera.perspective();
 		m_framebuffer->clear(1.f, 0.63f, 0.f, 1.f); 
@@ -157,7 +133,19 @@ void GameView::onResize(uint32_t width, uint32_t height)
 	uint32_t newHeight = Game::resolution.y;
 
 	m_framebuffer->resize(newWidth, newHeight);
-	m_game.camera.entity.get<Camera2D>().camera.viewport = vec2f(newWidth, newHeight);
+	m_game.camera.entity.get<Camera2DComponent>().camera.viewport = vec2f(newWidth, newHeight);
+}
+
+void GameView::onReceive(const PauseGameEvent& event)
+{
+	if (event.pause != m_paused)
+	{
+		m_paused = !m_paused;
+		if (m_paused)
+			AudioBackend::stop();
+		else
+			AudioBackend::start();
+	}
 }
 
 }

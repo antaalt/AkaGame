@@ -2,7 +2,7 @@
 
 #include "../Component/Collider2D.h"
 #include "../Component/Player.h"
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 #include "../Component/Coin.h"
 
 namespace aka {

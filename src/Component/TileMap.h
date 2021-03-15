@@ -6,10 +6,10 @@
 
 namespace aka {
 
-struct TileMap
+struct TileMapComponent
 {
-	TileMap() : TileMap(vec2u(0), vec2u(0), nullptr) {}
-	TileMap(const vec2u& gridCount, const vec2u& gridSize, Texture::Ptr texture) : gridCount(gridCount), gridSize(gridSize), texture(texture) {}
+	TileMapComponent() : TileMapComponent(vec2u(0), vec2u(0), nullptr) {}
+	TileMapComponent(const vec2u& gridCount, const vec2u& gridSize, Texture::Ptr texture) : gridCount(gridCount), gridSize(gridSize), texture(texture) {}
 
 	vec2u gridCount;
 	vec2u gridSize;

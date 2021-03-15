@@ -7,7 +7,7 @@
 #include "../Component/TileLayer.h"
 #include "../Component/Collider2D.h"
 #include "../Component/Camera2D.h"
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 #include "../Component/Coin.h"
 #include "../Component/Text.h"
 #include "../Component/Player.h"
@@ -16,9 +16,9 @@
 #include "../Component/Hurtable.h"
 
 #include "../System/PhysicSystem.h"
-#include "../System/AnimatorSystem.h"
-#include "../System/TileMapSystem.h"
-#include "../System/TileRenderSystem.h"
+#include "../System/SpriteAnimatorSystem.h"
+#include "../System/TileMapRenderSystem.h"
+#include "../System/SpriteRenderSystem.h"
 #include "../System/TextRenderSystem.h"
 #include "../System/CollisionSystem.h"
 #include "../System/CoinSystem.h"
@@ -35,19 +35,19 @@ Entity Game::Factory::player(World& world, const vec2f& position)
 	const Sprite::Frame& frame = playerSprite.getFrame(0, 0);
 
 	Entity e = world.createEntity("Character");
-	e.add<Transform2D>(Transform2D(position, vec2f(1.f), radianf(0)));
-	e.add<Animator>(Animator(&playerSprite, 1));
-	e.add<RigidBody2D>(RigidBody2D(0.2f));
-	e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f((float)frame.width, (float)frame.height), CollisionType::Solid, 0.1f, 0.1f));
+	e.add<Transform2DComponent>(Transform2DComponent(position, vec2f(1.f), radianf(0)));
+	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&playerSprite, 1));
+	e.add<RigidBody2DComponent>(RigidBody2DComponent(0.2f));
+	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f((float)frame.width, (float)frame.height), CollisionType::Solid, 0.1f, 0.1f));
 	e.add<PlayerComponent>(PlayerComponent());
 
-	e.get<Animator>().play("Idle");
+	e.get<SpriteAnimatorComponent>().play("Idle");
 	PlayerComponent& player = e.get<PlayerComponent>();
 	player.jump = input::Key::Space;
 	player.left = input::Key::A;
 	player.right = input::Key::D;
 
-	e.add<Text>(Text(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
+	e.add<Text2DComponent>(Text2DComponent(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
 
 	return e;
 }
@@ -67,9 +67,9 @@ Entity Game::Factory::background(World& world, const vec2f& position, const vec2
 	Sprite& sprite = SpriteManager::create("Background", std::move(s));
 
 	Entity e = world.createEntity("Background");
-	e.add<Transform2D>(Transform2D(Transform2D(position, scale, radianf(0.f))));
-	e.add<Animator>(Animator(&sprite, -2));
-	e.get<Animator>().play("Default");
+	e.add<Transform2DComponent>(Transform2DComponent(Transform2DComponent(position, scale, radianf(0.f))));
+	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&sprite, -2));
+	e.get<SpriteAnimatorComponent>().play("Default");
 	return e;
 }
 
@@ -81,9 +81,9 @@ Entity Game::Factory::wall(World& world, float height)
 	colliderSprite.animations[0].frames[0].width = 1;
 	colliderSprite.animations[0].frames[0].height = 1;
 	Entity e = world.createEntity("DeathWall");
-	e.add<Transform2D>(Transform2D(vec2f(0.f), vec2f(10.f, height), radian(0.f)));
-	e.add<Animator>(Animator(&colliderSprite, 5));
-	e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(1.f), CollisionType::Event, 0.1f, 0.1f));
+	e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(10.f, height), radian(0.f)));
+	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&colliderSprite, 5));
+	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(1.f), CollisionType::Event, 0.1f, 0.1f));
 	e.add<HurtComponent>();
 	return e;
 }
@@ -91,17 +91,17 @@ Entity Game::Factory::wall(World& world, float height)
 Entity Game::Factory::camera(World& world, const vec2f& viewport)
 {
 	Entity e = world.createEntity("Camera");
-	e.add<Transform2D>(Transform2D());
-	e.add<Camera2D>(Camera2D(viewport));
-	e.get<Camera2D>().main = true;
+	e.add<Transform2DComponent>(Transform2DComponent());
+	e.add<Camera2DComponent>(Camera2DComponent(viewport));
+	e.get<Camera2DComponent>().main = true;
 	return e;
 }
 
 Entity Game::Factory::collider(World& world, const vec2f& position, const vec2f& size)
 {
 	Entity e = world.createEntity("Collider");
-	e.add<Transform2D>(Transform2D(position, size, radianf(0.f)));
-	e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f)));
+	e.add<Transform2DComponent>(Transform2DComponent(position, size, radianf(0.f)));
+	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(16.f)));
 	return e;
 }
 
@@ -109,19 +109,19 @@ Entity Game::Factory::coin(World& world, const vec2f& position, const vec2f& siz
 {
 	Sprite& sprite = SpriteManager::get("Coin");
 	Entity e = world.createEntity("Coin");
-	e.add<Transform2D>(Transform2D(position, size, radianf(0)));
-	e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
-	e.add<Animator>(Animator(&sprite, 1));
+	e.add<Transform2DComponent>(Transform2DComponent(position, size, radianf(0)));
+	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
+	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&sprite, 1));
 	e.add<CoinComponent>();
-	e.get<Animator>().play("Idle");
+	e.get<SpriteAnimatorComponent>().play("Idle");
 	return e;
 }
 
 Entity Game::Factory::spike(World& world, const vec2f& position, const vec2f& size)
 {
 	Entity e = world.createEntity("Spike");
-	e.add<Transform2D>(Transform2D(position, size, radianf(0)));
-	e.add<Collider2D>(Collider2D(vec2f(0.f), vec2f(1.f), CollisionType::Event));
+	e.add<Transform2DComponent>(Transform2DComponent(position, size, radianf(0)));
+	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(1.f), CollisionType::Event));
 	e.add<HurtComponent>();
 	return e;
 }
@@ -129,9 +129,9 @@ Entity Game::Factory::spike(World& world, const vec2f& position, const vec2f& si
 Entity Game::Factory::layer(World& world, const vec2f& position, const vec2u& tileCount, const vec2u& atlasTileCount, const vec2u& tileSize, Texture::Ptr atlas, const std::vector<int>& data, int32_t layer)
 {
 	Entity entity = world.createEntity("Layer");
-	entity.add<Transform2D>(Transform2D(vec2f(0.f), vec2f(1.f), radianf(0.f)));
-	entity.add<TileMap>(TileMap(atlasTileCount, tileSize, atlas));
-	entity.add<TileLayer>(TileLayer(position, tileCount, tileSize, color4f(1.f), data, layer));
+	entity.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(1.f), radianf(0.f)));
+	entity.add<TileMapComponent>(TileMapComponent(atlasTileCount, tileSize, atlas));
+	entity.add<TileLayerComponent>(TileLayerComponent(position, tileCount, tileSize, color4f(1.f), data, layer));
 	return entity;
 }
 
@@ -139,20 +139,20 @@ Entity Game::Factory::leave(World& world, const vec2f& pos, const vec2f& size, c
 {
 	Entity e = world.createEntity("Particle");
 	// Generate random coordinates / rotation in level space ?
-	e.add<Transform2D>(Transform2D(
+	e.add<Transform2DComponent>(Transform2DComponent(
 		vec2f((float)pos.x + random<float>(0.f, (float)size.x), (float)pos.y + random<float>(0.f, (float)size.y)),
 		vec2f(3.f),
 		radianf(random<float>(0.f, 2.f * pi<float>()))
 	));
-	e.add<Particle2D>(Particle2D{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), radianf(0.f), vec2f(0.f), color, 10 });
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), radianf(0.f), vec2f(0.f), color, 10 });
 	return e;
 }
 
-void Game::Level::load(const String& levelName, World& world)
+void Game::Level::load(ID levelID, World& world)
 {
 	// Load Ogmo level
 	OgmoWorld ogmoWorld = OgmoWorld::load(Asset::path("levels/world.ogmo"));
-	OgmoLevel ogmoLevel = OgmoLevel::load(ogmoWorld, Asset::path("levels/" + levelName + ".json"));
+	OgmoLevel ogmoLevel = OgmoLevel::load(ogmoWorld, Asset::path("levels/" + String::format("level%u", levelID.value()) + ".json"));
 
 	// Size
 	this->offset = vec2f(ogmoLevel.offset);
@@ -161,8 +161,8 @@ void Game::Level::load(const String& levelName, World& world)
 	// Layers
 	std::map<std::string, Texture::Ptr> atlas;
 	auto createTileLayer = [&](const OgmoLevel::Layer* ogmoLayer, int32_t layerDepth) -> Entity {
-		ASSERT(ogmoLayer->layer->type == OgmoWorld::LayerType::Tile, "");
-		ASSERT(ogmoLayer->tileset->tileSize == ogmoLayer->gridCellSize, "");
+		AKA_ASSERT(ogmoLayer->layer->type == OgmoWorld::LayerType::Tile, "");
+		AKA_ASSERT(ogmoLayer->tileset->tileSize == ogmoLayer->gridCellSize, "");
 		Texture::Ptr texture;
 		auto it = atlas.find(ogmoLayer->tileset->name);
 		if (it == atlas.end())
@@ -286,9 +286,9 @@ void Game::initialize(uint32_t width, uint32_t height)
 	// INIT SYSTEMS
 	world.attach<PhysicSystem>();
 	world.attach<CollisionSystem>();
-	world.attach<TileSystem>();
-	world.attach<TileMapSystem>();
-	world.attach<AnimatorSystem>();
+	world.attach<SpriteRenderSystem>();
+	world.attach<TileMapRenderSystem>();
+	world.attach<SpriteAnimatorSystem>();
 	world.attach<TextRenderSystem>();
 	world.attach<CoinSystem>(world);
 	world.attach<SoundSystem>();
@@ -309,13 +309,34 @@ void Game::initialize(uint32_t width, uint32_t height)
 
 void Game::destroy()
 {
+	EventDispatcher<PlayerDeathEvent>::clear();
 	world.destroy();
 }
 
 void Game::update(Time::Unit deltaTime)
 {
 	EventDispatcher<PlayerDeathEvent>::dispatch();
-	if (!transition.active)
+	if (deathAnimation)
+	{
+		const Time::Unit duration = Time::Unit::milliseconds(500);
+		Time::Unit now = Time::now();
+		Time::Unit elapsed = now - deathAnimationStart;
+		if (elapsed > duration)
+		{
+			Transform2DComponent& transform = player.entity.get<Transform2DComponent>();
+			transform.position = currentLevel->spawn;
+			wall.entity.get<Transform2DComponent>().size.x = currentLevel->offset.x - 50.f;
+			deathAnimation = false;
+			// Animation finished
+		}
+		else
+		{
+			// Shake screen
+			Transform2DComponent& t = camera.entity.get<Transform2DComponent>();
+			t.position.y = deathAnimationPos.y + cos(radian(now.seconds() * 2.f * pi<float>() * 10.f)) * 2.f;
+		}
+	}
+	else if (!transition.active)
 	{
 		// Only update world when not transitioning
 		world.update(deltaTime);
@@ -325,14 +346,12 @@ void Game::update(Time::Unit deltaTime)
 		camera.track(*currentLevel, player);
 
 		// Move death wall
-		float dist = player.entity.get<Transform2D>().position.x - wall.entity.get<Transform2D>().size.x;
-		float speed = max(deltaTime.seconds() * dist, deltaTime.seconds() * 16 * 2);
-		wall.entity.get<Transform2D>().size.x += speed;
+		wall.update(deltaTime, player);
 
 		// Check player position against level bounds
 		PlayerComponent& playerComponent = player.entity.get<PlayerComponent>();
-		Transform2D& transformComponent = player.entity.get<Transform2D>();
-		Collider2D& colliderComponent = player.entity.get<Collider2D>();
+		Transform2DComponent& transformComponent = player.entity.get<Transform2DComponent>();
+		Collider2DComponent& colliderComponent = player.entity.get<Collider2DComponent>();
 
 		vec2f pos = transformComponent.model().multiplyPoint(colliderComponent.position);
 		vec2f size = transformComponent.model().multiplyVector(colliderComponent.size);
@@ -341,7 +360,7 @@ void Game::update(Time::Unit deltaTime)
 		if (pos.x + size.x > currentLevel->size.x + currentLevel->offset.x)
 		{
 			offset = 1;
-			transition.startPosition = camera.entity.get<Transform2D>().position;
+			transition.startPosition = camera.entity.get<Transform2DComponent>().position;
 			transition.endPosition = vec2f(
 				(float)(currentLevel->size.x + currentLevel->offset.x),
 				transition.startPosition.y
@@ -351,9 +370,9 @@ void Game::update(Time::Unit deltaTime)
 		else if (pos.x + size.x < currentLevel->offset.x)
 		{
 			offset = -1;
-			transition.startPosition = camera.entity.get<Transform2D>().position;
+			transition.startPosition = camera.entity.get<Transform2DComponent>().position;
 			transition.endPosition = vec2f(
-				(float)(currentLevel->offset.x - camera.entity.get<Camera2D>().camera.viewport.x),
+				(float)(currentLevel->offset.x - camera.entity.get<Camera2DComponent>().camera.viewport.x),
 				transition.startPosition.y
 			);
 			Logger::info("Previous level");
@@ -361,7 +380,7 @@ void Game::update(Time::Unit deltaTime)
 		else if (pos.y + size.y > currentLevel->size.y + currentLevel->offset.y)
 		{
 			offset = 1;
-			transition.startPosition = camera.entity.get<Transform2D>().position;
+			transition.startPosition = camera.entity.get<Transform2DComponent>().position;
 			transition.endPosition = vec2f(
 				transition.startPosition.x,
 				(float)(currentLevel->size.y + currentLevel->offset.y)
@@ -371,10 +390,10 @@ void Game::update(Time::Unit deltaTime)
 		else if (pos.y + size.y < currentLevel->offset.y)
 		{
 			offset = -1;
-			transition.startPosition = camera.entity.get<Transform2D>().position;
+			transition.startPosition = camera.entity.get<Transform2DComponent>().position;
 			transition.endPosition = vec2f(
 				transition.startPosition.x,
-				(float)(currentLevel->offset.y - camera.entity.get<Camera2D>().camera.viewport.y)
+				(float)(currentLevel->offset.y - camera.entity.get<Camera2DComponent>().camera.viewport.y)
 			);
 			Logger::info("Previous level");
 		}
@@ -399,7 +418,7 @@ void Game::update(Time::Unit deltaTime)
 		else
 		{
 			// Manage camera position
-			camera.entity.get<Transform2D>().position = lerp(transition.startPosition, transition.endPosition, t);
+			camera.entity.get<Transform2DComponent>().position = lerp(transition.startPosition, transition.endPosition, t);
 		}
 	}
 }
@@ -413,18 +432,17 @@ void Game::onReceive(const PlayerDeathEvent& event)
 {
 	// TODO launch an animation and wait for the end.
 	// Remove the rigid body component, launch animation
-	// (player die and whole background become black. then restart.
+	// (player die and whole background become black. then restart.)
 	// Restart 
-	Transform2D& transform = player.entity.get<Transform2D>();
-	transform.position = currentLevel->spawn;
-	wall.entity.get<Transform2D>().size.x = currentLevel->offset.x - 50.f;
+	deathAnimation = true;
+	deathAnimationStart = Time::now();
+	deathAnimationPos = camera.entity.get<Transform2DComponent>().position;
 }
 
 void Game::load(Level::ID levelID)
 {
-	String newLevelName = String::format("level%u", levelID.value());
 	Level level;
-	level.load(newLevelName, world);
+	level.load(levelID, world);
 	auto it = levels.insert(std::make_pair(levelID, level));
 	if (!it.second)
 		throw std::runtime_error("Failed to add level");
@@ -441,14 +459,24 @@ void Game::destroy(Level::ID level)
 	levels.erase(it);
 }
 
+void Game::save(const Path& path)
+{
+	// Only save current level ?
+	// And which coins where picked
+}
+
+void Game::load(const Path& path)
+{
+}
+
 void Game::Camera::track(const Level& level, const Player& player)
 {
-	Transform2D& cameraTransformComponent = entity.get<Transform2D>();
-	Camera2D& cameraComponent = entity.get<Camera2D>();
+	Transform2DComponent& cameraTransformComponent = entity.get<Transform2DComponent>();
+	Camera2DComponent& cameraComponent = entity.get<Camera2DComponent>();
 	CameraOrthographic& camera = cameraComponent.camera;
 	// Track the player
 	PlayerComponent& playerComponent = player.entity.get<PlayerComponent>();
-	Transform2D& playerTransformComponent = player.entity.get<Transform2D>();
+	Transform2DComponent& playerTransformComponent = player.entity.get<Transform2DComponent>();
 
 	const float hThreshold = 0.4f * camera.viewport.x;
 	const float vThreshold = 0.4f * camera.viewport.y;
@@ -497,36 +525,36 @@ Game::Player::Player(World& world) :
 {
 }
 
-void emitJumpParticles(Transform2D& transform, float velocity, World& world)
+void emitJumpParticles(Transform2DComponent& transform, float velocity, World& world)
 {
 	color4f color = color4f(0.8f);
 	Time::Unit duration = Time::Unit::milliseconds(500);
 	Entity e = world.createEntity("Particle");
-	e.add<Transform2D>(Transform2D(transform.position, vec2f(4.f), radianf(0.f)));
-	e.add<Particle2D>(Particle2D{ Time::now(), duration, vec2f::normalize(vec2f(0.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), radianf(0.f)));
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(0.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
 
 	e = world.createEntity("Particle");
-	e.add<Transform2D>(Transform2D(transform.position, vec2f(4.f), radianf(0.f)));
-	e.add<Particle2D>(Particle2D{ Time::now(), duration, vec2f::normalize(vec2f(1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), radianf(0.f)));
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
 
 	e = world.createEntity("Particle");
-	e.add<Transform2D>(Transform2D(transform.position, vec2f(4.f), radianf(0.f)));
-	e.add<Particle2D>(Particle2D{ Time::now(), duration, vec2f::normalize(vec2f(-1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), radianf(0.f)));
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(-1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
 }
 
 void Game::Player::update(World& world, Time::Unit deltaTime)
 {
 	PlayerComponent& player = entity.get<PlayerComponent>();
-	Animator& animator = entity.get<Animator>();
-	RigidBody2D& rigid = entity.get<RigidBody2D>();
-	Transform2D& transform = entity.get<Transform2D>();
+	SpriteAnimatorComponent& animator = entity.get<SpriteAnimatorComponent>();
+	RigidBody2DComponent& rigid = entity.get<RigidBody2DComponent>();
+	Transform2DComponent& transform = entity.get<Transform2DComponent>();
 
 	// Run
 	const float runSpeed = player.speed;
 	const float runFriction = 30.f;
 	// Jump
 	const float initialJumpVelocity = 16.f;
-	const float initialDoubleJumpVelocity = 12.f;
+	const float initialDoubleJumpVelocity = 5.f;
 	const float jumpLateralAcceleration = 20.f;
 	const float jumpLateralFriction = 10.f;
 	const float maxJumpLateralAcceleration = 10.f;
@@ -574,9 +602,12 @@ void Game::Player::update(World& world, Time::Unit deltaTime)
 			}
 			emitJumpParticles(transform, initialJumpVelocity, world);
 		}
+		const float limit = 10.f;
+		transform.size.y = (clamp(rigid.velocity.y, -limit, limit) / limit) * -0.3f + 1.f; // [0.7, 1.3]
 	}
 	else
 	{
+		transform.size.y = 1.f;
 		if (input::pressed(player.left))
 		{
 			if (input::down(player.left))
@@ -631,10 +662,10 @@ void Game::Player::receive(const CollisionEvent& event)
 		{
 			coin.picked = true;
 			player.coin++;
-			if (staticEntity.has<Animator>())
-				staticEntity.get<Animator>().play("Picked");
-			if (playerEntity.has<Text>())
-				playerEntity.get<Text>().text = std::to_string(player.coin);
+			if (staticEntity.has<SpriteAnimatorComponent>())
+				staticEntity.get<SpriteAnimatorComponent>().play("Picked");
+			if (playerEntity.has<Text2DComponent>())
+				playerEntity.get<Text2DComponent>().text = std::to_string(player.coin);
 		}
 	}
 	else if (staticEntity.has<HurtComponent>())
@@ -646,6 +677,13 @@ void Game::Player::receive(const CollisionEvent& event)
 		player.state = PlayerComponent::State::Idle;
 		//playerEntity.get<Animator>().play("Idle");
 	}
+}
+
+void Game::DeathWall::update(Time::Unit deltaTime, Player& player)
+{
+	float dist = player.entity.get<Transform2DComponent>().position.x - entity.get<Transform2DComponent>().size.x;
+	float speed = max(deltaTime.seconds() * dist, deltaTime.seconds() * 16 * 2);
+	entity.get<Transform2DComponent>().size.x += speed;
 }
 
 };

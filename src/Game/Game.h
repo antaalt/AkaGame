@@ -36,6 +36,7 @@ struct Game :
 	struct DeathWall
 	{
 		Entity entity;
+		void update(Time::Unit deltaTime, Player& player);
 	};
 
 	struct Camera
@@ -47,7 +48,7 @@ struct Game :
 	struct Level
 	{
 		using ID = StrictType<uint32_t, struct LevelTagName>;
-		void load(const String& level, World& world);
+		void load(ID levelID, World& world);
 		void destroy();
 
 		vec2f spawn;
@@ -83,13 +84,24 @@ struct Game :
 	};
 
 	Game();
+	// Init the game
 	void initialize(uint32_t width, uint32_t height);
+	// Destroy the game
 	void destroy();
+	// Update the game logic
 	void update(Time::Unit deltaTime);
+	// Draw the game logic
 	void draw(Batch& batch);
+	// Receive player death events
 	void onReceive(const PlayerDeathEvent& event) override;
+	// Load a level, store it and make it current.
 	void load(Level::ID level);
+	// Destroy a level.
 	void destroy(Level::ID level);
+	// Save progress
+	void save(const Path& path);
+	// Load progress save
+	void load(const Path& path);
 
 	// Resources
 	/*std::map<String, Texture::Ptr> textures;
@@ -97,6 +109,9 @@ struct Game :
 	std::map<String, Sprite> sprites;*/
 	// Level
 	World world;
+	bool deathAnimation = false;
+	Time::Unit deathAnimationStart;
+	vec2f deathAnimationPos;
 	Transition transition;
 	Level* currentLevel;
 	Level::ID currentLevelID;

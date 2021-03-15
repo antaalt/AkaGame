@@ -1,15 +1,15 @@
-#include "Animator.h"
+#include "SpriteAnimator.h"
 
 #include <Aka/Core/Debug.h>
 
 namespace aka {
 
-Animator::Animator() :
-    Animator(nullptr, 0)
+SpriteAnimatorComponent::SpriteAnimatorComponent() :
+    SpriteAnimatorComponent(nullptr, 0)
 {
 }
 
-Animator::Animator(Sprite* sprite, int32_t layer) :
+SpriteAnimatorComponent::SpriteAnimatorComponent(Sprite* sprite, int32_t layer) :
     sprite(sprite),
     currentAnimation(0),
     currentFrame(0),
@@ -21,27 +21,27 @@ Animator::Animator(Sprite* sprite, int32_t layer) :
 {
 }
 
-const Sprite::Animation& Animator::getCurrentSpriteAnimation() const
+const Sprite::Animation& SpriteAnimatorComponent::getCurrentSpriteAnimation() const
 {
 	return sprite->animations[currentAnimation];
 }
 
-const Sprite::Frame& Animator::getCurrentSpriteFrame() const
+const Sprite::Frame& SpriteAnimatorComponent::getCurrentSpriteFrame() const
 {
     return sprite->getFrame(currentAnimation, currentFrame);
 }
 
-void Animator::play(const String& animation)
+void SpriteAnimatorComponent::play(const String& animation)
 {
     Sprite::Animation* a = sprite->getAnimation(animation);
-    ASSERT(a != nullptr, "No valid animation");
+	AKA_ASSERT(a != nullptr, "No valid animation");
     currentAnimation = static_cast<uint32_t>(a - sprite->animations.data());
     currentFrame = 0;
     animationTimer = Time::Unit();
     currentAnimationDuration = a->duration();
 }
 
-void Animator::update()
+void SpriteAnimatorComponent::update()
 {
     animationTimer = Time::Unit();
     currentAnimationDuration = sprite->animations[currentAnimation].duration();

@@ -1,15 +1,15 @@
-#include "AnimatorSystem.h"
+#include "SpriteAnimatorSystem.h"
 
 #include <Aka/Scene/World.h>
 
 namespace aka {
 
-void AnimatorSystem::update(World& world, Time::Unit deltaTime)
+void SpriteAnimatorSystem::update(World& world, Time::Unit deltaTime)
 {
-    auto view = world.registry().view<Animator>();
+    auto view = world.registry().view<SpriteAnimatorComponent>();
     for(entt::entity entity : view)
     {
-        Animator& animator = world.registry().get<Animator>(entity);
+		SpriteAnimatorComponent& animator = world.registry().get<SpriteAnimatorComponent>(entity);
         Time::Unit zero = Time::Unit();
         if (animator.currentAnimationDuration > zero && animator.sprite != nullptr)
         {
@@ -17,7 +17,7 @@ void AnimatorSystem::update(World& world, Time::Unit deltaTime)
             animator.animationTimer = (animator.animationTimer + deltaTime);
             if (animator.animationTimer >= animator.currentAnimationDuration)
             {
-                world.emit<AnimationFinishedEvent>(AnimationFinishedEvent(Entity(entity, &world)));
+                world.emit<SpriteAnimationFinishedEvent>(SpriteAnimationFinishedEvent(Entity(entity, &world)));
                 animator.animationTimer = animator.animationTimer % animator.currentAnimationDuration;
             }
             uint32_t frameID = 0;

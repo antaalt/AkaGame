@@ -5,14 +5,14 @@
 
 namespace aka {
 
-class AnimatorSystem;
+class SpriteAnimatorSystem;
 
-struct Animator
+struct SpriteAnimatorComponent
 {
-	friend AnimatorSystem;
+	friend class SpriteAnimatorSystem;
 
-	Animator();
-	Animator(Sprite* sprite, int32_t layer);
+	SpriteAnimatorComponent();
+	SpriteAnimatorComponent(Sprite* sprite, int32_t layer);
 
 	Sprite* sprite;
 	uint32_t currentAnimation;

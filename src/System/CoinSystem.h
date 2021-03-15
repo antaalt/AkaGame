@@ -1,15 +1,15 @@
 #pragma once
 #include <Aka/Scene/System.h>
-#include "../Component/Animator.h"
-#include "../System/AnimatorSystem.h"
+#include "../Component/SpriteAnimator.h"
+#include "../System/SpriteAnimatorSystem.h"
 
 namespace aka {
 
-class CoinSystem : public System, WorldEventListener<AnimationFinishedEvent>
+class CoinSystem : public System, WorldEventListener<SpriteAnimationFinishedEvent>
 {
 public:
 	CoinSystem(World& world);
-	void receive(const AnimationFinishedEvent& event) override;
+	void receive(const SpriteAnimationFinishedEvent& event) override;
 };
 
 

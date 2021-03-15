@@ -5,7 +5,7 @@
 
 namespace aka {
 
-struct Particle2D {
+struct Particle2DComponent {
 	// Shape
 	// velocity
 	Time::Unit birthTime = Time::zero();

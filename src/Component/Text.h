@@ -6,10 +6,10 @@
 
 namespace aka {
 
-struct Text
+struct Text2DComponent
 {
-	Text() : Text(vec2f(0.f), nullptr, "", color4f(1.f), 0) {}
-	Text(const vec2f &offset, Font* font, const std::string& text, const color4f& color, int32_t layer) :
+	Text2DComponent() : Text2DComponent(vec2f(0.f), nullptr, "", color4f(1.f), 0) {}
+	Text2DComponent(const vec2f &offset, Font* font, const std::string& text, const color4f& color, int32_t layer) :
 		offset(offset), font(font), text(text), color(color), layer(layer) {}
 
 	vec2f offset;

@@ -49,8 +49,8 @@ void EditorUI::initialize()
         io.FontDefault = io.Fonts->AddFontFromFileTTF(assetDefault.cstr(), 18.0f);
         ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.cstr(), 13.0f, &config, icon_ranges);
         ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.cstr(), 13.0f, &config, icon_ranges);
-        ASSERT(iconFont != nullptr, "Icon font not loaded");
-        ASSERT(iconFont2 != nullptr, "Icon font not loaded");
+		AKA_ASSERT(iconFont != nullptr, "Icon font not loaded");
+		AKA_ASSERT(iconFont2 != nullptr, "Icon font not loaded");
 
         // --- Style
 		ImGui::StyleColorsClassic();
@@ -156,6 +156,9 @@ void EditorUI::destroy()
 
 void EditorUI::update(World& world) 
 {
+	const ImGuiIO& io = ImGui::GetIO(); 
+	if (!io.WantCaptureMouse && input::down(input::Key::H))
+		m_visible = !m_visible;
 	for (Widget* widget : m_widgets)
 		widget->update(world);
 }

@@ -1,23 +1,23 @@
-#include "TileMapSystem.h"
+#include "TileMapRenderSystem.h"
 
 #include <Aka/OS/FileSystem.h>
 #include <Aka/Scene/World.h>
 #include "../Component/Camera2D.h"
 #include "../Component/Transform2D.h"
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 #include "../Component/TileMap.h"
 #include "../Component/TileLayer.h"
 
 namespace aka {
 
-void TileMapSystem::draw(World& world, Batch& batch)
+void TileMapRenderSystem::draw(World& world, Batch& batch)
 {
-    auto view = world.registry().view<Transform2D, TileMap, TileLayer>();
-    view.each([&batch](Transform2D& transform, TileMap& atlas, TileLayer& layer)
+    auto view = world.registry().view<Transform2DComponent, TileMapComponent, TileLayerComponent>();
+    view.each([&batch](Transform2DComponent& transform, TileMapComponent& atlas, TileLayerComponent& layer)
     {
         if (atlas.texture == nullptr)
             return;
-        ASSERT(layer.gridSize == atlas.gridSize, "");
+		AKA_ASSERT(layer.gridSize == atlas.gridSize, "");
         for (size_t i = 0; i < layer.tileID.size(); i++)
         {
             // Ogmo tileID is top left to bottom while opengl projection is bottom to top.

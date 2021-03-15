@@ -25,7 +25,7 @@ void MenuView::onCreate()
 		Image img = Image::load(Asset::path("textures/background/background.png"));
 
 		Entity e = m_world.createEntity("Background");
-		e.add<Transform2D>(Transform2D(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), radianf(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), radianf(0.f)));
 		e.add<UIImageComponent>(UIImageComponent());
 		UIImageComponent& image = e.get<UIImageComponent>();
 		image.texture = Texture::create(img.width, img.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{});
@@ -38,7 +38,7 @@ void MenuView::onCreate()
 		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
 
 		Entity e = m_world.createEntity("StartButton");
-		e.add<Transform2D>(Transform2D(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), radianf(0.f)));
 		e.add<UIButtonComponent>(UIButtonComponent{
 			font,
 			text,
@@ -61,8 +61,8 @@ void MenuView::onCreate()
 		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
 
 		Entity e = m_world.createEntity("ConfigButton");
-		e.add<Transform2D>(Transform2D(center - s / 2.f, vec2f(1.f), radianf(0.f)));
-		e.get<Transform2D>().position.y -= 60.f;
+		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.get<Transform2DComponent>().position.y -= 60.f;
 		e.add<UIButtonComponent>(UIButtonComponent{
 			font,
 			text,
@@ -84,8 +84,8 @@ void MenuView::onCreate()
 		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
 
 		Entity e = m_world.createEntity("QuitButton");
-		e.add<Transform2D>(Transform2D(center - s / 2.f, vec2f(1.f), radianf(0.f)));
-		e.get<Transform2D>().position.y -= 120.f;
+		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.get<Transform2DComponent>().position.y -= 120.f;
 		e.add<UIButtonComponent>(UIButtonComponent{
 			font,
 			text,
@@ -142,8 +142,8 @@ void MenuView::onResize(uint32_t width, uint32_t height)
 
 void UISystem::update(World& world, Time::Unit deltaTime)
 {
-	auto viewButton = world.registry().view<Transform2D, UIButtonComponent>();
-	viewButton.each([](Transform2D& transform, UIButtonComponent& button) {
+	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
+	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {
 		vec2f s = vec2f(button.font->size(button.text));
 		const input::Position& mouse = input::mouse();
 		// Hovered
@@ -164,8 +164,8 @@ void UISystem::update(World& world, Time::Unit deltaTime)
 
 void UISystem::draw(World& world, Batch& batch)
 {
-	auto viewButton = world.registry().view<Transform2D, UIButtonComponent>();
-	viewButton.each([&](Transform2D& transform, UIButtonComponent& button) {
+	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
+	viewButton.each([&](Transform2DComponent& transform, UIButtonComponent& button) {
 		vec2f s = vec2f(button.font->size(button.text));
 
 		mat3f backgroundTransform = transform.model() * mat3f::scale(vec2f(s.x + 2 * button.padding, s.y + 2 * button.padding));
@@ -175,8 +175,8 @@ void UISystem::draw(World& world, Batch& batch)
 		batch.draw(textTransform, Batch::Text(button.text, button.font, button.colorText, button.layer + 1));
 	});
 
-	auto viewImage = world.registry().view<Transform2D, UIImageComponent>();
-	viewImage.each([&](Transform2D& transform, UIImageComponent& image) {
+	auto viewImage = world.registry().view<Transform2DComponent, UIImageComponent>();
+	viewImage.each([&](Transform2DComponent& transform, UIImageComponent& image) {
 		batch.draw(transform.model(), Batch::Rect(vec2f(0.f), vec2f(1.f), image.texture, image.layer));
 	});
 }

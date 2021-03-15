@@ -14,16 +14,16 @@ void PhysicSystem::update(World& world, Time::Unit deltaTime)
 {
 	const vec2f force = vec2f(0.f, -9.81f) + vec2f(0.f, 2.f); // gravity + air resistance
 	float dt = deltaTime.seconds();
-	auto view = world.registry().view<RigidBody2D>();
-	view.each([dt, force](RigidBody2D& rigid) {
+	auto view = world.registry().view<RigidBody2DComponent>();
+	view.each([dt, force](RigidBody2DComponent& rigid) {
 		rigid.acceleration = (force / rigid.mass); // F=ma, acceleration is in m/s^2
 		rigid.velocity += rigid.acceleration * dt; // m/s
 		rigid.velocity.x = clamp(rigid.velocity.x, -maxVelocity.x, maxVelocity.x);
 		rigid.velocity.y = clamp(rigid.velocity.y, -maxVelocity.y, maxVelocity.y);
 	});
 	// Move all rigid body.
-	auto viewTransform = world.registry().view<RigidBody2D, Transform2D>();
-	viewTransform.each([dt](RigidBody2D& rigid, Transform2D& transform) {
+	auto viewTransform = world.registry().view<RigidBody2DComponent, Transform2DComponent>();
+	viewTransform.each([dt](RigidBody2DComponent& rigid, Transform2DComponent& transform) {
 		transform.position += rigid.velocity * dt * 16.f; // scale by 16 as 16 is ~ 1m in game unit
 	});
 }

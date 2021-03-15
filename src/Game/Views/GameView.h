@@ -9,7 +9,11 @@
 
 namespace aka {
 
-class GameView : public View
+struct PauseGameEvent {
+	bool pause = false;
+};
+
+class GameView : public View, EventListener<PauseGameEvent>
 {
 public:
 	GameView();
@@ -19,6 +23,7 @@ public:
 	void onUpdate(Time::Unit deltaTime) override;
 	void onRender() override;
 	void onResize(uint32_t width, uint32_t height) override;
+	void onReceive(const PauseGameEvent& event) override;
 private:
 	EditorUI m_gui;
 	// Rendering

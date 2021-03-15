@@ -1,17 +1,17 @@
-#include "TileRenderSystem.h"
+#include "SpriteRenderSystem.h"
 
 #include <Aka/OS/FileSystem.h>
 #include <Aka/Scene/World.h>
 #include "../Component/Camera2D.h"
 #include "../Component/Transform2D.h"
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 
 namespace aka {
 
-void TileSystem::draw(World& world, Batch &batch)
+void SpriteRenderSystem::draw(World& world, Batch &batch)
 {
-    auto view = world.registry().view<Animator, Transform2D>();
-    view.each([&batch](Animator& animator, Transform2D& transform)
+    auto view = world.registry().view<SpriteAnimatorComponent, Transform2DComponent>();
+    view.each([&batch](SpriteAnimatorComponent& animator, Transform2DComponent& transform)
     {
         uv2f uv0 = uv2f(0.f);
         uv2f uv1 = uv2f(1.f);

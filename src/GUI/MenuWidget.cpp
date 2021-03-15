@@ -13,7 +13,7 @@ void MenuWidget::update(World &world)
 	// Screenshot
 	if (input::down(input::Key::F1))
 	{
-		GraphicBackend::screenshot("./output.jpg");
+		GraphicBackend::screenshot("./output.png");
 		Logger::info("Screenshot taken.");
 	}
 	if (input::down(input::Key::F2))
@@ -28,21 +28,23 @@ void MenuWidget::update(World &world)
 		PlatformBackend::setFullscreen(m_fullscreen);
 		Logger::info("Fullscreen ", m_fullscreen ? "enabled" : "disabled");
 	}
+	// Pause the GameView
+	if (input::down(input::Key::P))
+	{
+		EventDispatcher<PauseGameEvent>::emit(PauseGameEvent{ !m_pause });
+	}
 }
 
 void MenuWidget::draw(World& world)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
+		// Edit
         if (ImGui::BeginMenu("Edit"))
         {
             if (ImGui::MenuItem("Load"))
             {
 				// TODO load a scene
-            }
-            if (ImGui::MenuItem("Quit"))
-            {
-				// TODO emit quit event
             }
 			if (ImGui::MenuItem("Screenshot", "F1"))
 			{
@@ -64,18 +66,26 @@ void MenuWidget::draw(World& world)
 				}
                 ImGui::EndMenu();
             }
+			ImGui::Separator();
+			if (ImGui::MenuItem("Quit"))
+			{
+				EventDispatcher<QuitEvent>::emit();
+				Logger::info("Quitting app.");
+			}
             ImGui::EndMenu();
         }
-        if (ImGui::MenuItem("Play"))
+		// Play
+        if (ImGui::MenuItem(m_pause ? "Play" : "Pause", "P"))
         {
-            // pause update
-        }
-        ImGui::Separator();
-        if (ImGui::MenuItem("Another"))
-        {
+			EventDispatcher<PauseGameEvent>::emit(PauseGameEvent{ !m_pause });
         }
 		ImGui::EndMainMenuBar();
 	}
+}
+
+void MenuWidget::onReceive(const PauseGameEvent& event)
+{
+	m_pause = event.pause;
 }
 
 };

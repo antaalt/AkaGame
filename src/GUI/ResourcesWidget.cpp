@@ -1,6 +1,6 @@
 #include "ResourcesWidget.h"
 
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 #include "Modal.h"
 
 namespace aka {
@@ -176,8 +176,8 @@ void ResourcesWidget::draw(World& world)
 											if (ImGui::SliderInt("Duration", &d, 0, 1000))
 											{
 												frame.duration = Time::Unit::milliseconds(d);
-												auto view = world.registry().view<Animator>();
-												view.each([sprite](Animator& animator) {
+												auto view = world.registry().view<SpriteAnimatorComponent>();
+												view.each([sprite](SpriteAnimatorComponent& animator) {
 													// Reset current frame duration stored in animator
 													if (animator.sprite == sprite)
 														animator.update();

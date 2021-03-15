@@ -3,7 +3,6 @@
 #include <Aka/Aka.h>
 
 #include "../Resources.h"
-#include "../Level.h"
 
 namespace aka {
 

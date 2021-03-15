@@ -19,13 +19,13 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 {
 	float dt = deltaTime.seconds();
 
-	auto viewDynamic = world.registry().view<RigidBody2D, Transform2D, Collider2D>();
-	auto viewStatic = world.registry().view<Transform2D, Collider2D>();
+	auto viewDynamic = world.registry().view<RigidBody2DComponent, Transform2DComponent, Collider2DComponent>();
+	auto viewStatic = world.registry().view<Transform2DComponent, Collider2DComponent>();
 	for (entt::entity entityDynamic : viewDynamic)
 	{
-		Transform2D& transformDynamic = world.registry().get<Transform2D>(entityDynamic);
-		RigidBody2D& rigidBodyDynamic = world.registry().get<RigidBody2D>(entityDynamic);
-		Collider2D& colliderDynamic = world.registry().get<Collider2D>(entityDynamic);
+		Transform2DComponent& transformDynamic = world.registry().get<Transform2DComponent>(entityDynamic);
+		RigidBody2DComponent& rigidBodyDynamic = world.registry().get<RigidBody2DComponent>(entityDynamic);
+		Collider2DComponent& colliderDynamic = world.registry().get<Collider2DComponent>(entityDynamic);
 
 		AABB2D rectDynamic;
 		rectDynamic.min = transformDynamic.model().multiplyPoint(colliderDynamic.position);
@@ -33,8 +33,8 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 
 		for (entt::entity entityStatic : viewStatic)
 		{
-			Transform2D& transformStatic = world.registry().get<Transform2D>(entityStatic);
-			Collider2D& colliderStatic = world.registry().get<Collider2D>(entityStatic);
+			Transform2DComponent& transformStatic = world.registry().get<Transform2DComponent>(entityStatic);
+			Collider2DComponent& colliderStatic = world.registry().get<Collider2DComponent>(entityStatic);
 
 			// Skip self intersection
 			if (entityDynamic == entityStatic)
@@ -90,8 +90,8 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 					// Change the velocity of shape a
 					rigidBodyDynamic.acceleration = vec2f(0);
 					rigidBodyDynamic.velocity = rigidBodyDynamic.velocity - p * r + t * f;
-					if (world.registry().has<RigidBody2D>(entityStatic)) {
-						RigidBody2D& otherRigid = world.registry().get<RigidBody2D>(entityStatic);
+					if (world.registry().has<RigidBody2DComponent>(entityStatic)) {
+						RigidBody2DComponent& otherRigid = world.registry().get<RigidBody2DComponent>(entityStatic);
 						otherRigid.acceleration = vec2f(0.f);
 						otherRigid.velocity = otherRigid.velocity + (p * r + t * f);
 					}

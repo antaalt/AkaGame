@@ -3,16 +3,16 @@
 #include <Aka/Scene/World.h>
 #include <Aka/OS/Logger.h>
 #include "../Component/Coin.h"
-#include "../Component/Animator.h"
+#include "../Component/SpriteAnimator.h"
 
 namespace aka {
 
 CoinSystem::CoinSystem(World& world) :
-	WorldEventListener<AnimationFinishedEvent>(world)
+	WorldEventListener<SpriteAnimationFinishedEvent>(world)
 {
 }
 
-void CoinSystem::receive(const AnimationFinishedEvent& event)
+void CoinSystem::receive(const SpriteAnimationFinishedEvent& event)
 {
 	Entity entity = event.entity;
 	if (entity.valid() && entity.has<CoinComponent>())
