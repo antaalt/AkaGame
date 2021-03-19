@@ -157,7 +157,7 @@ void EditorUI::destroy()
 void EditorUI::update(World& world) 
 {
 	const ImGuiIO& io = ImGui::GetIO(); 
-	if (!io.WantCaptureMouse && input::down(input::Key::H))
+	if (!io.WantCaptureMouse && Keyboard::down(KeyboardKey::H))
 		m_visible = !m_visible;
 	for (Widget* widget : m_widgets)
 		widget->update(world);

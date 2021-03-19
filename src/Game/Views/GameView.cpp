@@ -86,17 +86,17 @@ void GameView::onUpdate(Time::Unit deltaTime)
 	else
 	{
 		Transform2DComponent& t = m_game.camera.entity.get<Transform2DComponent>();
-		t.position.x += (input::pressed(input::Key::ArrowRight) - input::pressed(input::Key::ArrowLeft)) * deltaTime.seconds() * 50;
-		t.position.y += (input::pressed(input::Key::ArrowUp) - input::pressed(input::Key::ArrowDown)) * deltaTime.seconds() * 50;
+		t.position.x += (Keyboard::pressed(KeyboardKey::ArrowRight) - Keyboard::pressed(KeyboardKey::ArrowLeft)) * deltaTime.seconds() * 50;
+		t.position.y += (Keyboard::pressed(KeyboardKey::ArrowUp) - Keyboard::pressed(KeyboardKey::ArrowDown)) * deltaTime.seconds() * 50;
 	}
 
 	// Reset
-	if (input::down(input::Key::R))
+	if (Keyboard::down(KeyboardKey::R))
 	{
 		// TODO send back to level 1
 		EventDispatcher<PlayerDeathEvent>::emit();
 	}
-	if (input::pressed(input::Key::Escape))
+	if (Keyboard::pressed(KeyboardKey::Escape))
 		EventDispatcher<QuitEvent>::emit(QuitEvent());
 	// Update interface
 	m_gui.update(m_game.world);
@@ -110,7 +110,7 @@ void GameView::onRender()
 		Camera2DComponent& camera = m_game.camera.entity.get<Camera2DComponent>();
 		mat4f view = mat4f::inverse(mat4f::from2D(cameraTransform.model()));
 		mat4f projection = camera.camera.perspective();
-		m_framebuffer->clear(1.f, 0.63f, 0.f, 1.f); 
+		m_framebuffer->clear(color4f(1.f, 0.63f, 0.f, 1.f)); 
 		m_game.draw(m_batch);
 		m_batch.render(m_framebuffer, view, projection);
 		m_batch.clear();

@@ -50,7 +50,7 @@ void MenuView::onCreate()
 			1,
 			false,
 			false,
-			[&](const input::Position&) {
+			[&](const Position&) {
 				EventDispatcher<ViewChangedEvent>::emit(ViewChangedEvent{ View::create<GameView>()});
 			}
 		});
@@ -74,7 +74,7 @@ void MenuView::onCreate()
 			1,
 			false,
 			false,
-			[&](const input::Position&) {
+			[&](const Position&) {
 				Logger::info("Woah, config not implemented !");
 			}
 		});
@@ -97,7 +97,7 @@ void MenuView::onCreate()
 			1,
 			false,
 			false,
-			[&](const input::Position&) {
+			[&](const Position&) {
 				EventDispatcher<QuitEvent>::emit(QuitEvent());
 			}
 		});
@@ -125,7 +125,7 @@ void MenuView::onUpdate(Time::Unit dt)
 void MenuView::onRender()
 {
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-	backbuffer->clear(0.01f, 0.01f, 0.01f, 1.f);
+	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 
 	m_world.draw(m_batch);
 
@@ -145,14 +145,14 @@ void UISystem::update(World& world, Time::Unit deltaTime)
 	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
 	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {
 		vec2f s = vec2f(button.font->size(button.text));
-		const input::Position& mouse = input::mouse();
+		const Position& mouse = Mouse::position();
 		// Hovered
 		if ((mouse.x > transform.position.x) && (mouse.x < transform.position.x + s.x + 2 * button.padding) && (mouse.y > transform.position.y) && (mouse.y < transform.position.y + s.y + 2 * button.padding))
 			button.hovered = true;
 		else
 			button.hovered = false;
 		// Active
-		if (button.hovered && input::pressed(input::Button::ButtonLeft))
+		if (button.hovered && Mouse::pressed(MouseButton::ButtonLeft))
 		{
 			button.active = true;
 			button.callback(mouse);

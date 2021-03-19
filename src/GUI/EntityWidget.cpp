@@ -236,16 +236,16 @@ template <> bool ComponentNode<Text2DComponent>::draw(Text2DComponent& text)
 	return false;
 }
 
-void keySelector(const char *label, input::Key& currentKey)
+void keySelector(const char *label, KeyboardKey& currentKey)
 {
-	const char* currentName = input::getKeyName(currentKey);
+	const char* currentName = Keyboard::name(currentKey);
 	if (ImGui::BeginCombo(label, currentName))
 	{
-		for (uint32_t iKey = 0; iKey < (uint32_t)input::Key::Count; iKey++)
+		for (uint32_t iKey = 0; iKey < (uint32_t)KeyboardKey::Count; iKey++)
 		{
-			input::Key key = (input::Key)iKey;
+			KeyboardKey key = (KeyboardKey)iKey;
 			bool sameKey = key == currentKey;
-			const char* name = input::getKeyName(key);
+			const char* name = Keyboard::name(key);
 			if (ImGui::Selectable(name, sameKey))
 			{
 				if (!sameKey)
@@ -489,7 +489,7 @@ Entity pickEntity(World &world)
 	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
 	const mat3f cam = cameraTransform.model();
 	const mat3f view = mat3f::inverse(cam);
-	const vec2f screenPos(input::mouse().x, input::mouse().y);
+	const vec2f screenPos(Mouse::position().x, Mouse::position().y);
 	bool found = false;
 	int32_t layer = -100;
 	Entity picked = Entity::null();

@@ -25,14 +25,14 @@ void EndView::onDestroy()
 
 void EndView::onUpdate(Time::Unit dt)
 {
-	if (input::pressed(input::Key::Space))
+	if (Keyboard::pressed(KeyboardKey::Space))
 		EventDispatcher<ViewChangedEvent>::emit(ViewChangedEvent{ View::create<MenuView>() });
 }
 
 void EndView::onRender()
 {
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-	backbuffer->clear(0.01f, 0.01f, 0.01f, 1.f);
+	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 	{
 		Font& font = FontManager::getDefault();
 		std::string txt = "You won, congratulation !";

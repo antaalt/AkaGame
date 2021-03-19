@@ -11,25 +11,25 @@ MenuWidget::MenuWidget() :
 void MenuWidget::update(World &world)
 {
 	// Screenshot
-	if (input::down(input::Key::F1))
+	if (Keyboard::down(KeyboardKey::F1))
 	{
 		GraphicBackend::screenshot("./output.png");
 		Logger::info("Screenshot taken.");
 	}
-	if (input::down(input::Key::F2))
+	if (Keyboard::down(KeyboardKey::F2))
 	{
 		m_vsync = !m_vsync;
 		GraphicBackend::vsync(m_vsync);
 		Logger::info("Vsync ", m_vsync ? "enabled" : "disabled");
 	}
-	if (input::down(input::Key::F3))
+	if (Keyboard::down(KeyboardKey::F3))
 	{
 		m_fullscreen = !m_fullscreen;
 		PlatformBackend::setFullscreen(m_fullscreen);
 		Logger::info("Fullscreen ", m_fullscreen ? "enabled" : "disabled");
 	}
 	// Pause the GameView
-	if (input::down(input::Key::P))
+	if (Keyboard::down(KeyboardKey::P))
 	{
 		EventDispatcher<PauseGameEvent>::emit(PauseGameEvent{ !m_pause });
 	}

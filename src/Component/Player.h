@@ -18,9 +18,9 @@ struct PlayerComponent
 	};
 	State state = State::Idle;
 	float speed = 6.f;
-	input::Key jump = input::Key::Space;
-	input::Key left = input::Key::A;
-	input::Key right = input::Key::D;
+	KeyboardKey jump = KeyboardKey::Space;
+	KeyboardKey left = KeyboardKey::A;
+	KeyboardKey right = KeyboardKey::D;
 };
 
 }

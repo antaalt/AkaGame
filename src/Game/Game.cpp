@@ -43,9 +43,9 @@ Entity Game::Factory::player(World& world, const vec2f& position)
 
 	e.get<SpriteAnimatorComponent>().play("Idle");
 	PlayerComponent& player = e.get<PlayerComponent>();
-	player.jump = input::Key::Space;
-	player.left = input::Key::A;
-	player.right = input::Key::D;
+	player.jump = KeyboardKey::Space;
+	player.left = KeyboardKey::A;
+	player.right = KeyboardKey::D;
 
 	e.add<Text2DComponent>(Text2DComponent(vec2f(3.f, 17.f), &FontManager::get("Espera16"), "0", color4f(1.f), 3));
 
@@ -561,17 +561,17 @@ void Game::Player::update(World& world, Time::Unit deltaTime)
 
 	if (player.state == PlayerComponent::State::Jumping || player.state == PlayerComponent::State::DoubleJumping)
 	{
-		if (input::pressed(player.left))
+		if (Keyboard::pressed(player.left))
 		{
-			if (input::down(player.left))
+			if (Keyboard::down(player.left))
 				animator.play("Run");
 			animator.flipU = true;
 			rigid.velocity.x -= jumpLateralAcceleration * deltaTime.seconds();
 			rigid.velocity.x = clamp(rigid.velocity.x, -maxJumpLateralAcceleration, maxJumpLateralAcceleration);
 		}
-		else if (input::pressed(player.right))
+		else if (Keyboard::pressed(player.right))
 		{
-			if (input::down(player.right))
+			if (Keyboard::down(player.right))
 				animator.play("Run");
 			animator.flipU = false;
 			rigid.velocity.x += jumpLateralAcceleration * deltaTime.seconds();
@@ -586,17 +586,17 @@ void Game::Player::update(World& world, Time::Unit deltaTime)
 				rigid.velocity.x = min(rigid.velocity.x + jumpLateralFriction * deltaTime.seconds(), 0.f);
 		}
 
-		if (input::down(player.jump) && player.state == PlayerComponent::State::Jumping)
+		if (Keyboard::down(player.jump) && player.state == PlayerComponent::State::Jumping)
 		{
 			world.createEntity("DoubleJumpFX").add<SoundInstance>(SoundInstance(AudioManager::get("Jump"), 1.f));
 			player.state = PlayerComponent::State::DoubleJumping;
 			rigid.velocity.y = initialDoubleJumpVelocity;
 			// Allow double jumping in the opposite direction.
-			if (input::pressed(player.left) && rigid.velocity.x > 0.f)
+			if (Keyboard::pressed(player.left) && rigid.velocity.x > 0.f)
 			{
 				rigid.velocity.x = -initialDoubleJumpVelocity;
 			}
-			else if (input::pressed(player.right) && rigid.velocity.x < 0.f)
+			else if (Keyboard::pressed(player.right) && rigid.velocity.x < 0.f)
 			{
 				rigid.velocity.x = initialDoubleJumpVelocity;
 			}
@@ -608,17 +608,17 @@ void Game::Player::update(World& world, Time::Unit deltaTime)
 	else
 	{
 		transform.size.y = 1.f;
-		if (input::pressed(player.left))
+		if (Keyboard::pressed(player.left))
 		{
-			if (input::down(player.left))
+			if (Keyboard::down(player.left))
 				animator.play("Run");
 			animator.flipU = true;
 			player.state = PlayerComponent::State::Walking;
 			rigid.velocity.x = -runSpeed;
 		}
-		else if (input::pressed(player.right))
+		else if (Keyboard::pressed(player.right))
 		{
-			if (input::down(player.right))
+			if (Keyboard::down(player.right))
 				animator.play("Run");
 			animator.flipU = false;
 			player.state = PlayerComponent::State::Walking;
@@ -638,7 +638,7 @@ void Game::Player::update(World& world, Time::Unit deltaTime)
 			player.state = PlayerComponent::State::Idle;
 		}
 
-		if (input::down(player.jump))
+		if (Keyboard::down(player.jump))
 		{
 			world.createEntity("JumpFX").add<SoundInstance>(SoundInstance(AudioManager::get("Jump"), 1.f));
 			player.state = PlayerComponent::State::Jumping;

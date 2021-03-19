@@ -69,7 +69,7 @@ void IntroView::onUpdate(Time::Unit dt)
 void IntroView::onRender()
 {
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-	backbuffer->clear(0.01f, 0.01f, 0.01f, 1.f);
+	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 	if (m_redraw)
 	{
 		m_batch.clear();

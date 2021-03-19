@@ -23,7 +23,7 @@ struct UIButtonComponent {
 	bool hovered; // TODO move state in UIComponent, available for every ui.
 	bool active;
 
-	std::function<void(const input::Position&)> callback;
+	std::function<void(const Position&)> callback;
 };
 
 struct UIImageComponent {
