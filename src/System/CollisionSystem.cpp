@@ -88,11 +88,9 @@ void CollisionSystem::update(World& world, Time::Unit deltaTime)
 					// Friction
 					float f = min<float>(colliderDynamic.friction, colliderStatic.friction); // max friction value of object a & b
 					// Change the velocity of shape a
-					rigidBodyDynamic.acceleration = vec2f(0);
 					rigidBodyDynamic.velocity = rigidBodyDynamic.velocity - p * r + t * f;
 					if (world.registry().has<RigidBody2DComponent>(entityStatic)) {
 						RigidBody2DComponent& otherRigid = world.registry().get<RigidBody2DComponent>(entityStatic);
-						otherRigid.acceleration = vec2f(0.f);
 						otherRigid.velocity = otherRigid.velocity + (p * r + t * f);
 					}
 					// Move the rigid & its collider to avoid overlapping.

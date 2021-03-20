@@ -32,9 +32,8 @@ struct Collider2DComponent
 struct RigidBody2DComponent
 {
 	RigidBody2DComponent() : RigidBody2DComponent(1.f) {}
-	RigidBody2DComponent(float mass) : acceleration(0.f), velocity(0.f), mass(mass) {}
+	RigidBody2DComponent(float mass) : velocity(0.f), mass(mass) {}
 
-	vec2f acceleration; // m/s^2
 	vec2f velocity; // m/s
 	float mass; // kg
 };

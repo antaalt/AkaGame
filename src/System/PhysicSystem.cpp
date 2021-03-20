@@ -16,8 +16,8 @@ void PhysicSystem::update(World& world, Time::Unit deltaTime)
 	float dt = deltaTime.seconds();
 	auto view = world.registry().view<RigidBody2DComponent>();
 	view.each([dt, force](RigidBody2DComponent& rigid) {
-		rigid.acceleration = (force / rigid.mass); // F=ma, acceleration is in m/s^2
-		rigid.velocity += rigid.acceleration * dt; // m/s
+		vec2f acceleration = (force / rigid.mass); // F=ma, acceleration is in m/s^2
+		rigid.velocity += acceleration * dt; // m/s
 		rigid.velocity.x = clamp(rigid.velocity.x, -maxVelocity.x, maxVelocity.x);
 		rigid.velocity.y = clamp(rigid.velocity.y, -maxVelocity.y, maxVelocity.y);
 	});

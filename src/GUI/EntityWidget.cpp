@@ -113,7 +113,6 @@ template <> const char* ComponentNode<RigidBody2DComponent>::icon() { return ICO
 template <> bool ComponentNode<RigidBody2DComponent>::draw(RigidBody2DComponent& rigid)
 {
 	ImGui::InputFloat("Mass", &rigid.mass, 0.1f, 1.f);
-	ImGui::InputFloat2("Acceleration", rigid.acceleration.data);
 	ImGui::InputFloat2("Velocity", rigid.velocity.data);
 	return false;
 }
