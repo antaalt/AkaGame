@@ -3,11 +3,11 @@
 namespace aka {
 
 Transform2DComponent::Transform2DComponent() :
-	Transform2DComponent(vec2f(0.f), vec2f(1.f), radianf(0.f))
+	Transform2DComponent(vec2f(0.f), vec2f(1.f), anglef::radian(0.f))
 {
 }
 
-Transform2DComponent::Transform2DComponent(const vec2f& position, const vec2f& scale, radianf rotation) :
+Transform2DComponent::Transform2DComponent(const vec2f& position, const vec2f& scale, anglef rotation) :
 	position(position),
 	size(scale),
 	pivot(0.f),

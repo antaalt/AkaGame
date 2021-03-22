@@ -35,7 +35,7 @@ Entity Game::Factory::player(World& world, const vec2f& position)
 	const Sprite::Frame& frame = playerSprite.getFrame(0, 0);
 
 	Entity e = world.createEntity("Character");
-	e.add<Transform2DComponent>(Transform2DComponent(position, vec2f(1.f), radianf(0)));
+	e.add<Transform2DComponent>(Transform2DComponent(position, vec2f(1.f), anglef::radian(0)));
 	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&playerSprite, 1));
 	e.add<RigidBody2DComponent>(RigidBody2DComponent(0.2f));
 	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f((float)frame.width, (float)frame.height), CollisionType::Solid, 0.1f, 0.1f));
@@ -67,7 +67,7 @@ Entity Game::Factory::background(World& world, const vec2f& position, const vec2
 	Sprite& sprite = SpriteManager::create("Background", std::move(s));
 
 	Entity e = world.createEntity("Background");
-	e.add<Transform2DComponent>(Transform2DComponent(Transform2DComponent(position, scale, radianf(0.f))));
+	e.add<Transform2DComponent>(Transform2DComponent(Transform2DComponent(position, scale, anglef::radian(0.f))));
 	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&sprite, -2));
 	e.get<SpriteAnimatorComponent>().play("Default");
 	return e;
@@ -81,7 +81,7 @@ Entity Game::Factory::wall(World& world, float height)
 	colliderSprite.animations[0].frames[0].width = 1;
 	colliderSprite.animations[0].frames[0].height = 1;
 	Entity e = world.createEntity("DeathWall");
-	e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(10.f, height), radian(0.f)));
+	e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(10.f, height), anglef::radian(0.f)));
 	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&colliderSprite, 5));
 	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(1.f), CollisionType::Event, 0.1f, 0.1f));
 	e.add<HurtComponent>();
@@ -100,7 +100,7 @@ Entity Game::Factory::camera(World& world, const vec2f& viewport)
 Entity Game::Factory::collider(World& world, const vec2f& position, const vec2f& size)
 {
 	Entity e = world.createEntity("Collider");
-	e.add<Transform2DComponent>(Transform2DComponent(position, size, radianf(0.f)));
+	e.add<Transform2DComponent>(Transform2DComponent(position, size, anglef::radian(0.f)));
 	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(16.f)));
 	return e;
 }
@@ -109,7 +109,7 @@ Entity Game::Factory::coin(World& world, const vec2f& position, const vec2f& siz
 {
 	Sprite& sprite = SpriteManager::get("Coin");
 	Entity e = world.createEntity("Coin");
-	e.add<Transform2DComponent>(Transform2DComponent(position, size, radianf(0)));
+	e.add<Transform2DComponent>(Transform2DComponent(position, size, anglef::radian(0)));
 	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(16.f), CollisionType::Event, 0.1f, 0.1f));
 	e.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&sprite, 1));
 	e.add<CoinComponent>();
@@ -120,7 +120,7 @@ Entity Game::Factory::coin(World& world, const vec2f& position, const vec2f& siz
 Entity Game::Factory::spike(World& world, const vec2f& position, const vec2f& size)
 {
 	Entity e = world.createEntity("Spike");
-	e.add<Transform2DComponent>(Transform2DComponent(position, size, radianf(0)));
+	e.add<Transform2DComponent>(Transform2DComponent(position, size, anglef::radian(0)));
 	e.add<Collider2DComponent>(Collider2DComponent(vec2f(0.f), vec2f(1.f), CollisionType::Event));
 	e.add<HurtComponent>();
 	return e;
@@ -129,7 +129,7 @@ Entity Game::Factory::spike(World& world, const vec2f& position, const vec2f& si
 Entity Game::Factory::layer(World& world, const vec2f& position, const vec2u& tileCount, const vec2u& atlasTileCount, const vec2u& tileSize, Texture::Ptr atlas, const std::vector<int>& data, int32_t layer)
 {
 	Entity entity = world.createEntity("Layer");
-	entity.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(1.f), radianf(0.f)));
+	entity.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(1.f), anglef::radian(0.f)));
 	entity.add<TileMapComponent>(TileMapComponent(atlasTileCount, tileSize, atlas));
 	entity.add<TileLayerComponent>(TileLayerComponent(position, tileCount, tileSize, color4f(1.f), data, layer));
 	return entity;
@@ -142,9 +142,9 @@ Entity Game::Factory::leave(World& world, const vec2f& pos, const vec2f& size, c
 	e.add<Transform2DComponent>(Transform2DComponent(
 		vec2f((float)pos.x + random<float>(0.f, (float)size.x), (float)pos.y + random<float>(0.f, (float)size.y)),
 		vec2f(3.f),
-		radianf(random<float>(0.f, 2.f * pi<float>()))
+		anglef::radian(random<float>(0.f, 2.f * pi<float>.radian()))
 	));
-	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), radianf(0.f), vec2f(0.f), color, 10 });
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), Time::zero(), vec2f::normalize(vec2f(1.f)), anglef::radian(0.f), vec2f(0.f), color, 10 });
 	return e;
 }
 
@@ -333,7 +333,7 @@ void Game::update(Time::Unit deltaTime)
 		{
 			// Shake screen
 			Transform2DComponent& t = camera.entity.get<Transform2DComponent>();
-			t.position.y = deathAnimationPos.y + cos(radian(now.seconds() * 2.f * pi<float>() * 10.f)) * 2.f;
+			t.position.y = deathAnimationPos.y + cos(anglef::radian(now.seconds() * 2.f * pi<float>.radian() * 10.f)) * 2.f;
 		}
 	}
 	else if (!transition.active)
@@ -346,7 +346,7 @@ void Game::update(Time::Unit deltaTime)
 		camera.track(*currentLevel, player);
 
 		// Move death wall
-		wall.update(deltaTime, player);
+		//wall.update(deltaTime, player);
 
 		// Check player position against level bounds
 		PlayerComponent& playerComponent = player.entity.get<PlayerComponent>();
@@ -377,7 +377,7 @@ void Game::update(Time::Unit deltaTime)
 			);
 			Logger::info("Previous level");
 		}
-		else if (pos.y + size.y > currentLevel->size.y + currentLevel->offset.y)
+		/*else if (pos.y + size.y > currentLevel->size.y + currentLevel->offset.y)
 		{
 			offset = 1;
 			transition.startPosition = camera.entity.get<Transform2DComponent>().position;
@@ -396,7 +396,7 @@ void Game::update(Time::Unit deltaTime)
 				(float)(currentLevel->offset.y - camera.entity.get<Camera2DComponent>().camera.viewport.y)
 			);
 			Logger::info("Previous level");
-		}
+		}*/
 		if (offset != 0)
 		{
 			transition.active = true;
@@ -530,16 +530,16 @@ void emitJumpParticles(Transform2DComponent& transform, float velocity, World& w
 	color4f color = color4f(0.8f);
 	Time::Unit duration = Time::Unit::milliseconds(500);
 	Entity e = world.createEntity("Particle");
-	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), radianf(0.f)));
-	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(0.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), anglef::radian(0.f)));
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(0.f, -1.f)) * velocity, anglef::radian(random(6.f)), vec2f(5.f), color, 10 });
 
 	e = world.createEntity("Particle");
-	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), radianf(0.f)));
-	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), anglef::radian(0.f)));
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(1.f, -1.f)) * velocity, anglef::radian(random(6.f)), vec2f(5.f), color, 10 });
 
 	e = world.createEntity("Particle");
-	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), radianf(0.f)));
-	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(-1.f, -1.f)) * velocity, radianf(random(6.f)), vec2f(5.f), color, 10 });
+	e.add<Transform2DComponent>(Transform2DComponent(transform.position, vec2f(4.f), anglef::radian(0.f)));
+	e.add<Particle2DComponent>(Particle2DComponent{ Time::now(), duration, vec2f::normalize(vec2f(-1.f, -1.f)) * velocity, anglef::radian(random(6.f)), vec2f(5.f), color, 10 });
 }
 
 void Game::Player::update(World& world, Time::Unit deltaTime)

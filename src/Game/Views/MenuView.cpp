@@ -25,7 +25,7 @@ void MenuView::onCreate()
 		Image img = Image::load(Asset::path("textures/background/background.png"));
 
 		Entity e = m_world.createEntity("Background");
-		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), radianf(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), anglef::radian(0.f)));
 		e.add<UIImageComponent>(UIImageComponent());
 		UIImageComponent& image = e.get<UIImageComponent>();
 		image.texture = Texture::create(img.width, img.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{});
@@ -38,7 +38,7 @@ void MenuView::onCreate()
 		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
 
 		Entity e = m_world.createEntity("StartButton");
-		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), anglef::radian(0.f)));
 		e.add<UIButtonComponent>(UIButtonComponent{
 			font,
 			text,
@@ -61,7 +61,7 @@ void MenuView::onCreate()
 		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
 
 		Entity e = m_world.createEntity("ConfigButton");
-		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), anglef::radian(0.f)));
 		e.get<Transform2DComponent>().position.y -= 60.f;
 		e.add<UIButtonComponent>(UIButtonComponent{
 			font,
@@ -84,7 +84,7 @@ void MenuView::onCreate()
 		vec2f s = vec2f(font->size(text)) + vec2f(padding) * 2.f;
 
 		Entity e = m_world.createEntity("QuitButton");
-		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), radianf(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(center - s / 2.f, vec2f(1.f), anglef::radian(0.f)));
 		e.get<Transform2DComponent>().position.y -= 120.f;
 		e.add<UIButtonComponent>(UIButtonComponent{
 			font,

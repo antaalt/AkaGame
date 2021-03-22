@@ -13,7 +13,7 @@ void ParticleSystem::update(World& world, Time::Unit deltaTime)
 	// Move particles
 	view.each([&](Particle2DComponent& particle, Transform2DComponent& transform) {
 		transform.position += particle.velocity * deltaTime.seconds() * 3.f;
-		transform.rotation = radianf(transform.rotation() + particle.angularVelocity() * deltaTime.seconds() * 3.f);
+		transform.rotation = transform.rotation + particle.angularVelocity * deltaTime.seconds() * 3.f;
 		transform.size += particle.scaleVelocity * deltaTime.seconds() * 3.f;
 	});
 	// Renew particles if finished.

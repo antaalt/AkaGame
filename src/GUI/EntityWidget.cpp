@@ -41,7 +41,9 @@ template <> bool ComponentNode<Transform2DComponent>::draw(Transform2DComponent&
 	ImGui::InputFloat2("Position", transform.position.data);
 	ImGui::InputFloat2("Size", transform.size.data);
 	ImGui::InputFloat2("Pivot", transform.pivot.data);
-	ImGui::SliderAngle("Rotation", &transform.rotation());
+	float rot = transform.rotation.radian();
+	if (ImGui::SliderAngle("Rotation", &rot))
+		transform.rotation = anglef::radian(rot);
 	return false;
 }
 
@@ -340,7 +342,10 @@ template <> bool ComponentNode<Particle2DComponent>::draw(Particle2DComponent& p
 	if (ImGui::InputInt("Life time", &lifeTime))
 		particle.lifeTime = Time::Unit::milliseconds(lifeTime);
 	ImGui::InputFloat2("Velocity", particle.velocity.data);
-	ImGui::SliderAngle("Angular velocity", &(particle.angularVelocity()));
+
+	float rot = particle.angularVelocity.radian();
+	if (ImGui::SliderAngle("Rotation", &rot))
+		particle.angularVelocity = anglef::radian(rot);
 	ImGui::InputFloat2("Scale velocity", particle.scaleVelocity.data);
 	ImGui::ColorEdit4("Color", particle.color.data, ImGuiColorEditFlags_Float);
 	ImGui::SliderInt("Layer", &particle.layer, -20, 20);
