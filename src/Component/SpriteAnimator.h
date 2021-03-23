@@ -23,7 +23,7 @@ struct SpriteAnimatorComponent
 	const Sprite::Animation& getCurrentSpriteAnimation() const;
 	const Sprite::Frame& getCurrentSpriteFrame() const;
 
-	void play(const String& animation);
+	void play(const String& animation, bool restart = false);
 	void update();
 private:
 	Time::Unit animationTimer;

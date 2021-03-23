@@ -265,9 +265,9 @@ template <> bool ComponentNode<PlayerComponent>::draw(PlayerComponent& player)
 {
 	ImGui::SliderInt("Coin", &player.coin, 0, 50);
 	ImGui::SliderFloat("Speed", &player.speed, 0.f, 50.f);
-	keySelector("Jump", player.jump);
-	keySelector("Left", player.left);
-	keySelector("Right", player.right);
+	//keySelector("Jump", player.jump);
+	//keySelector("Left", player.left);
+	//keySelector("Right", player.right);
 	player.state;
 	return false;
 }

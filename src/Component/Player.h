@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Aka/Scene/Component.h>
-#include <Aka/Platform/Input.h>
+#include <Aka/Core/Controller.h>
 
 namespace aka {
 
@@ -18,9 +18,8 @@ struct PlayerComponent
 	};
 	State state = State::Idle;
 	float speed = 6.f;
-	KeyboardKey jump = KeyboardKey::Space;
-	KeyboardKey left = KeyboardKey::A;
-	KeyboardKey right = KeyboardKey::D;
+	ButtonController jump;
+	MotionController motion;
 };
 
 }

@@ -31,14 +31,23 @@ const Sprite::Frame& SpriteAnimatorComponent::getCurrentSpriteFrame() const
     return sprite->getFrame(currentAnimation, currentFrame);
 }
 
-void SpriteAnimatorComponent::play(const String& animation)
+void SpriteAnimatorComponent::play(const String& animation, bool restart)
 {
     Sprite::Animation* a = sprite->getAnimation(animation);
 	AKA_ASSERT(a != nullptr, "No valid animation");
+	bool same = (a - sprite->animations.data()) == currentAnimation;
     currentAnimation = static_cast<uint32_t>(a - sprite->animations.data());
-    currentFrame = 0;
-    animationTimer = Time::Unit();
-    currentAnimationDuration = a->duration();
+	if (restart)
+	{
+		currentFrame = 0;
+		animationTimer = Time::Unit();
+		currentAnimationDuration = a->duration();
+	}
+	else if (!same)
+	{
+		currentFrame = currentFrame % sprite->animations[currentAnimation].frames.size();
+		currentAnimationDuration = a->duration();
+	}
 }
 
 void SpriteAnimatorComponent::update()
