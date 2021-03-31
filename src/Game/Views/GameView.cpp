@@ -111,9 +111,9 @@ void GameView::onRender()
 		mat4f view = mat4f::inverse(mat4f::from2D(cameraTransform.model()));
 		mat4f projection = camera.camera.perspective();
 		m_framebuffer->clear(color4f(1.f, 0.63f, 0.f, 1.f)); 
-		m_game.draw(m_batch);
-		m_batch.render(m_framebuffer, view, projection);
-		m_batch.clear();
+		m_game.draw();
+		Renderer2D::render(m_framebuffer, view, projection);
+		Renderer2D::clear();
 	}
 	
 	{

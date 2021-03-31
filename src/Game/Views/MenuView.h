@@ -35,7 +35,7 @@ class UISystem : public System
 {
 public:
 	void update(World& world, Time::Unit deltaTime) override;
-	void draw(World& world, Batch& batch) override;
+	void draw(World& world) override;
 };
 
 class MenuView : public View {
@@ -47,7 +47,6 @@ public:
 	void onResize(uint32_t width, uint32_t height) override;
 private:
 	World m_world;
-	Batch m_batch;
 };
 
 };

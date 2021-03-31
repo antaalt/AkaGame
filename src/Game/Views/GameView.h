@@ -28,7 +28,6 @@ private:
 	EditorUI m_gui;
 	// Rendering
 	bool m_paused;
-	Batch m_batch;
 	Framebuffer::Ptr m_framebuffer;
 	// Entity
 	Game m_game;

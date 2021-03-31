@@ -424,9 +424,9 @@ void Game::update(Time::Unit deltaTime)
 	}
 }
 
-void Game::draw(Batch& batch)
+void Game::draw()
 {
-	world.draw(batch);
+	world.draw();
 }
 
 void Game::onReceive(const PlayerDeathEvent& event)

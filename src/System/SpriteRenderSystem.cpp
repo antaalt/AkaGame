@@ -8,10 +8,10 @@
 
 namespace aka {
 
-void SpriteRenderSystem::draw(World& world, Batch &batch)
+void SpriteRenderSystem::draw(World& world)
 {
     auto view = world.registry().view<SpriteAnimatorComponent, Transform2DComponent>();
-    view.each([&batch](SpriteAnimatorComponent& animator, Transform2DComponent& transform)
+    view.each([](SpriteAnimatorComponent& animator, Transform2DComponent& transform)
     {
         uv2f uv0 = uv2f(0.f);
         uv2f uv1 = uv2f(1.f);
@@ -29,7 +29,7 @@ void SpriteRenderSystem::draw(World& world, Batch &batch)
         const Texture::Ptr texture = currentFrame.texture;
         vec2f position = vec2f(0.f);
         vec2f size = vec2f((float)currentFrame.width, (float)currentFrame.height);
-        batch.draw(transform.model(), Batch::Rect(position, size, uv0, uv1, texture, animator.layer));
+		Renderer2D::drawRect(transform.model(), position, size, uv0, uv1, texture, color4f(1.f), animator.layer);
     });
 }
 

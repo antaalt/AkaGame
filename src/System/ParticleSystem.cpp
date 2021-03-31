@@ -21,7 +21,7 @@ void ParticleSystem::update(World& world, Time::Unit deltaTime)
 	{
 		Particle2DComponent& particle = world.registry().get<Particle2DComponent>(entity);
 		if (particle.lifeTime == Time::zero())
-			return;
+			continue;
 		else if (Time::now() - particle.birthTime > particle.lifeTime)
 		{
 			world.registry().destroy(entity);
@@ -30,7 +30,7 @@ void ParticleSystem::update(World& world, Time::Unit deltaTime)
 	}
 }
 
-void ParticleSystem::draw(World& world, Batch& batch)
+void ParticleSystem::draw(World& world)
 {
 	auto view = world.registry().view<Particle2DComponent, Transform2DComponent>();
 	view.each([&](Particle2DComponent& particle, Transform2DComponent& transform) {
@@ -40,7 +40,7 @@ void ParticleSystem::draw(World& world, Batch& batch)
 		t *= mat3f::rotate(transform.rotation);
 		t *= mat3f::translate(vec2f(-0.5f * transform.size));
 		t *= mat3f::scale(transform.size);
-		batch.draw(t, Batch::Rect(vec2f(0.f), vec2f(1.f), particle.color, particle.layer));
+		Renderer2D::drawRect(t, vec2f(0.f), vec2f(1.f), uv2f(0.f), uv2f(1.f), nullptr, particle.color, particle.layer);
 	});
 }
 

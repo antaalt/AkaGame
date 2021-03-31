@@ -91,7 +91,7 @@ struct Game :
 	// Update the game logic
 	void update(Time::Unit deltaTime);
 	// Draw the game logic
-	void draw(Batch& batch);
+	void draw();
 	// Receive player death events
 	void onReceive(const PlayerDeathEvent& event) override;
 	// Load a level, store it and make it current.

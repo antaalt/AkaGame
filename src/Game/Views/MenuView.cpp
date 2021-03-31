@@ -127,10 +127,10 @@ void MenuView::onRender()
 	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
 	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 
-	m_world.draw(m_batch);
+	m_world.draw();
 
-	m_batch.render();
-	m_batch.clear();
+	Renderer2D::render();
+	Renderer2D::clear();
 }
 
 void MenuView::onResize(uint32_t width, uint32_t height)
@@ -162,22 +162,22 @@ void UISystem::update(World& world, Time::Unit deltaTime)
 	});
 }
 
-void UISystem::draw(World& world, Batch& batch)
+void UISystem::draw(World& world)
 {
 	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
-	viewButton.each([&](Transform2DComponent& transform, UIButtonComponent& button) {
+	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {
 		vec2f s = vec2f(button.font->size(button.text));
 
 		mat3f backgroundTransform = transform.model() * mat3f::scale(vec2f(s.x + 2 * button.padding, s.y + 2 * button.padding));
 		mat3f textTransform = transform.model() * mat3f::translate(vec2f(button.padding, button.padding));
 
-		batch.draw(backgroundTransform, Batch::Rect(vec2f(0.f), vec2f(1), button.active ? button.colorButtonActive : (button.hovered ? button.colorButtonHovered : button.colorButton), button.layer));
-		batch.draw(textTransform, Batch::Text(button.text, button.font, button.colorText, button.layer + 1));
+		Renderer2D::drawRect(backgroundTransform, vec2f(0.f), vec2f(1), uv2f(0.f), uv2f(1.f), nullptr, button.active ? button.colorButtonActive : (button.hovered ? button.colorButtonHovered : button.colorButton), button.layer);
+		Renderer2D::drawText(textTransform, button.text, button.font, button.colorText, button.layer + 1);
 	});
 
 	auto viewImage = world.registry().view<Transform2DComponent, UIImageComponent>();
 	viewImage.each([&](Transform2DComponent& transform, UIImageComponent& image) {
-		batch.draw(transform.model(), Batch::Rect(vec2f(0.f), vec2f(1.f), image.texture, image.layer));
+		Renderer2D::drawRect(transform.model(), vec2f(0.f), vec2f(1.f), uv2f(0.f), uv2f(1.f), image.texture, color4f(1.f), image.layer);
 	});
 }
 

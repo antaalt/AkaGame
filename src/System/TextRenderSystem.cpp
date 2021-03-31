@@ -9,13 +9,16 @@
 
 namespace aka {
 
-void TextRenderSystem::draw(World& world, Batch& batch)
+void TextRenderSystem::draw(World& world)
 {
     auto view = world.registry().view<Text2DComponent, Transform2DComponent>();
-    view.each([&batch](Text2DComponent& text, Transform2DComponent& transform) {
-		batch.draw(
+    view.each([](Text2DComponent& text, Transform2DComponent& transform) {
+		Renderer2D::drawText(
 			transform.model() * mat3f::translate(text.offset),
-			Batch::Text(text.text, text.font, text.color, text.layer)
+			text.text,
+			text.font, 
+			text.color,
+			text.layer
 		);
     });
 }

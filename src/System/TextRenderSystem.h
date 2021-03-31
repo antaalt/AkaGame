@@ -8,7 +8,7 @@ namespace aka {
 class TextRenderSystem : public System
 {
 public:
-	void draw(World& world, Batch &batch) override;
+	void draw(World& world) override;
 };
 
 }

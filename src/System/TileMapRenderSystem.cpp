@@ -10,10 +10,10 @@
 
 namespace aka {
 
-void TileMapRenderSystem::draw(World& world, Batch& batch)
+void TileMapRenderSystem::draw(World& world)
 {
     auto view = world.registry().view<Transform2DComponent, TileMapComponent, TileLayerComponent>();
-    view.each([&batch](Transform2DComponent& transform, TileMapComponent& atlas, TileLayerComponent& layer)
+    view.each([](Transform2DComponent& transform, TileMapComponent& atlas, TileLayerComponent& layer)
     {
         if (atlas.texture == nullptr)
             return;
@@ -30,7 +30,7 @@ void TileMapRenderSystem::draw(World& world, Batch& batch)
             vec2u atlasID = vec2u(atlasIDUnique % atlas.gridCount.x, atlas.gridCount.y - 1 - atlasIDUnique / atlas.gridCount.x);
             uv2f start = uv2f(vec2f(atlasID) / vec2f(atlas.gridCount));
             uv2f end = start + uv2f(vec2f(1.f) / vec2f(atlas.gridCount));
-            batch.draw(transform.model(), Batch::Rect(position, size, start, end, atlas.texture, layer.color, layer.layer));
+			Renderer2D::drawRect(transform.model(), position, size, start, end, atlas.texture, layer.color, layer.layer);
         }
     });
 }
