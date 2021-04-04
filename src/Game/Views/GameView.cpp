@@ -37,12 +37,16 @@ void GameView::onCreate()
 	uint32_t height = Game::resolution.y;
 	{
 		// INIT FRAMEBUFFER
-		Sampler sampler;
-		sampler.filterMag = aka::Sampler::Filter::Nearest;
-		sampler.filterMin = aka::Sampler::Filter::Nearest;
-		sampler.wrapS = aka::Sampler::Wrap::Clamp;
-		sampler.wrapT = aka::Sampler::Wrap::Clamp;
-		m_framebuffer = Framebuffer::create(width, height, sampler);
+		FramebufferAttachment attachment;
+		attachment.type = FramebufferAttachmentType::Color0;
+		attachment.texture = Texture::create(
+			width, height,
+			TextureFormat::Byte,
+			TextureComponent::RGBA,
+			TextureFlag::RenderTarget,
+			Sampler::nearest()
+		);
+		m_framebuffer = Framebuffer::create(width, height, &attachment, 1);
 		PlatformBackend::setLimits(m_framebuffer->width(), m_framebuffer->height(), 0, 0);
 	}
 

@@ -58,7 +58,7 @@ Entity Game::Factory::background(World& world, const vec2f& position, const vec2
 	Sprite::Animation animation;
 	animation.name = "Default";
 	animation.frames.push_back(Sprite::Frame::create(
-		Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{}),
+		Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, Sampler{}),
 		Time::Unit::milliseconds(500)
 	));
 	animation.frames.back().texture->upload(image.bytes.data());
@@ -171,8 +171,9 @@ void Game::Level::load(ID levelID, World& world)
 			texture = Texture::create(
 				ogmoLayer->tileset->image.width,
 				ogmoLayer->tileset->image.height,
-				Texture::Format::UnsignedByte,
-				Texture::Component::RGBA,
+				TextureFormat::UnsignedByte,
+				TextureComponent::RGBA,
+				TextureFlag::None,
 				Sampler{}
 			);
 			texture->upload(ogmoLayer->tileset->image.bytes.data());

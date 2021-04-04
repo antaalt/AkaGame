@@ -219,10 +219,11 @@ void ResourcesWidget::draw(World& world)
 											Sampler sampler;
 											sampler.filterMag = aka::Sampler::Filter::Nearest;
 											sampler.filterMin = aka::Sampler::Filter::Nearest;
-											sampler.wrapS = aka::Sampler::Wrap::Clamp;
-											sampler.wrapT = aka::Sampler::Wrap::Clamp;
+											sampler.mipmapMode = aka::Sampler::MipMapMode::None;
+											sampler.wrapU = aka::Sampler::Wrap::ClampToEdge;
+											sampler.wrapV = aka::Sampler::Wrap::ClampToEdge;
 											Sprite::Frame frame = Sprite::Frame::create(
-												Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, sampler),
+												Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, sampler),
 												Time::Unit::milliseconds(500)
 											);
 											frame.texture->upload(image.bytes.data());

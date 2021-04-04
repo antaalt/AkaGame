@@ -16,7 +16,7 @@ void TextRenderSystem::draw(World& world)
 		Renderer2D::drawText(
 			transform.model() * mat3f::translate(text.offset),
 			text.text,
-			text.font, 
+			*text.font, 
 			text.color,
 			text.layer
 		);

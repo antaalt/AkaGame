@@ -28,7 +28,7 @@ void MenuView::onCreate()
 		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), anglef::radian(0.f)));
 		e.add<UIImageComponent>(UIImageComponent());
 		UIImageComponent& image = e.get<UIImageComponent>();
-		image.texture = Texture::create(img.width, img.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{});
+		image.texture = Texture::create(img.width, img.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, Sampler::nearest());
 		image.texture->upload(img.bytes.data());
 		image.layer = 0;
 	}
@@ -172,7 +172,7 @@ void UISystem::draw(World& world)
 		mat3f textTransform = transform.model() * mat3f::translate(vec2f(button.padding, button.padding));
 
 		Renderer2D::drawRect(backgroundTransform, vec2f(0.f), vec2f(1), uv2f(0.f), uv2f(1.f), nullptr, button.active ? button.colorButtonActive : (button.hovered ? button.colorButtonHovered : button.colorButton), button.layer);
-		Renderer2D::drawText(textTransform, button.text, button.font, button.colorText, button.layer + 1);
+		Renderer2D::drawText(textTransform, button.text, *button.font, button.colorText, button.layer + 1);
 	});
 
 	auto viewImage = world.registry().view<Transform2DComponent, UIImageComponent>();

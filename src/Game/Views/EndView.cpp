@@ -41,7 +41,7 @@ void EndView::onRender()
 			(float)((int)backbuffer->width() / 2 - size.x / 2),
 			(float)((int)backbuffer->height() / 2 - size.y / 2)
 		));
-		Renderer2D::drawText(transformText, txt, &font, color4f(1.f), 0);
+		Renderer2D::drawText(transformText, txt, font, color4f(1.f), 0);
 	}
 	{
 		Font& font = FontManager::get("Espera16");
@@ -51,7 +51,7 @@ void EndView::onRender()
 			(float)((int)backbuffer->width() / 2 - size.x / 2),
 			(float)((int)backbuffer->height() / 2 - size.y / 2) - 150.f
 		));
-		Renderer2D::drawText(transformText, txt, &font, color4f(1.f), 0);
+		Renderer2D::drawText(transformText, txt, font, color4f(1.f), 0);
 	}
 	Renderer2D::render();
 	Renderer2D::clear();

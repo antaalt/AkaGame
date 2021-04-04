@@ -315,9 +315,9 @@ template <> bool ComponentNode<TileMapComponent>::draw(TileMapComponent& map)
 				Sampler sampler;
 				sampler.filterMag = aka::Sampler::Filter::Nearest;
 				sampler.filterMin = aka::Sampler::Filter::Nearest;
-				sampler.wrapS = aka::Sampler::Wrap::Clamp;
-				sampler.wrapT = aka::Sampler::Wrap::Clamp;
-				map.texture = Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, sampler);
+				sampler.wrapU = aka::Sampler::Wrap::ClampToEdge;
+				sampler.wrapV = aka::Sampler::Wrap::ClampToEdge;
+				map.texture = Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, sampler);
 				map.texture->upload(image.bytes.data());
 			}
 			catch (const std::exception&) {}

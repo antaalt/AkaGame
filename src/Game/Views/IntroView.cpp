@@ -18,7 +18,7 @@ void IntroView::onCreate()
 	Sprite::Animation& animation = sprite.animations.back();
 	animation.name = "Default";
 	animation.frames.push_back(Sprite::Frame::create(
-		Texture::create(image.width, image.height, Texture::Format::UnsignedByte, Texture::Component::RGBA, Sampler{}),
+		Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, Sampler{}),
 		Time::Unit::milliseconds(0))
 	);
 	animation.frames.back().texture->upload(image.bytes.data());
@@ -75,7 +75,7 @@ void IntroView::onRender()
 			(float)((int)backbuffer->width() / 2 - size.x / 2),
 			(float)((int)backbuffer->height() / 2 - size.y / 2) - 150.f
 		));
-		Renderer2D::drawText(transformText, txt, &font, color4f(1.f, 1.f, 1.f, m_logoAlpha), 0);
+		Renderer2D::drawText(transformText, txt, font, color4f(1.f, 1.f, 1.f, m_logoAlpha), 0);
 	}
 	{
 		Sprite& sprite = SpriteManager::get("Logo");
