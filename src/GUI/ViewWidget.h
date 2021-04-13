@@ -1,9 +1,11 @@
 #pragma	once
-#include "EditorUI.h"
+#include "../EditorApp.h"
 
 namespace aka {
 
-class ViewWidget : public EditorUI::Widget, EventListener<ViewChangedEvent>
+class ViewWidget : 
+	public EditorWidget, 
+	EventListener<ViewChangedEvent>
 {
 public:
 	void draw(World& world) override;

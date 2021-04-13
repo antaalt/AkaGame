@@ -6,12 +6,6 @@ namespace aka {
 
 void IntroView::onCreate()
 {
-	{
-		// INIT fonts
-		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
-	}
 	Image image = Image::load(Asset::path("logo/aka.png"));
 	Sprite sprite;
 	sprite.animations.emplace_back();
@@ -29,11 +23,6 @@ void IntroView::onCreate()
 
 void IntroView::onDestroy()
 {
-	{
-		FontManager::destroy("Espera48");
-		FontManager::destroy("Espera16");
-		FontManager::destroy("BoldFont48");
-	}
 	SpriteManager::destroy("Logo");
 }
 

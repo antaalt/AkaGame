@@ -1,11 +1,13 @@
 #pragma once 
-#include "EditorUI.h"
+#include "../EditorApp.h"
 
 #include "../Game/Views/GameView.h"
 
 namespace aka {
 
-class MenuWidget : public EditorUI::Widget, EventListener<PauseGameEvent>
+class MenuWidget : 
+	public EditorWidget,
+	EventListener<PauseGameEvent>
 {
 public:
 	MenuWidget();

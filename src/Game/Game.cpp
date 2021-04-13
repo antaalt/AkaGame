@@ -522,6 +522,23 @@ void Game::Camera::track(const Level& level, const Player& player)
 	cameraTransformComponent.position.y = min(cameraTransformComponent.position.y, grid.y - camera.viewport.y);
 }
 
+mat4f Game::Camera::view() const
+{
+	const Transform2DComponent& cameraTransform = entity.get<Transform2DComponent>();
+	return mat4f::inverse(mat4f::from2D(cameraTransform.model()));
+}
+
+mat4f Game::Camera::projection() const
+{
+	Camera2DComponent& camera = entity.get<Camera2DComponent>();
+	return camera.camera.perspective();
+}
+
+void Game::Camera::setViewport(uint32_t width, uint32_t height)
+{
+	entity.get<Camera2DComponent>().camera.viewport = vec2f(width, height);
+}
+
 Game::Player::Player(World& world) :
 	WorldEventListener<CollisionEvent>(world)
 {

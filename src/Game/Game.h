@@ -8,13 +8,8 @@
 
 namespace aka {
 
-struct PlayerDeathEvent {
-
-};
-
-struct PlayerWinEvent {
-
-};
+struct PlayerDeathEvent {};
+struct PlayerWinEvent {};
 
 struct Game : 
 	EventListener<PlayerDeathEvent>
@@ -41,8 +36,12 @@ struct Game :
 
 	struct Camera
 	{
-		Entity entity;
 		void track(const Level& level, const Player& player);
+		mat4f view() const;
+		mat4f projection() const;
+		void setViewport(uint32_t width, uint32_t height);
+
+		Entity entity;
 	};
 
 	struct Level

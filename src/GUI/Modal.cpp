@@ -1,7 +1,7 @@
 #include "Modal.h"
 
+#include <imgui.h>
 #include <IconsFontAwesome5.h>
-#include "EditorUI.h"
 
 #include <algorithm>
 

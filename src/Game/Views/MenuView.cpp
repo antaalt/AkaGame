@@ -7,12 +7,6 @@ namespace aka {
 
 void MenuView::onCreate()
 {
-	{
-		// INIT fonts
-		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
-	}
 	Font* font = &FontManager::getDefault();
 	float padding = 10.f;
 	vec2f center = vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()) / 2.f;
@@ -109,11 +103,6 @@ void MenuView::onCreate()
 
 void MenuView::onDestroy()
 {
-	{
-		FontManager::destroy("Espera48");
-		FontManager::destroy("Espera16");
-		FontManager::destroy("BoldFont48");
-	}
 	m_world.destroy();
 }
 

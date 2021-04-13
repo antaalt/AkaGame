@@ -22,6 +22,8 @@
 
 #include "../System/SoundSystem.h"
 
+#include "../Game/Resources.h"
+
 #include "Modal.h"
 
 namespace aka {

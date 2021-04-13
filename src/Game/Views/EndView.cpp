@@ -4,25 +4,6 @@
 
 namespace aka {
 
-void EndView::onCreate()
-{
-	{
-		// INIT fonts
-		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
-	}
-}
-
-void EndView::onDestroy()
-{
-	{
-		FontManager::destroy("Espera48");
-		FontManager::destroy("Espera16");
-		FontManager::destroy("BoldFont48");
-	}
-}
-
 void EndView::onUpdate(Time::Unit dt)
 {
 	if (Keyboard::pressed(KeyboardKey::Space))

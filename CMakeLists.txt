@@ -4,8 +4,10 @@ project(AkaGame)
 # Include Aka
 add_subdirectory(lib/Aka)
 
-set(SRC
+add_executable(AkaGame
 	"src/main.cpp"
+	"src/GameApp.cpp"
+	"src/EditorApp.cpp"
 
 	"src/System/SpriteAnimatorSystem.h"
 	"src/System/SpriteAnimatorSystem.cpp"
@@ -25,11 +27,11 @@ set(SRC
 	"src/System/SpriteRenderSystem.cpp"
 	"src/System/ParticleSystem.h"
 	"src/System/ParticleSystem.cpp"
-	
+
 	"src/GUI/EntityWidget.h"
 	"src/GUI/EntityWidget.cpp"
-	"src/GUI/EditorUI.h"
-	"src/GUI/EditorUI.cpp"
+	
+	
 	"src/GUI/InfoWidget.h"
 	"src/GUI/InfoWidget.cpp"
 	"src/GUI/Modal.h"
@@ -40,7 +42,7 @@ set(SRC
 	"src/GUI/MenuWidget.cpp"
 	"src/GUI/ViewWidget.h"
 	"src/GUI/ViewWidget.cpp"
-	
+
 	"src/Game/Views/GameView.h"
 	"src/Game/Views/GameView.cpp"
 	"src/Game/Views/EndView.h"
@@ -55,7 +57,7 @@ set(SRC
 	"src/Game/OgmoWorld.cpp"
 	"src/Game/Game.h"
 	"src/Game/Game.cpp"
-	
+
 	"src/Component/Camera2D.h"
 	"src/Component/Coin.h"
 	"src/Component/Collider2D.h"
@@ -69,35 +71,8 @@ set(SRC
 	"src/Component/Transform2D.h"
 	"src/Component/Transform2D.cpp"
 )
-if(GRAPHIC_OPENGL)
-	set(SRC
-		${SRC}
-		"lib/imgui/imgui.cpp"
-		"lib/imgui/imgui_demo.cpp"
-		"lib/imgui/imgui_draw.cpp"
-		"lib/imgui/imgui_widgets.cpp"
-		"lib/imgui/imgui_tables.cpp"
-		"lib/imgui/backends/imgui_impl_opengl3.cpp"
-		"lib/imgui/backends/imgui_impl_glfw.cpp"
-	)
-elseif(GRAPHIC_D3D11)
-	set(SRC
-		${SRC}
-		"lib/imgui/imgui.cpp"
-		"lib/imgui/imgui_demo.cpp"
-		"lib/imgui/imgui_draw.cpp"
-		"lib/imgui/imgui_widgets.cpp"
-		"lib/imgui/imgui_tables.cpp"
-		"lib/imgui/backends/imgui_impl_dx11.cpp"
-		"lib/imgui/backends/imgui_impl_glfw.cpp"
-	)
-endif()
-add_executable(AkaGame
-	${SRC}
-)
 
 # Add third party libs
-target_include_directories(AkaGame PUBLIC lib/imgui)
 target_include_directories(AkaGame PUBLIC lib/Aka/lib/glfw/include)
 target_include_directories(AkaGame PUBLIC lib/Aka/lib/glew/include)
 target_include_directories(AkaGame PUBLIC lib/IconFontCppHeaders)
