@@ -45,6 +45,7 @@ void EditorApp::onCreate()
 
 	{
 		// INIT fonts
+		// TODO application holds assets (provide functions such as load texture, font...)
 		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
 		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
 		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));

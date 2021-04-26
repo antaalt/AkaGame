@@ -3,13 +3,17 @@
 
 int main()
 {
-	//aka::GameApp game;
+#if 0
+	aka::GameApp game;
+#else
 	aka::EditorApp game;
+#endif
 
 	aka::Config cfg;
 	cfg.width = 1280;
 	cfg.height = 720;
 	cfg.name = "Game";
+	cfg.icon = aka::Image::load(aka::Asset::path("textures/icon/icon.png"), false);
 	cfg.app = &game;
 
 	aka::Application::run(cfg);
