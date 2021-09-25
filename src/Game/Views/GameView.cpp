@@ -4,20 +4,19 @@ namespace aka {
 
 void GameView::onCreate()
 {
-	uint32_t width = (uint32_t)(GraphicBackend::backbuffer()->width() * Game::resolution.y / (float)GraphicBackend::backbuffer()->height());
+	uint32_t width = (uint32_t)(GraphicBackend::device()->backbuffer()->width() * Game::resolution.y / (float)GraphicBackend::device()->backbuffer()->height());
 	uint32_t height = Game::resolution.y;
 	{
 		// INIT FRAMEBUFFER
-		FramebufferAttachment attachment;
-		attachment.type = FramebufferAttachmentType::Color0;
-		attachment.texture = Texture::create(
-			width, height,
-			TextureFormat::Byte,
-			TextureComponent::RGBA,
-			TextureFlag::RenderTarget,
-			Sampler::nearest()
-		);
-		m_framebuffer = Framebuffer::create(width, height, &attachment, 1);
+		Attachment attachment = {
+			AttachmentType::Color0,
+			Texture2D::create(
+				width, height,
+				TextureFormat::RGBA8,
+				TextureFlag::RenderTarget | TextureFlag::ShaderResource
+			)
+		};
+		m_framebuffer = Framebuffer::create(&attachment, 1);
 		PlatformBackend::setLimits(m_framebuffer->width(), m_framebuffer->height(), 0, 0);
 	}
 
@@ -27,6 +26,11 @@ void GameView::onCreate()
 void GameView::onDestroy()
 {
 	m_game.destroy();
+}
+
+void GameView::onFixedUpdate(Time::Unit deltaTime)
+{
+	m_game.fixedUpdate(deltaTime);
 }
 
 void GameView::onUpdate(Time::Unit deltaTime)
@@ -46,7 +50,7 @@ void GameView::onRender()
 	
 	{
 		// Blit to backbuffer
-		GraphicBackend::backbuffer()->blit(m_framebuffer, FramebufferAttachmentType::Color0, Sampler::Filter::Nearest);
+		GraphicBackend::device()->backbuffer()->blit(m_framebuffer->get(AttachmentType::Color0), TextureFilter::Nearest);
 	}
 }
 
@@ -55,7 +59,11 @@ void GameView::onResize(uint32_t width, uint32_t height)
 	uint32_t newWidth = (uint32_t)(width * Game::resolution.y / (float)height);
 	uint32_t newHeight = Game::resolution.y;
 
-	m_framebuffer->resize(newWidth, newHeight);
+	m_framebuffer->set(AttachmentType::Color0, Texture2D::create(
+		newWidth, newHeight,
+		TextureFormat::RGBA8,
+		TextureFlag::RenderTarget | TextureFlag::ShaderResource
+	));
 	m_game.camera.setViewport(newWidth, newHeight);
 }
 

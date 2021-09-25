@@ -127,7 +127,7 @@ void ResourcesWidget::draw(World& world)
 						{
 							try
 							{
-								FontManager::create(file::name(path), Font(path, height));
+								FontManager::create(File::name(path), Font(path, height));
 								String::copy(bufferPath, 256, path.cstr());
 								height = 48;
 								path = "";
@@ -209,7 +209,7 @@ void ResourcesWidget::draw(World& world)
 									if (Modal::LoadButton("Load image", &path))
 									{
 										Image image = Image::load(path);
-										if (image.bytes.size() == 0)
+										if (image.size() == 0)
 										{
 											error = "Could not load image";
 										}
@@ -217,17 +217,11 @@ void ResourcesWidget::draw(World& world)
 										{
 											// TODO texture as resource ?
 											// TODO modal to select sampler
-											Sampler sampler;
-											sampler.filterMag = aka::Sampler::Filter::Nearest;
-											sampler.filterMin = aka::Sampler::Filter::Nearest;
-											sampler.mipmapMode = aka::Sampler::MipMapMode::None;
-											sampler.wrapU = aka::Sampler::Wrap::ClampToEdge;
-											sampler.wrapV = aka::Sampler::Wrap::ClampToEdge;
 											Sprite::Frame frame = Sprite::Frame::create(
-												Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, sampler),
+												Texture2D::create(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource),
 												Time::Unit::milliseconds(500)
 											);
-											frame.texture->upload(image.bytes.data());
+											frame.texture->upload(image.data());
 											animation.frames.push_back(frame);
 										}
 									}
@@ -290,8 +284,8 @@ void ResourcesWidget::draw(World& world)
 						{
 							try
 							{
-								FileStream stream(path, FileMode::ReadOnly);
-								SpriteManager::create(file::name(bufferPath), Sprite::parse(stream));
+								FileStream stream(path, FileMode::Read, FileType::Binary);
+								SpriteManager::create(File::name(bufferPath), Sprite::parse(stream));
 								String::copy(bufferPath, 256, path.cstr());
 								path = "";
 								ImGui::CloseCurrentPopup();
@@ -364,7 +358,7 @@ void ResourcesWidget::draw(World& world)
 								error = "Could not load audio";
 							else
 							{
-								AudioManager::create(file::name(path), std::move(stream));
+								AudioManager::create(File::name(path), std::move(stream));
 								String::copy(bufferPath, 256, path.cstr());
 								path = "";
 								memory = false;

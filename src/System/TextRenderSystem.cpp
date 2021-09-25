@@ -9,7 +9,7 @@
 
 namespace aka {
 
-void TextRenderSystem::draw(World& world)
+void TextRenderSystem::onRender(World& world)
 {
     auto view = world.registry().view<Text2DComponent, Transform2DComponent>();
     view.each([](Text2DComponent& text, Transform2DComponent& transform) {

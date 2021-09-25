@@ -8,7 +8,7 @@
 
 namespace aka {
 
-void SpriteRenderSystem::draw(World& world)
+void SpriteRenderSystem::onRender(World& world)
 {
     auto view = world.registry().view<SpriteAnimatorComponent, Transform2DComponent>();
     view.each([](SpriteAnimatorComponent& animator, Transform2DComponent& transform)

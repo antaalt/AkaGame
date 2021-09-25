@@ -9,21 +9,21 @@ void MenuView::onCreate()
 {
 	Font* font = &FontManager::getDefault();
 	float padding = 10.f;
-	vec2f center = vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()) / 2.f;
+	vec2f center = vec2f(GraphicBackend::device()->backbuffer()->width(), GraphicBackend::device()->backbuffer()->height()) / 2.f;
 	color4f red = color4f(0.93f, 0.04f, 0.26f, 1.f);
 	color4f blue = color4f(0.01f, 0.47f, 0.96f, 1.f);
 	color4f dark = color4f(0.1f, 0.1f, 0.1f, 1.f);
 	color4f light = color4f(0.9f, 0.9f, 0.9f, 1.f);
 
 	{
-		Image img = Image::load(Asset::path("textures/background/background.png"));
+		Image img = Image::load(ResourceManager::path("textures/background/background.png"));
 
 		Entity e = m_world.createEntity("Background");
-		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::backbuffer()->width(), GraphicBackend::backbuffer()->height()), anglef::radian(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::device()->backbuffer()->width(), GraphicBackend::device()->backbuffer()->height()), anglef::radian(0.f)));
 		e.add<UIImageComponent>(UIImageComponent());
 		UIImageComponent& image = e.get<UIImageComponent>();
-		image.texture = Texture::create(img.width, img.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, Sampler::nearest());
-		image.texture->upload(img.bytes.data());
+		image.texture = Texture2D::create(img.width(), img.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource);
+		image.texture->upload(img.data());
 		image.layer = 0;
 	}
 
@@ -113,10 +113,10 @@ void MenuView::onUpdate(Time::Unit dt)
 
 void MenuView::onRender()
 {
-	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
+	Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
 	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 
-	m_world.draw();
+	m_world.render();
 
 	Renderer2D::render();
 	Renderer2D::clear();
@@ -129,7 +129,7 @@ void MenuView::onResize(uint32_t width, uint32_t height)
 	onCreate();
 }
 
-void UISystem::update(World& world, Time::Unit deltaTime)
+void UISystem::onUpdate(World& world, Time::Unit deltaTime)
 {
 	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
 	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {
@@ -151,7 +151,7 @@ void UISystem::update(World& world, Time::Unit deltaTime)
 	});
 }
 
-void UISystem::draw(World& world)
+void UISystem::onRender(World& world)
 {
 	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
 	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {

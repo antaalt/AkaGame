@@ -13,13 +13,20 @@ void MenuWidget::update(World &world)
 	// Screenshot
 	if (Keyboard::down(KeyboardKey::F1))
 	{
-		GraphicBackend::screenshot("./output.png");
+		GraphicDevice* device = GraphicBackend::device();
+		Backbuffer::Ptr backbuffer = device->backbuffer();
+		Image image(backbuffer->width(), backbuffer->height(), 4, ImageFormat::UnsignedByte);
+		device->backbuffer()->download(image.data());
+		image.encodePNG("screen.png");
 		Logger::info("Screenshot taken.");
 	}
 	if (Keyboard::down(KeyboardKey::F2))
 	{
 		m_vsync = !m_vsync;
-		GraphicBackend::vsync(m_vsync);
+		Synchronisation sync = Synchronisation::Unlimited;
+		if (m_vsync)
+			sync = Synchronisation::Vertical;
+		GraphicBackend::device()->backbuffer()->set(sync);
 		Logger::info("Vsync ", m_vsync ? "enabled" : "disabled");
 	}
 	if (Keyboard::down(KeyboardKey::F3))
@@ -48,7 +55,11 @@ void MenuWidget::draw(World& world)
             }
 			if (ImGui::MenuItem("Screenshot", "F1"))
 			{
-				GraphicBackend::screenshot("./output.jpg");
+				GraphicDevice* device = GraphicBackend::device();
+				Backbuffer::Ptr backbuffer = device->backbuffer();
+				Image image(backbuffer->width(), backbuffer->height(), 4, ImageFormat::UnsignedByte);
+				device->backbuffer()->download(image.data());
+				image.encodePNG("screen.png");
 				Logger::info("Screenshot taken.");
 			}
             ImGui::Separator();
@@ -56,7 +67,10 @@ void MenuWidget::draw(World& world)
             {
                 if (ImGui::MenuItem("Vsync", "F2", &m_vsync))
                 {
-                    GraphicBackend::vsync(m_vsync);
+					Synchronisation sync = Synchronisation::Unlimited;
+					if (m_vsync)
+						sync = Synchronisation::Vertical;
+					GraphicBackend::device()->backbuffer()->set(sync);
 					Logger::info("Vsync ", m_vsync ? "enabled" : "disabled");
                 }
 				if (ImGui::MenuItem("Fullscreen", "F3", &m_fullscreen))

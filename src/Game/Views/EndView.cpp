@@ -12,7 +12,7 @@ void EndView::onUpdate(Time::Unit dt)
 
 void EndView::onRender()
 {
-	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
+	Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
 	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 	{
 		Font& font = FontManager::getDefault();

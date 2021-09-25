@@ -4,7 +4,7 @@
 
 namespace aka {
 
-void SpriteAnimatorSystem::update(World& world, Time::Unit deltaTime)
+void SpriteAnimatorSystem::onUpdate(World& world, Time::Unit deltaTime)
 {
     auto view = world.registry().view<SpriteAnimatorComponent>();
     for(entt::entity entity : view)

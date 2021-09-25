@@ -7,7 +7,7 @@
 
 namespace aka {
 
-void ParticleSystem::update(World& world, Time::Unit deltaTime)
+void ParticleSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
 {
 	auto view = world.registry().view<Particle2DComponent, Transform2DComponent>();
 	// Move particles
@@ -30,7 +30,7 @@ void ParticleSystem::update(World& world, Time::Unit deltaTime)
 	}
 }
 
-void ParticleSystem::draw(World& world)
+void ParticleSystem::onRender(World& world)
 {
 	auto view = world.registry().view<Particle2DComponent, Transform2DComponent>();
 	view.each([&](Particle2DComponent& particle, Transform2DComponent& transform) {

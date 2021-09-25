@@ -10,7 +10,7 @@
 
 namespace aka {
 
-void TileMapRenderSystem::draw(World& world)
+void TileMapRenderSystem::onRender(World& world)
 {
     auto view = world.registry().view<Transform2DComponent, TileMapComponent, TileLayerComponent>();
     view.each([](Transform2DComponent& transform, TileMapComponent& atlas, TileLayerComponent& layer)

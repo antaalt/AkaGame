@@ -26,21 +26,21 @@ void onAudioUpdate(entt::registry& registry, entt::entity entity)
 	AudioBackend::play(sound.audio);
 }
 
-void SoundSystem::create(World& world)
+void SoundSystem::onCreate(World& world)
 {
 	world.registry().on_construct<SoundInstance>().connect<&onAudioAdd>();
 	world.registry().on_destroy<SoundInstance>().connect<&onAudioRemove>();
 	world.registry().on_update<SoundInstance>().connect<&onAudioUpdate>();
 }
 
-void SoundSystem::destroy(World& world)
+void SoundSystem::onDestroy(World& world)
 {
 	world.registry().on_construct<SoundInstance>().disconnect<&onAudioAdd>();
 	world.registry().on_destroy<SoundInstance>().disconnect<&onAudioRemove>();
 	world.registry().on_update<SoundInstance>().disconnect<&onAudioUpdate>();
 }
 
-void SoundSystem::update(World& world, Time::Unit deltaTime)
+void SoundSystem::onUpdate(World& world, Time::Unit deltaTime)
 {
 	auto view = world.registry().view<SoundInstance>();
 	for (entt::entity entity : view) {

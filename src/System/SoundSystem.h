@@ -10,9 +10,9 @@ namespace aka {
 class SoundSystem : public System
 {
 public:
-	void create(World& world) override;
-	void destroy(World& world) override;
-	void update(World& world, Time::Unit deltaTime) override;
+	void onCreate(World& world) override;
+	void onDestroy(World& world) override;
+	void onUpdate(World& world, Time::Unit deltaTime) override;
 };
 
 };

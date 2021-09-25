@@ -29,7 +29,7 @@ World* getWorld(View::Ptr view)
 	}
 }
 
-void EditorApp::onCreate()
+void EditorApp::onCreate(int argc, char* argv[])
 {
 	{
 		Device device = Device::getDefault();
@@ -46,9 +46,9 @@ void EditorApp::onCreate()
 	{
 		// INIT fonts
 		// TODO application holds assets (provide functions such as load texture, font...)
-		FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-		FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-		FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
+		FontManager::create("Espera48", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 48));
+		FontManager::create("Espera16", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 16));
+		FontManager::create("BoldFont48", Font(ResourceManager::path("font/Theboldfont/theboldfont.ttf"), 48));
 	}
 
 	{
@@ -64,9 +64,9 @@ void EditorApp::onCreate()
 		config.MergeMode = true;
 		config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
 		static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-		Path asset = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf");
-		Path asset2 = Asset::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf");
-		Path assetDefault = Asset::path("font/OpenSans/OpenSans-Regular.ttf");
+		Path asset = ResourceManager::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf");
+		Path asset2 = ResourceManager::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf");
+		Path assetDefault = ResourceManager::path("font/OpenSans/OpenSans-Regular.ttf");
 		io.FontDefault = io.Fonts->AddFontFromFileTTF(assetDefault.cstr(), 18.0f);
 		ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.cstr(), 13.0f, &config, icon_ranges);
 		ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.cstr(), 13.0f, &config, icon_ranges);
@@ -107,6 +107,11 @@ void EditorApp::onDestroy()
 void EditorApp::onFrame()
 {
 	m_view->onFrame();
+}
+
+void EditorApp::onFixedUpdate(Time::Unit deltaTime)
+{
+	m_view->onFixedUpdate(deltaTime);
 }
 
 void EditorApp::onUpdate(Time::Unit deltaTime)

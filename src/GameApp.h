@@ -8,7 +8,7 @@ class GameApp :
 	EventListener<ViewChangedEvent>
 {
 public:
-	void onCreate() override;
+	void onCreate(int argc, char* argv[]) override;
 	void onDestroy() override;
 	void onFrame() override;
 	void onUpdate(Time::Unit deltaTime) override;

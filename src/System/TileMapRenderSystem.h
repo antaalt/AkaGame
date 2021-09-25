@@ -8,7 +8,7 @@ namespace aka {
 class TileMapRenderSystem : public System
 {
 public:
-	void draw(World& world) override;
+	void onRender(World& world) override;
 };
 
 }

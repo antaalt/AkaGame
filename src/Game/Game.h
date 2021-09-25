@@ -78,7 +78,7 @@ struct Game :
 		static Entity collider(World& world, const vec2f& position, const vec2f& size);
 		static Entity coin(World& world, const vec2f& position, const vec2f& size);
 		static Entity spike(World& world, const vec2f& position, const vec2f& size);
-		static Entity layer(World& world, const vec2f& position, const vec2u& tileCount, const vec2u& atlasTileCount, const vec2u& tileSize, Texture::Ptr atlas, const std::vector<int>& data, int32_t layer);
+		static Entity layer(World& world, const vec2f& position, const vec2u& tileCount, const vec2u& atlasTileCount, const vec2u& tileSize, Texture2D::Ptr atlas, const std::vector<int>& data, int32_t layer);
 		static Entity leave(World& world, const vec2f& pos, const vec2f& size, const color4f& color);
 	};
 
@@ -87,6 +87,8 @@ struct Game :
 	void initialize(uint32_t width, uint32_t height);
 	// Destroy the game
 	void destroy();
+	// Update the game logic at fixed timestep
+	void fixedUpdate(Time::Unit deltaTime);
 	// Update the game logic
 	void update(Time::Unit deltaTime);
 	// Draw the game logic

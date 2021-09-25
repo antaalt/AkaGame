@@ -29,7 +29,7 @@ namespace aka {
 
 Entity Game::Factory::player(World& world, const vec2f& position)
 {
-	FileStream fs(Asset::path("textures/player/player.aseprite"), FileMode::ReadOnly);
+	FileStream fs(ResourceManager::path("textures/player/player.aseprite"), FileMode::Read, FileType::Binary);
 	SpriteManager::create("Player", Sprite::parse(fs));
 	Sprite& playerSprite = SpriteManager::get("Player");
 	const Sprite::Frame& frame = playerSprite.getFrame(0, 0);
@@ -58,10 +58,10 @@ Entity Game::Factory::background(World& world, const vec2f& position, const vec2
 	Sprite::Animation animation;
 	animation.name = "Default";
 	animation.frames.push_back(Sprite::Frame::create(
-		Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, Sampler{}),
+		Texture2D::create(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource),
 		Time::Unit::milliseconds(500)
 	));
-	animation.frames.back().texture->upload(image.bytes.data());
+	animation.frames.back().texture->upload(image.data());
 	vec2f scale = vec2f(size) / vec2f(animation.frames.back().width, animation.frames.back().height);
 	Sprite s;
 	s.animations.push_back(animation);
@@ -77,7 +77,7 @@ Entity Game::Factory::background(World& world, const vec2f& position, const vec2
 Entity Game::Factory::wall(World& world, float height)
 {
 	// INIT DEATH WALL
-	FileStream fs(Asset::path("textures/collider/collider.aseprite"), FileMode::ReadOnly);
+	FileStream fs(ResourceManager::path("textures/collider/collider.aseprite"), FileMode::Read, FileType::Binary);
 	Sprite& colliderSprite = SpriteManager::create("Collider", Sprite::parse(fs));
 	colliderSprite.animations[0].frames[0].width = 1;
 	colliderSprite.animations[0].frames[0].height = 1;
@@ -127,7 +127,7 @@ Entity Game::Factory::spike(World& world, const vec2f& position, const vec2f& si
 	return e;
 }
 
-Entity Game::Factory::layer(World& world, const vec2f& position, const vec2u& tileCount, const vec2u& atlasTileCount, const vec2u& tileSize, Texture::Ptr atlas, const std::vector<int>& data, int32_t layer)
+Entity Game::Factory::layer(World& world, const vec2f& position, const vec2u& tileCount, const vec2u& atlasTileCount, const vec2u& tileSize, Texture2D::Ptr atlas, const std::vector<int>& data, int32_t layer)
 {
 	Entity entity = world.createEntity("Layer");
 	entity.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(1.f), anglef::radian(0.f)));
@@ -152,31 +152,29 @@ Entity Game::Factory::leave(World& world, const vec2f& pos, const vec2f& size, c
 void Game::Level::load(ID levelID, World& world)
 {
 	// Load Ogmo level
-	OgmoWorld ogmoWorld = OgmoWorld::load(Asset::path("levels/world.ogmo"));
-	OgmoLevel ogmoLevel = OgmoLevel::load(ogmoWorld, Asset::path("levels/" + String::format("level%u", levelID.value()) + ".json"));
+	OgmoWorld ogmoWorld = OgmoWorld::load(ResourceManager::path("levels/world.ogmo"));
+	OgmoLevel ogmoLevel = OgmoLevel::load(ogmoWorld, ResourceManager::path("levels/" + String::format("level%u", levelID.value()) + ".json"));
 
 	// Size
 	this->offset = vec2f(ogmoLevel.offset);
 	this->size = vec2f(ogmoLevel.size);
 
 	// Layers
-	std::map<std::string, Texture::Ptr> atlas;
+	std::map<std::string, Texture2D::Ptr> atlas;
 	auto createTileLayer = [&](const OgmoLevel::Layer* ogmoLayer, int32_t layerDepth) -> Entity {
 		AKA_ASSERT(ogmoLayer->layer->type == OgmoWorld::LayerType::Tile, "");
 		AKA_ASSERT(ogmoLayer->tileset->tileSize == ogmoLayer->gridCellSize, "");
-		Texture::Ptr texture;
+		Texture2D::Ptr texture;
 		auto it = atlas.find(ogmoLayer->tileset->name);
 		if (it == atlas.end())
 		{
-			texture = Texture::create(
-				ogmoLayer->tileset->image.width,
-				ogmoLayer->tileset->image.height,
-				TextureFormat::UnsignedByte,
-				TextureComponent::RGBA,
-				TextureFlag::None,
-				Sampler{}
+			texture = Texture2D::create(
+				ogmoLayer->tileset->image.width(),
+				ogmoLayer->tileset->image.height(),
+				TextureFormat::RGBA8,
+				TextureFlag::ShaderResource
 			);
-			texture->upload(ogmoLayer->tileset->image.bytes.data());
+			texture->upload(ogmoLayer->tileset->image.data());
 			atlas.insert(std::make_pair(ogmoLayer->tileset->name, texture));
 		}
 		else
@@ -185,31 +183,31 @@ void Game::Level::load(ID levelID, World& world)
 		}
 		return Factory::layer(
 			world,
-			vec2f(offset), 
+			vec2f(offset),
 			ogmoLayer->gridCellCount,
 			ogmoLayer->tileset->tileCount,
-			ogmoLayer->tileset->tileSize, 
-			texture, 
-			ogmoLayer->data, 
+			ogmoLayer->tileset->tileSize,
+			texture,
+			ogmoLayer->data,
 			layerDepth
 		);
 	};
-	
+
 	// Layers
 	this->entities.push_back(createTileLayer(ogmoLevel.getLayer("Background"), -1));
 	this->entities.push_back(createTileLayer(ogmoLevel.getLayer("Playerground"), 0));
 	this->entities.push_back(createTileLayer(ogmoLevel.getLayer("Foreground"), 1));
-	
+
 	// Background
-	this->entities.push_back(Factory::background(world, offset, size, Image::load(Asset::path("textures/background/background.png"))));
-		
+	this->entities.push_back(Factory::background(world, offset, size, Image::load(ResourceManager::path("textures/background/background.png"))));
+
 	// Audio effect
-	AudioManager::create("Jump", AudioStream::loadMemory(Asset::path("sounds/jump.mp3")));
+	AudioManager::create("Jump", AudioStream::loadMemory(ResourceManager::path("sounds/jump.mp3")));
 
 	// Sprites
-	FileStream fsCollider(Asset::path("textures/collider/collider.aseprite"), FileMode::ReadOnly);
+	FileStream fsCollider(ResourceManager::path("textures/collider/collider.aseprite"), FileMode::Read, FileType::Binary);
 	SpriteManager::create("Collider", Sprite::parse(fsCollider));
-	FileStream fsCoin(Asset::path("textures/interact/interact.aseprite"), FileMode::ReadOnly);
+	FileStream fsCoin(ResourceManager::path("textures/interact/interact.aseprite"), FileMode::Read, FileType::Binary);
 	SpriteManager::create("Coin", Sprite::parse(fsCoin));
 
 	// Entities
@@ -223,7 +221,7 @@ void Game::Level::load(ID levelID, World& world)
 		{
 			this->entities.push_back(Factory::collider(
 				world,
-				vec2f(offset) + flipY(entity.position, entity.size, layer), 
+				vec2f(offset) + flipY(entity.position, entity.size, layer),
 				vec2f(entity.size) / 16.f
 			));
 		}
@@ -299,7 +297,7 @@ void Game::initialize(uint32_t width, uint32_t height)
 
 	// INIT background sounds
 	Entity e = world.createEntity("BackgroundMusic");
-	AudioStream::Ptr audio = AudioManager::create("Forest", AudioStream::openStream(Asset::path("sounds/forest.mp3")));
+	AudioStream::Ptr audio = AudioManager::create("Forest", AudioStream::openStream(ResourceManager::path("sounds/forest.mp3")));
 	e.add<SoundInstance>(SoundInstance(audio, true));
 
 	load(Level::ID(0));
@@ -313,6 +311,18 @@ void Game::destroy()
 {
 	EventDispatcher<PlayerDeathEvent>::clear();
 	world.destroy();
+}
+
+void Game::fixedUpdate(Time::Unit deltaTime)
+{
+	if (deathAnimation)
+	{
+
+	}
+	else if (!transition.active)
+	{
+		world.fixedUpdate(deltaTime);
+	}
 }
 
 void Game::update(Time::Unit deltaTime)
@@ -374,7 +384,7 @@ void Game::update(Time::Unit deltaTime)
 			offset = -1;
 			transition.startPosition = camera.entity.get<Transform2DComponent>().position;
 			transition.endPosition = vec2f(
-				(float)(currentLevel->offset.x - camera.entity.get<Camera2DComponent>().camera.viewport.x),
+				(float)(currentLevel->offset.x - camera.entity.get<Camera2DComponent>().camera.right),
 				transition.startPosition.y
 			);
 			Logger::info("Previous level");
@@ -427,7 +437,7 @@ void Game::update(Time::Unit deltaTime)
 
 void Game::draw()
 {
-	world.draw();
+	world.render();
 }
 
 void Game::onReceive(const PlayerDeathEvent& event)
@@ -435,7 +445,7 @@ void Game::onReceive(const PlayerDeathEvent& event)
 	// TODO launch an animation and wait for the end.
 	// Remove the rigid body component, launch animation
 	// (player die and whole background become black. then restart.)
-	// Restart 
+	// Restart
 	deathAnimation = true;
 	deathAnimationStart = Time::now();
 	deathAnimationPos = camera.entity.get<Transform2DComponent>().position;
@@ -480,8 +490,8 @@ void Game::Camera::track(const Level& level, const Player& player)
 	PlayerComponent& playerComponent = player.entity.get<PlayerComponent>();
 	Transform2DComponent& playerTransformComponent = player.entity.get<Transform2DComponent>();
 
-	const float hThreshold = 0.4f * camera.viewport.x;
-	const float vThreshold = 0.4f * camera.viewport.y;
+	const float hThreshold = 0.4f * camera.right;
+	const float vThreshold = 0.4f * camera.top;
 	const vec2f playerPosition = playerTransformComponent.position;
 	const vec2f playerRelativePosition = playerPosition - cameraTransformComponent.position;
 
@@ -493,9 +503,9 @@ void Game::Camera::track(const Level& level, const Player& player)
 			float distance = abs<float>(playerRelativePosition.x - hThreshold);
 			cameraTransformComponent.position.x = cameraTransformComponent.position.x - distance;
 		}
-		else if (playerRelativePosition.x > camera.viewport.x - hThreshold)
+		else if (playerRelativePosition.x > camera.right - hThreshold)
 		{
-			float distance = playerRelativePosition.x - (camera.viewport.x - hThreshold);
+			float distance = playerRelativePosition.x - (camera.right - hThreshold);
 			cameraTransformComponent.position.x = cameraTransformComponent.position.x + distance;
 		}
 	}
@@ -507,9 +517,9 @@ void Game::Camera::track(const Level& level, const Player& player)
 			float distance = abs<float>(playerRelativePosition.y - vThreshold);
 			cameraTransformComponent.position.y = cameraTransformComponent.position.y - distance;
 		}
-		else if (playerRelativePosition.y > camera.viewport.y - vThreshold)
+		else if (playerRelativePosition.y > camera.top - vThreshold)
 		{
-			float distance = playerRelativePosition.y - (camera.viewport.y - vThreshold);
+			float distance = playerRelativePosition.y - (camera.top - vThreshold);
 			cameraTransformComponent.position.y = cameraTransformComponent.position.y + distance;
 		}
 	}
@@ -517,9 +527,9 @@ void Game::Camera::track(const Level& level, const Player& player)
 	// Clamp camera position to the current level bounds.
 	vec2f grid = vec2f(level.size) + vec2f(level.offset);
 	cameraTransformComponent.position.x = max(cameraTransformComponent.position.x, (float)level.offset.x);
-	cameraTransformComponent.position.x = min(cameraTransformComponent.position.x, grid.x - camera.viewport.x);
+	cameraTransformComponent.position.x = min(cameraTransformComponent.position.x, grid.x - camera.right);
 	cameraTransformComponent.position.y = max(cameraTransformComponent.position.y, (float)level.offset.y);
-	cameraTransformComponent.position.y = min(cameraTransformComponent.position.y, grid.y - camera.viewport.y);
+	cameraTransformComponent.position.y = min(cameraTransformComponent.position.y, grid.y - camera.top);
 }
 
 mat4f Game::Camera::view() const
@@ -531,12 +541,13 @@ mat4f Game::Camera::view() const
 mat4f Game::Camera::projection() const
 {
 	Camera2DComponent& camera = entity.get<Camera2DComponent>();
-	return camera.camera.perspective();
+	return camera.camera.projection();
 }
 
 void Game::Camera::setViewport(uint32_t width, uint32_t height)
 {
-	entity.get<Camera2DComponent>().camera.viewport = vec2f(width, height);
+	entity.get<Camera2DComponent>().camera.right = (float)width;
+	entity.get<Camera2DComponent>().camera.top = (float)height;
 }
 
 Game::Player::Player(World& world) :

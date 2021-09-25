@@ -6,16 +6,16 @@ namespace aka {
 
 void IntroView::onCreate()
 {
-	Image image = Image::load(Asset::path("logo/aka.png"));
+	Image image = Image::load(ResourceManager::path("logo/aka.png"));
 	Sprite sprite;
 	sprite.animations.emplace_back();
 	Sprite::Animation& animation = sprite.animations.back();
 	animation.name = "Default";
 	animation.frames.push_back(Sprite::Frame::create(
-		Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, Sampler{}),
+		Texture2D::create(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource),
 		Time::Unit::milliseconds(0))
 	);
-	animation.frames.back().texture->upload(image.bytes.data());
+	animation.frames.back().texture->upload(image.data());
 
 	SpriteManager::create("Logo", std::move(sprite));
 	m_elapsed = Time::Unit::milliseconds(0);
@@ -53,7 +53,7 @@ void IntroView::onUpdate(Time::Unit dt)
 
 void IntroView::onRender()
 {
-	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
+	Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
 	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
 	Renderer2D::clear();
 	{

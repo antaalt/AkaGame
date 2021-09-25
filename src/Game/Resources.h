@@ -7,7 +7,7 @@
 namespace aka {
 
 template <typename T>
-class ResourceManager
+class ResourceManagerGame
 {
 	using map = std::map<String, T>;
 public:
@@ -21,10 +21,10 @@ public:
 	struct Iterator
 	{
 		using map = std::map<String, T>;
-		typename map::iterator begin() { return ResourceManager<T>::m_data.begin(); }
-		typename map::iterator end() { return ResourceManager<T>::m_data.end(); }
-		typename map::const_iterator begin()const { return ResourceManager<T>::m_data.begin(); }
-		typename map::const_iterator end() const { return ResourceManager<T>::m_data.end(); }
+		typename map::iterator begin() { return ResourceManagerGame<T>::m_data.begin(); }
+		typename map::iterator end() { return ResourceManagerGame<T>::m_data.end(); }
+		typename map::const_iterator begin()const { return ResourceManagerGame<T>::m_data.begin(); }
+		typename map::const_iterator end() const { return ResourceManagerGame<T>::m_data.end(); }
 	};
 	static Iterator iterator;
 private:
@@ -33,18 +33,18 @@ private:
 };
 
 template <typename T>
-std::mutex ResourceManager<T>::m_lock;
+std::mutex ResourceManagerGame<T>::m_lock;
 template <typename T>
-std::map<String, T> ResourceManager<T>::m_data;
+std::map<String, T> ResourceManagerGame<T>::m_data;
 template <typename T>
-typename ResourceManager<T>::Iterator ResourceManager<T>::iterator;
+typename ResourceManagerGame<T>::Iterator ResourceManagerGame<T>::iterator;
 
-using FontManager = ResourceManager<Font>;
-using SpriteManager = ResourceManager<Sprite>;
-using AudioManager = ResourceManager<AudioStream::Ptr>;
+using FontManager = ResourceManagerGame<Font>;
+using SpriteManager = ResourceManagerGame<Sprite>;
+using AudioManager = ResourceManagerGame<AudioStream::Ptr>;
 
 template <typename T>
-T& ResourceManager<T>::create(const String& str, T&& data)
+T& ResourceManagerGame<T>::create(const String& str, T&& data)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.insert(std::make_pair(str, std::move(data)));
@@ -54,7 +54,7 @@ T& ResourceManager<T>::create(const String& str, T&& data)
 }
 
 template<typename T>
-inline bool ResourceManager<T>::has(const String& str)
+inline bool ResourceManagerGame<T>::has(const String& str)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
@@ -62,7 +62,7 @@ inline bool ResourceManager<T>::has(const String& str)
 }
 
 template <typename T>
-T& ResourceManager<T>::get(const String& str)
+T& ResourceManagerGame<T>::get(const String& str)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);
@@ -70,14 +70,14 @@ T& ResourceManager<T>::get(const String& str)
 }
 
 template<typename T>
-T& ResourceManager<T>::getDefault()
+T& ResourceManagerGame<T>::getDefault()
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	return m_data.begin()->second;
 }
 
 template <typename T>
-void ResourceManager<T>::destroy(const String& str)
+void ResourceManagerGame<T>::destroy(const String& str)
 {
 	std::lock_guard<std::mutex> m(m_lock);
 	auto it = m_data.find(str);

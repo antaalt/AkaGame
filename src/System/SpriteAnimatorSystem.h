@@ -15,7 +15,7 @@ struct SpriteAnimationFinishedEvent {
 class SpriteAnimatorSystem: public System
 {
 public:
-	void update(World &world, Time::Unit deltaTime) override;
+	void onUpdate(World &world, Time::Unit deltaTime) override;
 };
 
 

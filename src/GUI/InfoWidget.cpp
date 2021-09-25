@@ -25,10 +25,11 @@ void InfoWidget::draw(World& world)
 		//ImGui::Text("Indices : %zu", m_batch.indicesCount());
 		ImGui::Separator();
 		const char* apiName[] = {
+			"None",
 			"OpenGL",
 			"DirectX11"
 		};
-		ImGui::Text("Api : %s", apiName[(int)GraphicBackend::api()]);
+		ImGui::Text("Api : %s", apiName[(int)GraphicBackend::device()->api()]);
 		ImGui::Text("Device : %s", device.vendor);
 		ImGui::Text("Renderer : %s", device.renderer);
 	}

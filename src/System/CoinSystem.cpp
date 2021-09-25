@@ -14,6 +14,7 @@ CoinSystem::CoinSystem(World& world) :
 
 void CoinSystem::receive(const SpriteAnimationFinishedEvent& event)
 {
+	// TODO loop through all coin entities and if one is finished (replay is false and time is up) delete it
 	Entity entity = event.entity;
 	if (entity.valid() && entity.has<CoinComponent>())
 	{

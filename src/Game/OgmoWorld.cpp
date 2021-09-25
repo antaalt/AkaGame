@@ -17,7 +17,9 @@ const OgmoLevel::Layer* OgmoLevel::getLayer(const std::string& name) const
 OgmoLevel OgmoLevel::load(const OgmoWorld &world, const Path& path)
 {
 	OgmoLevel level;
-	const nlohmann::json json = nlohmann::json::parse(File::readString(path));
+	String str;
+	File::read(path, &str);
+	const nlohmann::json json = nlohmann::json::parse(str.cstr());
 	level.size.x = json["width"];
 	level.size.y = json["height"];
 	level.offset.x = json["offsetX"];
@@ -88,8 +90,10 @@ const OgmoWorld::Layer* OgmoWorld::getLayer(const std::string& name) const
 OgmoWorld OgmoWorld::load(const Path& path)
 {
 	OgmoWorld world;
-	const String relativePath = path.str().substr(0, path.str().findLast('/') + 1);
-	const nlohmann::json json = nlohmann::json::parse(File::readString(path));
+	const Path relativePath = path.up();
+	String str;
+	File::read(path, &str);
+	const nlohmann::json json = nlohmann::json::parse(str.cstr());
 	const nlohmann::json& jsonTilesets = json["tilesets"];
 	for (const nlohmann::json& jsonTileset : jsonTilesets)
 	{
@@ -98,9 +102,9 @@ OgmoWorld OgmoWorld::load(const Path& path)
 		String imagePath = std::string(jsonTileset["path"]);
 		tileset.image = Image::load(Path::normalize(relativePath + imagePath));
 		tileset.tileSize = vec2u(jsonTileset["tileWidth"], jsonTileset["tileHeight"]);
-		tileset.tileCount = vec2u(tileset.image.width / tileset.tileSize.x, tileset.image.height / tileset.tileSize.y);
-		AKA_ASSERT(tileset.image.width % tileset.tileCount.x == 0, "");
-		AKA_ASSERT(tileset.image.height % tileset.tileCount.y == 0, "");
+		tileset.tileCount = vec2u(tileset.image.width() / tileset.tileSize.x, tileset.image.height() / tileset.tileSize.y);
+		AKA_ASSERT(tileset.image.width() % tileset.tileCount.x == 0, "");
+		AKA_ASSERT(tileset.image.height() % tileset.tileCount.y == 0, "");
 		world.tilesets.push_back(tileset);
 	}
 	const nlohmann::json& jsonEntities = json["entities"];

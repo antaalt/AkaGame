@@ -4,11 +4,11 @@
 
 namespace aka {
 
-void GameApp::onCreate()
+void GameApp::onCreate(int argc, char* argv[])
 {
-	FontManager::create("Espera48", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 48));
-	FontManager::create("Espera16", Font(Asset::path("font/Espera/Espera-Bold.ttf"), 16));
-	FontManager::create("BoldFont48", Font(Asset::path("font/Theboldfont/theboldfont.ttf"), 48));
+	FontManager::create("Espera48", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 48));
+	FontManager::create("Espera16", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 16));
+	FontManager::create("BoldFont48", Font(ResourceManager::path("font/Theboldfont/theboldfont.ttf"), 48));
 	
 	m_view = View::create<IntroView>();
 	m_view->onCreate();

@@ -17,7 +17,7 @@ Transform2DComponent::Transform2DComponent(const vec2f& position, const vec2f& s
 
 mat3f Transform2DComponent::model() const
 {
-	mat3f model = mat4f::identity();
+	mat3f model = mat3f::identity();
 	// Translate
 	model *= mat3f::translate(position);
 	// Rotate around center of object

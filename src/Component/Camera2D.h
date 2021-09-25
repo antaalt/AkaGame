@@ -9,7 +9,13 @@ namespace aka {
 struct Camera2DComponent
 {
 	Camera2DComponent() : Camera2DComponent(vec2f(1.f)) {}
-	Camera2DComponent(const vec2f& viewport) : camera(viewport), main(false) {}
+	Camera2DComponent(const vec2f& viewport) : camera{}, main(false) {
+		camera.left = camera.bottom = 0.f;
+		camera.right = viewport.x;
+		camera.top = viewport.y;
+		camera.nearZ = -1.f;
+		camera.farZ = 1.f;
+	}
 
 	CameraOrthographic camera;
 	bool main; // Is it the main camera in the scene ?

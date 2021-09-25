@@ -125,7 +125,12 @@ template <> const char* ComponentNode<Camera2DComponent>::name() { return "Camer
 template <> const char* ComponentNode<Camera2DComponent>::icon() { return ICON_FA_CAMERA; }
 template <> bool ComponentNode<Camera2DComponent>::draw(Camera2DComponent& camera)
 {
-	ImGui::InputFloat2("Viewport", camera.camera.viewport.data);
+	ImGui::InputFloat("Left", &camera.camera.left);
+	ImGui::InputFloat("Right", &camera.camera.right);
+	ImGui::InputFloat("Top", &camera.camera.top);
+	ImGui::InputFloat("Bottom", &camera.camera.bottom);
+	ImGui::InputFloat("Near", &camera.camera.nearZ);
+	ImGui::InputFloat("Far", &camera.camera.farZ);
 	ImGui::Checkbox("Main", &camera.main);
 	return false;
 }
@@ -314,13 +319,8 @@ template <> bool ComponentNode<TileMapComponent>::draw(TileMapComponent& map)
 			try
 			{
 				Image image = Image::load(path);
-				Sampler sampler;
-				sampler.filterMag = aka::Sampler::Filter::Nearest;
-				sampler.filterMin = aka::Sampler::Filter::Nearest;
-				sampler.wrapU = aka::Sampler::Wrap::ClampToEdge;
-				sampler.wrapV = aka::Sampler::Wrap::ClampToEdge;
-				map.texture = Texture::create(image.width, image.height, TextureFormat::UnsignedByte, TextureComponent::RGBA, TextureFlag::None, sampler);
-				map.texture->upload(image.bytes.data());
+				map.texture = Texture2D::create(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource);
+				map.texture->upload(image.data());
 			}
 			catch (const std::exception&) {}
 		}
@@ -434,8 +434,8 @@ void overlay(World &world, Entity entity)
 		Transform2DComponent& cameraTransform = cameraEntity.get<Transform2DComponent>();
 		Camera2DComponent& camera = cameraEntity.get<Camera2DComponent>();
 		mat3f view = mat3f::inverse(cameraTransform.model());
-		Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
+		Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
+		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / vec2f(camera.camera.right, camera.camera.top);
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f));
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// Animator overlay for current entity
@@ -445,7 +445,7 @@ void overlay(World &world, Entity entity)
 			SpriteAnimatorComponent& a = entity.get<SpriteAnimatorComponent>();
 			const Sprite::Frame& f = a.getCurrentSpriteFrame();
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
-			p.y = camera.camera.viewport.y - p.y;
+			p.y = camera.camera.top - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
@@ -457,7 +457,7 @@ void overlay(World &world, Entity entity)
 			Transform2DComponent& t = entity.get<Transform2DComponent>();
 			Collider2DComponent& c = entity.get<Collider2DComponent>();
 			vec2f p = vec2f(view * t.model() * vec3f(c.position, 1));
-			p.y = camera.camera.viewport.y - p.y;
+			p.y = camera.camera.top - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f(c.size, 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
@@ -470,7 +470,7 @@ void overlay(World &world, Entity entity)
 			Text2DComponent& text = entity.get<Text2DComponent>();
 			vec2i size = text.font->size(text.text);
 			vec2f p = vec2f(view * t.model() * vec3f(text.offset, 1));
-			p.y = camera.camera.viewport.y - p.y;
+			p.y = camera.camera.top - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f(vec2f(size), 0));
 			ImVec2 pos0 = ImVec2(scale.x * p.x, scale.y * p.y);
 			ImVec2 pos1 = ImVec2(scale.x * (p.x + s.x), scale.y * (p.y - s.y));
@@ -491,8 +491,8 @@ Entity pickEntity(World &world)
 		return Entity::null();
 	Transform2DComponent& cameraTransform = cameraEntity.get<Transform2DComponent>();
 	Camera2DComponent& camera = cameraEntity.get<Camera2DComponent>();
-	Framebuffer::Ptr backbuffer = GraphicBackend::backbuffer();
-	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / camera.camera.viewport;
+	Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
+	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / vec2f(camera.camera.right, camera.camera.top);
 	const mat3f cam = cameraTransform.model();
 	const mat3f view = mat3f::inverse(cam);
 	const vec2f screenPos(Mouse::position().x, Mouse::position().y);

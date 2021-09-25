@@ -27,15 +27,15 @@ struct UIButtonComponent {
 };
 
 struct UIImageComponent {
-	Texture::Ptr texture;
+	Texture2D::Ptr texture;
 	int32_t layer;
 };
 
 class UISystem : public System
 {
 public:
-	void update(World& world, Time::Unit deltaTime) override;
-	void draw(World& world) override;
+	void onUpdate(World& world, Time::Unit deltaTime) override;
+	void onRender(World& world) override;
 };
 
 class MenuView : public View {

@@ -15,7 +15,7 @@ CollisionEvent::CollisionEvent(Entity d, Entity s, CollisionType type, Collision
 {
 }
 
-void CollisionSystem::update(World& world, Time::Unit deltaTime)
+void CollisionSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
 {
 	float dt = deltaTime.seconds();
 

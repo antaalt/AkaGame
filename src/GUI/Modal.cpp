@@ -17,7 +17,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 	if (ImGui::Button(label))
 	{
 		ImGui::OpenPopup(buffer);
-		currentPath = Asset::path("");
+		currentPath = ResourceManager::path("");
 		String::copy(currentPathBuffer, 256, currentPath.cstr());
 		selectedPath = nullptr;
 		paths = Path::enumerate(currentPath);
@@ -51,7 +51,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 			for (Path& path : paths)
 			{
 				bool selected = (&path == selectedPath);
-				bool isFolder = (path.str().last() == '/');
+				bool isFolder = Directory::exist(currentPath + path);
 				if (isFolder)
 				{
 					int err = snprintf(buffer, 256, "%s %s", ICON_FA_FOLDER, path.cstr());
@@ -104,7 +104,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		}
 		ImGui::EndPopup();
 	}
-	return (loading && resultPath->str().length() > 0 && file::exist(Path(*resultPath)));
+	return (loading && resultPath->length() > 0 && File::exist(Path(*resultPath)));
 }
 
 bool Modal::Error(const char* label, std::string& error)

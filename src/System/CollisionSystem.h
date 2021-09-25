@@ -26,7 +26,7 @@ struct CollisionEvent {
 class CollisionSystem : public System
 {
 public:
-	void update(World& world, Time::Unit deltaTime) override;
+	void onFixedUpdate(World& world, Time::Unit deltaTime) override;
 };
 
 };
