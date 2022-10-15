@@ -2,7 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include <Aka/Core/Debug.h>
+#include <Aka/Core/Config.h>
 
 namespace aka {
 
@@ -18,7 +18,7 @@ OgmoLevel OgmoLevel::load(const OgmoWorld &world, const Path& path)
 {
 	OgmoLevel level;
 	String str;
-	File::read(path, &str);
+	OS::File::read(path, &str);
 	const nlohmann::json json = nlohmann::json::parse(str.cstr());
 	level.size.x = json["width"];
 	level.size.y = json["height"];
@@ -92,7 +92,7 @@ OgmoWorld OgmoWorld::load(const Path& path)
 	OgmoWorld world;
 	const Path relativePath = path.up();
 	String str;
-	File::read(path, &str);
+	OS::File::read(path, &str);
 	const nlohmann::json json = nlohmann::json::parse(str.cstr());
 	const nlohmann::json& jsonTilesets = json["tilesets"];
 	for (const nlohmann::json& jsonTileset : jsonTilesets)
@@ -100,7 +100,7 @@ OgmoWorld OgmoWorld::load(const Path& path)
 		Tileset tileset;
 		tileset.name = jsonTileset["label"];
 		String imagePath = std::string(jsonTileset["path"]);
-		tileset.image = Image::load(Path::normalize(relativePath + imagePath));
+		tileset.image = Image::load(OS::normalize(relativePath + imagePath));
 		tileset.tileSize = vec2u(jsonTileset["tileWidth"], jsonTileset["tileHeight"]);
 		tileset.tileCount = vec2u(tileset.image.width() / tileset.tileSize.x, tileset.image.height() / tileset.tileSize.y);
 		AKA_ASSERT(tileset.image.width() % tileset.tileCount.x == 0, "");

@@ -6,7 +6,7 @@
 
 namespace aka {
 
-template <typename T>
+/*template <typename T>
 class ResourceManagerGame
 {
 	using map = std::map<String, T>;
@@ -39,9 +39,9 @@ std::map<String, T> ResourceManagerGame<T>::m_data;
 template <typename T>
 typename ResourceManagerGame<T>::Iterator ResourceManagerGame<T>::iterator;
 
-using FontManager = ResourceManagerGame<Font>;
-using SpriteManager = ResourceManagerGame<Sprite>;
-using AudioManager = ResourceManagerGame<AudioStream::Ptr>;
+//using FontManager = ResourceManagerGame<Font::Ptr>;
+//using SpriteManager = ResourceManagerGame<Sprite>;
+//using AudioManager = ResourceManagerGame<AudioStream::Ptr>;
 
 template <typename T>
 T& ResourceManagerGame<T>::create(const String& str, T&& data)
@@ -85,5 +85,5 @@ void ResourceManagerGame<T>::destroy(const String& str)
 		return;
 	m_data.erase(it);
 }
-
+*/
 };

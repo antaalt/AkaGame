@@ -8,8 +8,8 @@ namespace aka {
 
 class EndView : public View {
 public:
-	void onUpdate(Time::Unit dt) override;
-	void onRender() override;
+	void onUpdate(Time dt) override;
+	void onRender(gfx::Frame* frame) override;
 };
 
 };

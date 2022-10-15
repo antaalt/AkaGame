@@ -15,7 +15,7 @@ CollisionEvent::CollisionEvent(Entity d, Entity s, CollisionType type, Collision
 {
 }
 
-void CollisionSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
+void CollisionSystem::onFixedUpdate(World& world, Time deltaTime)
 {
 	float dt = deltaTime.seconds();
 
@@ -50,7 +50,7 @@ void CollisionSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
 				if (colliderStatic.is(CollisionType::Solid))
 				{
 					// Adjust velocity
-					// Get normal 
+					// Get normal
 					vec2f normal = vec2f::normalize(c.separation);
 					if (normal.x > 0.f && normal.y > 0.f)
 					{
@@ -97,8 +97,8 @@ void CollisionSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
 					transformDynamic.position += c.separation;
 				}
 				world.emit<CollisionEvent>(CollisionEvent(
-					Entity(entityDynamic, &world), 
-					Entity(entityStatic, &world), 
+					Entity(entityDynamic, &world),
+					Entity(entityStatic, &world),
 					colliderStatic.type,
 					face
 				));

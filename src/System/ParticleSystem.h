@@ -5,8 +5,8 @@ namespace aka {
 class ParticleSystem : public System
 {
 public:
-	void onFixedUpdate(World& world, Time::Unit deltaTime);
-	void onRender(World& world);
+	void onFixedUpdate(World& world, Time deltaTime) override;
+	void onRender(World& world, gfx::Frame* frame) override;
 };
 
 };

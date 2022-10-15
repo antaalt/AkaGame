@@ -1,14 +1,25 @@
 #include "GameApp.h"
 
+#include <Aka/Resource/AssetImporter.h>
+
 #include "Game/Views/IntroView.h"
 
 namespace aka {
 
 void GameApp::onCreate(int argc, char* argv[])
 {
-	FontManager::create("Espera48", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 48));
-	FontManager::create("Espera16", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 16));
-	FontManager::create("BoldFont48", Font(ResourceManager::path("font/Theboldfont/theboldfont.ttf"), 48));
+	AssetImporter::import("font/Espera/Espera-Bold.ttf", ResourceType::Font, [&](Asset& asset) {
+		asset.load(graphic());
+		resource()->add("EsperaBold", asset);
+	});
+	AssetImporter::import("font/Theboldfont/theboldfont.ttf", ResourceType::Font, [&](Asset& asset) {
+		asset.load(graphic());
+		resource()->add("TheBoldFont", asset);
+	});
+	AssetImporter::import("font/OpenSans/OpenSans-Regular.ttf", ResourceType::Font, [&](Asset& asset) {
+		asset.load(graphic());
+		resource()->add("OpenSans", asset);
+	});
 	
 	m_view = View::create<IntroView>();
 	m_view->onCreate();
@@ -17,9 +28,6 @@ void GameApp::onCreate(int argc, char* argv[])
 void GameApp::onDestroy()
 {
 	m_view->onDestroy();
-	FontManager::destroy("Espera48");
-	FontManager::destroy("Espera16");
-	FontManager::destroy("BoldFont48");
 }
 
 void GameApp::onFrame()
@@ -27,14 +35,14 @@ void GameApp::onFrame()
 	m_view->onFrame();
 }
 
-void GameApp::onUpdate(Time::Unit deltaTime)
+void GameApp::onUpdate(Time deltaTime)
 {
 	m_view->onUpdate(deltaTime);
 }
 
-void GameApp::onRender()
+void GameApp::onRender(gfx::Frame* frame)
 {
-	m_view->onRender();
+	m_view->onRender(frame);
 }
 
 void GameApp::onResize(uint32_t width, uint32_t height)

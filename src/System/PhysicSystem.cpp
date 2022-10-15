@@ -10,7 +10,7 @@ namespace aka {
 
 static vec2f maxVelocity(50.f);
 
-void PhysicSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
+void PhysicSystem::onFixedUpdate(World& world, Time deltaTime)
 {
 	const vec2f force = vec2f(0.f, -9.81f) + vec2f(0.f, 2.f); // gravity + air resistance
 	float dt = deltaTime.seconds();

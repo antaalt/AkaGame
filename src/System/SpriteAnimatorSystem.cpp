@@ -4,13 +4,13 @@
 
 namespace aka {
 
-void SpriteAnimatorSystem::onUpdate(World& world, Time::Unit deltaTime)
+void SpriteAnimatorSystem::onUpdate(World& world, Time deltaTime)
 {
     auto view = world.registry().view<SpriteAnimatorComponent>();
     for(entt::entity entity : view)
     {
 		SpriteAnimatorComponent& animator = world.registry().get<SpriteAnimatorComponent>(entity);
-        Time::Unit zero = Time::Unit();
+        Time zero = Time();
         if (animator.currentAnimationDuration > zero && animator.sprite != nullptr)
         {
             //animator.animationTimer = (animator.animationTimer + deltaTime) % animator.currentAnimationDuration;
@@ -21,8 +21,9 @@ void SpriteAnimatorSystem::onUpdate(World& world, Time::Unit deltaTime)
                 animator.animationTimer = animator.animationTimer % animator.currentAnimationDuration;
             }
             uint32_t frameID = 0;
-            Time::Unit currentFrameDuration = zero;
-            for (Sprite::Frame& frame : animator.sprite->animations[animator.currentAnimation].frames)
+            Time currentFrameDuration = zero;
+			const SpriteAnimation& animation = animator.sprite->getAnimation(animator.currentAnimation);
+            for (const SpriteFrame& frame : animation.frames)
             {
                 if (animator.animationTimer < currentFrameDuration + frame.duration)
                     break;

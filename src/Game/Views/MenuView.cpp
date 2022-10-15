@@ -7,23 +7,27 @@ namespace aka {
 
 void MenuView::onCreate()
 {
-	Font* font = &FontManager::getDefault();
+	gfx::GraphicDevice* device = Application::app()->graphic();
+	PlatformDevice* platform = Application::app()->platform();
+	AssetRegistry* registry = Application::app()->resource();
+	Font* font = registry->find("EsperaBold").get<Font>();
 	float padding = 10.f;
-	vec2f center = vec2f(GraphicBackend::device()->backbuffer()->width(), GraphicBackend::device()->backbuffer()->height()) / 2.f;
+	vec2f center = vec2f(platform->width(), platform->height()) / 2.f;
 	color4f red = color4f(0.93f, 0.04f, 0.26f, 1.f);
 	color4f blue = color4f(0.01f, 0.47f, 0.96f, 1.f);
 	color4f dark = color4f(0.1f, 0.1f, 0.1f, 1.f);
 	color4f light = color4f(0.9f, 0.9f, 0.9f, 1.f);
 
 	{
-		Image img = Image::load(ResourceManager::path("textures/background/background.png"));
+		Image img = Image::load(OS::cwd() + "asset/textures/background/background.png");
 
 		Entity e = m_world.createEntity("Background");
-		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(GraphicBackend::device()->backbuffer()->width(), GraphicBackend::device()->backbuffer()->height()), anglef::radian(0.f)));
+		e.add<Transform2DComponent>(Transform2DComponent(vec2f(0.f), vec2f(platform->width(), platform->height()), anglef::radian(0.f)));
 		e.add<UIImageComponent>(UIImageComponent());
 		UIImageComponent& image = e.get<UIImageComponent>();
-		image.texture = Texture2D::create(img.width(), img.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource);
-		image.texture->upload(img.data());
+		//image.texture = gfx::Texture::create2D(img.width(), img.height(), gfx::TextureFormat::RGBA8, gfx::TextureFlag::ShaderResource);
+		const void* data = img.data();
+		device->upload(image.texture, &data, 0, 0, img.width(), img.height());
 		image.layer = 0;
 	}
 
@@ -98,28 +102,19 @@ void MenuView::onCreate()
 	}
 
 	m_world.attach<UISystem>();
-	m_world.create();
 }
 
 void MenuView::onDestroy()
 {
-	m_world.destroy();
+	m_world.detach<UISystem>();
 }
 
-void MenuView::onUpdate(Time::Unit dt)
+void MenuView::onUpdate(Time dt)
 {
-	m_world.update(dt);
 }
 
-void MenuView::onRender()
+void MenuView::onRender(gfx::Frame* frame)
 {
-	Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
-	backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
-
-	m_world.render();
-
-	Renderer2D::render();
-	Renderer2D::clear();
 }
 
 void MenuView::onResize(uint32_t width, uint32_t height)
@@ -129,19 +124,20 @@ void MenuView::onResize(uint32_t width, uint32_t height)
 	onCreate();
 }
 
-void UISystem::onUpdate(World& world, Time::Unit deltaTime)
+void UISystem::onUpdate(World& world, Time deltaTime)
 {
 	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
 	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {
+		PlatformDevice* platform = Application::app()->platform();
 		vec2f s = vec2f(button.font->size(button.text));
-		const Position& mouse = Mouse::position();
+		const Position& mouse = platform->mouse().position();
 		// Hovered
 		if ((mouse.x > transform.position.x) && (mouse.x < transform.position.x + s.x + 2 * button.padding) && (mouse.y > transform.position.y) && (mouse.y < transform.position.y + s.y + 2 * button.padding))
 			button.hovered = true;
 		else
 			button.hovered = false;
 		// Active
-		if (button.hovered && Mouse::pressed(MouseButton::ButtonLeft))
+		if (button.hovered && platform->mouse().pressed(MouseButton::ButtonLeft))
 		{
 			button.active = true;
 			button.callback(mouse);
@@ -151,7 +147,7 @@ void UISystem::onUpdate(World& world, Time::Unit deltaTime)
 	});
 }
 
-void UISystem::onRender(World& world)
+void UISystem::onRender(World& world, gfx::Frame* frame)
 {
 	auto viewButton = world.registry().view<Transform2DComponent, UIButtonComponent>();
 	viewButton.each([](Transform2DComponent& transform, UIButtonComponent& button) {
@@ -160,14 +156,21 @@ void UISystem::onRender(World& world)
 		mat3f backgroundTransform = transform.model() * mat3f::scale(vec2f(s.x + 2 * button.padding, s.y + 2 * button.padding));
 		mat3f textTransform = transform.model() * mat3f::translate(vec2f(button.padding, button.padding));
 
-		Renderer2D::drawRect(backgroundTransform, vec2f(0.f), vec2f(1), uv2f(0.f), uv2f(1.f), nullptr, button.active ? button.colorButtonActive : (button.hovered ? button.colorButtonHovered : button.colorButton), button.layer);
-		Renderer2D::drawText(textTransform, button.text, *button.font, button.colorText, button.layer + 1);
+		//Renderer2D::drawRect(backgroundTransform, vec2f(0.f), vec2f(1), uv2f(0.f), uv2f(1.f), nullptr, button.active ? button.colorButtonActive : (button.hovered ? button.colorButtonHovered : button.colorButton), button.layer);
+		//Renderer2D::drawText(textTransform, button.text, *button.font, button.colorText, button.layer + 1);
 	});
 
 	auto viewImage = world.registry().view<Transform2DComponent, UIImageComponent>();
 	viewImage.each([&](Transform2DComponent& transform, UIImageComponent& image) {
-		Renderer2D::drawRect(transform.model(), vec2f(0.f), vec2f(1.f), uv2f(0.f), uv2f(1.f), image.texture, color4f(1.f), image.layer);
+		//Renderer2D::drawRect(transform.model(), vec2f(0.f), vec2f(1.f), uv2f(0.f), uv2f(1.f), image.texture, color4f(1.f), image.layer);
 	});
+
+	
+	//Framebuffer::Ptr backbuffer = Application::graphic()->backbuffer();
+	//backbuffer->clear(color4f(0.01f, 0.01f, 0.01f, 1.f));
+
+	//Renderer2D::render();
+	//Renderer2D::clear();
 }
 
 };

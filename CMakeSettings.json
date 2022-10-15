@@ -1,41 +1,18 @@
 ﻿{
   "configurations": [
     {
-      "name": "GLDebug",
+      "name": "VulkanDebug",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\.bin\\build\\${name}",
-      "installRoot": "${projectDir}\\.bin\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "FREETYPE_INCLUDE_DIR_freetype2",
-          "value": "./lib/Aka/lib/freetype/include",
-          "type": "PATH"
-        },
-        {
-          "name": "FREETYPE_INCLUDE_DIR_ft2build",
-          "value": "./lib/Aka/lib/freetype/include",
-          "type": "PATH"
-        }
-      ]
-    },
-    {
-      "name": "D3DDebug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\.bin\\build\\${name}",
-      "installRoot": "${projectDir}\\.bin\\install\\${name}",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
         {
-          "name": "GRAPHIC_D3D11",
+          "name": "GRAPHIC_VULKAN",
           "value": "True",
           "type": "BOOL"
         },
@@ -43,20 +20,13 @@
           "name": "GRAPHIC_OPENGL",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "GRAPHIC_D3D11",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
-    },
-    {
-      "name": "GLRelease",
-      "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
     }
   ]
 }

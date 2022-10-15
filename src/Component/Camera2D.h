@@ -8,13 +8,14 @@ namespace aka {
 
 struct Camera2DComponent
 {
+	static constexpr float range = 10.f;
 	Camera2DComponent() : Camera2DComponent(vec2f(1.f)) {}
 	Camera2DComponent(const vec2f& viewport) : camera{}, main(false) {
 		camera.left = camera.bottom = 0.f;
 		camera.right = viewport.x;
 		camera.top = viewport.y;
-		camera.nearZ = -1.f;
-		camera.farZ = 1.f;
+		camera.nearZ = -range;
+		camera.farZ = range;
 	}
 
 	CameraOrthographic camera;

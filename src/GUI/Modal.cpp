@@ -17,10 +17,10 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 	if (ImGui::Button(label))
 	{
 		ImGui::OpenPopup(buffer);
-		currentPath = ResourceManager::path("");
+		currentPath = OS::cwd() + "asset/";
 		String::copy(currentPathBuffer, 256, currentPath.cstr());
 		selectedPath = nullptr;
-		paths = Path::enumerate(currentPath);
+		paths = OS::enumerate(currentPath);
 	}
 	bool loading = false;
 	bool openFlag = true;
@@ -51,7 +51,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 			for (Path& path : paths)
 			{
 				bool selected = (&path == selectedPath);
-				bool isFolder = Directory::exist(currentPath + path);
+				bool isFolder = OS::Directory::exist(currentPath + path);
 				if (isFolder)
 				{
 					int err = snprintf(buffer, 256, "%s %s", ICON_FA_FOLDER, path.cstr());
@@ -85,7 +85,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		if (updatedList)
 		{
 			String::copy(currentPathBuffer, 256, currentPath.cstr());
-			paths = Path::enumerate(currentPath);
+			paths = OS::enumerate(currentPath);
 			selectedPath = nullptr;
 		}
 		if (ImGui::Button("Load"))
@@ -104,7 +104,7 @@ bool Modal::LoadButton(const char* label, Path* resultPath) {
 		}
 		ImGui::EndPopup();
 	}
-	return (loading && resultPath->length() > 0 && File::exist(Path(*resultPath)));
+	return (loading && resultPath->length() > 0 && OS::File::exist(Path(*resultPath)));
 }
 
 bool Modal::Error(const char* label, std::string& error)

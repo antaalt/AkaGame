@@ -7,9 +7,9 @@ namespace aka {
 
 struct SoundInstance {
 	SoundInstance() : SoundInstance(nullptr, 1.f, false) {}
-	SoundInstance(AudioStream::Ptr audio, float volume, bool loop = false) : audio(audio), loop(loop) { audio->setVolume(volume); }
+	SoundInstance(AudioStream* audio, float volume, bool loop = false) : audio(audio), loop(loop) { audio->setVolume(volume); }
 
-	AudioStream::Ptr audio;
+	AudioStream* audio;
 	bool loop;
 };
 

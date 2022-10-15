@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Aka/Core/Sprite.h>
 #include <Aka/Scene/Component.h>
+#include <Aka/Resource/Resource/Sprite.h>
 
 namespace aka {
 
@@ -12,22 +12,24 @@ struct SpriteAnimatorComponent
 	friend class SpriteAnimatorSystem;
 
 	SpriteAnimatorComponent();
-	SpriteAnimatorComponent(Sprite* sprite, int32_t layer);
+	SpriteAnimatorComponent(Sprite* sprite, int32_t layerDepth);
 
 	Sprite* sprite;
 	uint32_t currentAnimation;
 	uint32_t currentFrame;
-	int32_t layer;
+	int32_t layerDepth;
 	bool flipU, flipV;
 
-	const Sprite::Animation& getCurrentSpriteAnimation() const;
-	const Sprite::Frame& getCurrentSpriteFrame() const;
+	const SpriteAnimation& getCurrentSpriteAnimation() const;
+	const SpriteFrame& getCurrentSpriteFrame() const;
 
+	// Play a new animation and restart or not the timer
 	void play(const String& animation, bool restart = false);
+	// Reset the animation
 	void update();
 private:
-	Time::Unit animationTimer;
-	Time::Unit currentAnimationDuration;
+	Time animationTimer;
+	Time currentAnimationDuration;
 };
 
 };

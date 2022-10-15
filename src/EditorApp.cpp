@@ -9,8 +9,12 @@
 #include "GUI/ViewWidget.h"
 
 #include "IconsFontAwesome5.h"
+#include "Shaders.h"
 
 #include <Aka/Layer/ImGuiLayer.h>
+
+#include <Aka/Resource/AssetImporter.h>
+#include <Aka/Resource/Resource/StaticMesh.h>
 
 namespace aka {
 
@@ -19,8 +23,7 @@ World* getWorld(View::Ptr view)
 	if (typeid(*view.get()) == typeid(GameView))
 	{
 		GameView* v = reinterpret_cast<GameView*>(view.get());
-		Game& g = v->game(); // TODO merge gameview & game.
-		return &g.world;
+		return &v->world;
 	}
 	else
 	{
@@ -29,26 +32,36 @@ World* getWorld(View::Ptr view)
 	}
 }
 
+EditorApp::EditorApp() :
+	Application(std::vector<Layer*>{ new ImGuiLayer }),
+	m_shaderReloadTimeElapsed(Time::zero()),
+	m_paused(false)
+{
+}
+
 void EditorApp::onCreate(int argc, char* argv[])
 {
 	{
-		Device device = Device::getDefault();
-		Logger::info("Device vendor : ", device.vendor);
-		Logger::info("Device renderer : ", device.renderer);
-		Logger::info("Device memory : ", device.memory);
-		Logger::info("Device version : ", device.version);
+		AssetImporter::import(OS::cwd() + "asset/font/Espera/Espera-Bold.ttf", ResourceType::Font, [&](Asset& asset) {
+			asset.load(graphic());
+			resource()->add("EsperaBold", asset);
+		});
+		AssetImporter::import(OS::cwd() + "asset/font/Theboldfont/theboldfont.ttf", ResourceType::Font, [&](Asset& asset) {
+			asset.load(graphic());
+			resource()->add("TheBoldFont", asset);
+		});
+		AssetImporter::import(OS::cwd() + "asset/font/OpenSans/OpenSans-Regular.ttf", ResourceType::Font, [&](Asset& asset) {
+			asset.load(graphic());
+			resource()->add("OpenSans", asset);
+		});
 	}
 
 	{
-		attach<ImGuiLayer>();
-	}
-
-	{
-		// INIT fonts
-		// TODO application holds assets (provide functions such as load texture, font...)
-		FontManager::create("Espera48", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 48));
-		FontManager::create("Espera16", Font(ResourceManager::path("font/Espera/Espera-Bold.ttf"), 16));
-		FontManager::create("BoldFont48", Font(ResourceManager::path("font/Theboldfont/theboldfont.ttf"), 48));
+		// Load shader descriptions
+		ShaderRegistry* registry = program();
+		registry->add(ProgramAnimatedSprite, graphic());
+		registry->add(ProgramStaticSprite, graphic());
+		registry->add(ProgramTilemap, graphic());
 	}
 
 	{
@@ -59,17 +72,34 @@ void EditorApp::onCreate(int argc, char* argv[])
 		m_widgets.push_back(new ViewWidget);
 
 		// --- Font
+		Asset EsperaBoldAsset = resource()->find("EsperaBold");
+		Asset TheBoldFontAsset = resource()->find("TheBoldFont");
+		Asset OpenSansAsset = resource()->find("OpenSans");
+		Font* EsperaBold = EsperaBoldAsset.get<Font>();
+		Font* TheBoldFont = TheBoldFontAsset.get<Font>();
+		Font* OpenSans = OpenSansAsset.get<Font>();
+		Blob FontAwesomeTTF[2];
+		OS::File::read(OS::cwd() + "asset/font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf", &FontAwesomeTTF[0]);
+		OS::File::read(OS::cwd() + "asset/font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf", &FontAwesomeTTF[1]);
+		const Blob& OpenSansTTF = reinterpret_cast<FontBuildData*>(OpenSans->getBuildData())->ttf;
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImFontConfig config;
 		config.MergeMode = true;
 		config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
 		static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-		Path asset = ResourceManager::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Regular-400.otf");
-		Path asset2 = ResourceManager::path("font/FontAwesome5.15.2/Font Awesome 5 Free-Solid-900.otf");
-		Path assetDefault = ResourceManager::path("font/OpenSans/OpenSans-Regular.ttf");
-		io.FontDefault = io.Fonts->AddFontFromFileTTF(assetDefault.cstr(), 18.0f);
-		ImFont* iconFont = io.Fonts->AddFontFromFileTTF(asset.cstr(), 13.0f, &config, icon_ranges);
-		ImFont* iconFont2 = io.Fonts->AddFontFromFileTTF(asset2.cstr(), 13.0f, &config, icon_ranges);
+		void* ImGuiOpenSansTTF = IM_ALLOC(OpenSansTTF.size()); // ownership transferred
+		void* ImGuiFontAwesomeTTF0 = IM_ALLOC(FontAwesomeTTF[0].size()); // ownership transferred
+		void* ImGuiFontAwesomeTTF1 = IM_ALLOC(FontAwesomeTTF[1].size()); // ownership transferred
+		memcpy(ImGuiOpenSansTTF, OpenSansTTF.data(), OpenSansTTF.size());
+		memcpy(ImGuiFontAwesomeTTF0, FontAwesomeTTF[0].data(), FontAwesomeTTF[0].size());
+		memcpy(ImGuiFontAwesomeTTF1, FontAwesomeTTF[1].data(), FontAwesomeTTF[1].size());
+		io.FontDefault = io.Fonts->AddFontFromMemoryTTF(ImGuiOpenSansTTF, (int)OpenSansTTF.size(), 18.0f);
+		ImFont* iconFont = io.Fonts->AddFontFromMemoryTTF(ImGuiFontAwesomeTTF0, (int)FontAwesomeTTF[0].size(), 13.0f, &config, icon_ranges);
+		ImFont* iconFont2 = io.Fonts->AddFontFromMemoryTTF(ImGuiFontAwesomeTTF1, (int)FontAwesomeTTF[1].size(), 13.0f, &config, icon_ranges);
+		bool buildResult = io.Fonts->Build();
+		AKA_ASSERT(buildResult, "Font build failed");
+		AKA_ASSERT(io.FontDefault != nullptr, "Icon font not loaded");
 		AKA_ASSERT(iconFont != nullptr, "Icon font not loaded");
 		AKA_ASSERT(iconFont2 != nullptr, "Icon font not loaded");
 
@@ -86,6 +116,9 @@ void EditorApp::onCreate(int argc, char* argv[])
 
 void EditorApp::onDestroy()
 {
+	AssetRegistry* registry = Application::app()->resource();
+	registry->clear();
+	m_world->clear();
 	m_view->onDestroy();
 
 	{
@@ -96,12 +129,6 @@ void EditorApp::onDestroy()
 		}
 		m_widgets.clear();
 	}
-
-	{
-		FontManager::destroy("Espera48");
-		FontManager::destroy("Espera16");
-		FontManager::destroy("BoldFont48");
-	}
 }
 
 void EditorApp::onFrame()
@@ -109,35 +136,42 @@ void EditorApp::onFrame()
 	m_view->onFrame();
 }
 
-void EditorApp::onFixedUpdate(Time::Unit deltaTime)
+void EditorApp::onFixedUpdate(Time deltaTime)
 {
 	m_view->onFixedUpdate(deltaTime);
 }
 
-void EditorApp::onUpdate(Time::Unit deltaTime)
+void EditorApp::onUpdate(Time deltaTime)
 {
 	EventDispatcher<PauseGameEvent>::dispatch();
 	// Update the game logic
 	m_view->onUpdate(deltaTime);
-
 	// Reset
-	if (Keyboard::down(KeyboardKey::R))
+	if (platform()->keyboard().down(KeyboardKey::R))
 	{
 		// TODO send back to level 1 ?
 		EventDispatcher<PlayerDeathEvent>::emit();
 	}
 	// Quit
-	if (Keyboard::pressed(KeyboardKey::Escape))
+	if (platform()->keyboard().pressed(KeyboardKey::Escape))
 		EventDispatcher<QuitEvent>::emit();
 
 	// UI
 	for (EditorWidget* widget : m_widgets)
 		widget->update(*m_world);
+
+	// Shaders
+	m_shaderReloadTimeElapsed += deltaTime;
+	if (m_shaderReloadTimeElapsed.milliseconds() > 1000)
+	{
+		m_shaderReloadTimeElapsed = Time::zero();
+		program()->reloadIfChanged(graphic());
+	}
 }
 
-void EditorApp::onRender()
+void EditorApp::onRender(gfx::Frame* frame)
 {
-	m_view->onRender();
+	m_view->onRender(frame);
 	for (EditorWidget* widget : m_widgets)
 		widget->draw(*m_world);
 }
@@ -149,6 +183,7 @@ void EditorApp::onResize(uint32_t width, uint32_t height)
 
 void EditorApp::onPresent()
 {
+	m_view->onPresent();
 	EventDispatcher<ViewChangedEvent>::dispatch();
 }
 
@@ -171,11 +206,12 @@ void EditorApp::onReceive(const PauseGameEvent& event)
 {
 	if (event.pause != m_paused)
 	{
-		m_paused = !m_paused;
-		if (m_paused)
-			AudioBackend::stop();
-		else
-			AudioBackend::start();
+		//AudioDevice* audio = Application::audio();
+		//m_paused = !m_paused;
+		//if (m_paused)
+		//	audio->stop();
+		//else
+		//	audio->start();
 	}
 }
 

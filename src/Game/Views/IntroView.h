@@ -10,11 +10,11 @@ class IntroView : public View {
 public:
 	void onCreate() override;
 	void onDestroy() override;
-	void onUpdate(Time::Unit dt) override;
-	void onRender() override;
+	void onUpdate(Time dt) override;
+	void onRender(gfx::Frame* frame) override;
 private:
 	float m_logoAlpha;
-	Time::Unit m_elapsed;
+	Time m_elapsed;
 };
 
 };

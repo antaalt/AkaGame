@@ -19,18 +19,13 @@ add_executable(AkaGame
 	"src/System/PhysicSystem.cpp"
 	"src/System/SoundSystem.h"
 	"src/System/SoundSystem.cpp"
-	"src/System/TextRenderSystem.h"
-	"src/System/TextRenderSystem.cpp"
-	"src/System/TileMapRenderSystem.h"
-	"src/System/TileMapRenderSystem.cpp"
-	"src/System/SpriteRenderSystem.h"
-	"src/System/SpriteRenderSystem.cpp"
+	"src/System/RenderSystem.cpp" 
+	
 	"src/System/ParticleSystem.h"
 	"src/System/ParticleSystem.cpp"
 
 	"src/GUI/EntityWidget.h"
 	"src/GUI/EntityWidget.cpp"
-	
 	
 	"src/GUI/InfoWidget.h"
 	"src/GUI/InfoWidget.cpp"
@@ -55,8 +50,6 @@ add_executable(AkaGame
 	"src/Game/Resources.cpp"
 	"src/Game/OgmoWorld.h"
 	"src/Game/OgmoWorld.cpp"
-	"src/Game/Game.h"
-	"src/Game/Game.cpp"
 
 	"src/Component/Camera2D.h"
 	"src/Component/Coin.h"
@@ -70,7 +63,8 @@ add_executable(AkaGame
 	"src/Component/SpriteAnimator.cpp"
 	"src/Component/Transform2D.h"
 	"src/Component/Transform2D.cpp"
-)
+	
+ )
 
 # Add third party libs
 target_include_directories(AkaGame PUBLIC lib/Aka/lib/glfw/include)

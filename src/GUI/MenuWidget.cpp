@@ -11,32 +11,33 @@ MenuWidget::MenuWidget() :
 void MenuWidget::update(World &world)
 {
 	// Screenshot
-	if (Keyboard::down(KeyboardKey::F1))
+	PlatformDevice* platform = Application::app()->platform();
+	gfx::GraphicDevice* graphic = Application::app()->graphic();
+	/*if (platform->keyboard().down(KeyboardKey::F1))
 	{
-		GraphicDevice* device = GraphicBackend::device();
-		Backbuffer::Ptr backbuffer = device->backbuffer();
+		Backbuffer::Ptr backbuffer = graphic->backbuffer();
 		Image image(backbuffer->width(), backbuffer->height(), 4, ImageFormat::UnsignedByte);
-		device->backbuffer()->download(image.data());
+		graphic->backbuffer()->download(image.data());
 		image.encodePNG("screen.png");
 		Logger::info("Screenshot taken.");
 	}
-	if (Keyboard::down(KeyboardKey::F2))
+	if (platform->keyboard().down(KeyboardKey::F2))
 	{
 		m_vsync = !m_vsync;
 		Synchronisation sync = Synchronisation::Unlimited;
 		if (m_vsync)
 			sync = Synchronisation::Vertical;
-		GraphicBackend::device()->backbuffer()->set(sync);
+		graphic->backbuffer()->set(sync);
 		Logger::info("Vsync ", m_vsync ? "enabled" : "disabled");
-	}
-	if (Keyboard::down(KeyboardKey::F3))
+	}*/
+	if (platform->keyboard().down(KeyboardKey::F3))
 	{
 		m_fullscreen = !m_fullscreen;
-		PlatformBackend::setFullscreen(m_fullscreen);
+		platform->fullscreen(m_fullscreen);
 		Logger::info("Fullscreen ", m_fullscreen ? "enabled" : "disabled");
 	}
 	// Pause the GameView
-	if (Keyboard::down(KeyboardKey::P))
+	if (platform->keyboard().down(KeyboardKey::P))
 	{
 		EventDispatcher<PauseGameEvent>::emit(PauseGameEvent{ !m_pause });
 	}
@@ -44,6 +45,8 @@ void MenuWidget::update(World &world)
 
 void MenuWidget::draw(World& world)
 {
+	PlatformDevice* platform = Application::app()->platform();
+	gfx::GraphicDevice* graphic = Application::app()->graphic();
 	if (ImGui::BeginMainMenuBar())
 	{
 		// Edit
@@ -55,27 +58,26 @@ void MenuWidget::draw(World& world)
             }
 			if (ImGui::MenuItem("Screenshot", "F1"))
 			{
-				GraphicDevice* device = GraphicBackend::device();
-				Backbuffer::Ptr backbuffer = device->backbuffer();
+				/*Backbuffer::Ptr backbuffer = graphic->backbuffer();
 				Image image(backbuffer->width(), backbuffer->height(), 4, ImageFormat::UnsignedByte);
-				device->backbuffer()->download(image.data());
+				graphic->backbuffer()->download(image.data());
 				image.encodePNG("screen.png");
-				Logger::info("Screenshot taken.");
+				Logger::info("Screenshot taken.");*/
 			}
             ImGui::Separator();
             if (ImGui::BeginMenu("Config"))
             {
-                if (ImGui::MenuItem("Vsync", "F2", &m_vsync))
+				/*if (ImGui::MenuItem("Vsync", "F2", &m_vsync))
                 {
 					Synchronisation sync = Synchronisation::Unlimited;
 					if (m_vsync)
 						sync = Synchronisation::Vertical;
-					GraphicBackend::device()->backbuffer()->set(sync);
+					graphic->backbuffer()->set(sync);
 					Logger::info("Vsync ", m_vsync ? "enabled" : "disabled");
-                }
+                }*/
 				if (ImGui::MenuItem("Fullscreen", "F3", &m_fullscreen))
 				{
-					PlatformBackend::setFullscreen(m_fullscreen);
+					platform->fullscreen(m_fullscreen);
 					Logger::info("Fullscreen ", m_fullscreen ? "enabled" : "disabled");
 				}
                 ImGui::EndMenu();

@@ -7,7 +7,7 @@
 
 namespace aka {
 
-void ParticleSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
+void ParticleSystem::onFixedUpdate(World& world, Time deltaTime)
 {
 	auto view = world.registry().view<Particle2DComponent, Transform2DComponent>();
 	// Move particles
@@ -30,7 +30,7 @@ void ParticleSystem::onFixedUpdate(World& world, Time::Unit deltaTime)
 	}
 }
 
-void ParticleSystem::onRender(World& world)
+void ParticleSystem::onRender(World& world, gfx::Frame* frame)
 {
 	auto view = world.registry().view<Particle2DComponent, Transform2DComponent>();
 	view.each([&](Particle2DComponent& particle, Transform2DComponent& transform) {
@@ -40,7 +40,7 @@ void ParticleSystem::onRender(World& world)
 		t *= mat3f::rotate(transform.rotation);
 		t *= mat3f::translate(vec2f(-0.5f * transform.size));
 		t *= mat3f::scale(transform.size);
-		Renderer2D::drawRect(t, vec2f(0.f), vec2f(1.f), uv2f(0.f), uv2f(1.f), nullptr, particle.color, particle.layer);
+		//Renderer2D::drawRect(t, vec2f(0.f), vec2f(1.f), uv2f(0.f), uv2f(1.f), nullptr, particle.color, particle.layer);
 	});
 }
 

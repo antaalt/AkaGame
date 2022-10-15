@@ -1,0 +1,29 @@
+{
+  "asset": {
+    "version": "0.1"
+  },
+  "programs": {
+    "sprite": {
+      "vertex": "sprite.vert",
+      "fragment": "sprite.frag"
+    },
+    "tilemap": {
+      "vertex": "tilemap.vert",
+      "fragment": "tilemap.frag"
+    }
+  },
+  "shaders": {
+    "sprite.vert": {
+      "path": "asset/shaders/renderer/sprite.vert"
+    },
+    "sprite.frag": {
+      "path": "asset/shaders/renderer/sprite.frag"
+    },
+    "tilemap.vert": {
+      "path": "asset/shaders/renderer/tilemap.vert"
+    },
+    "tilemap.frag": {
+      "path": "asset/shaders/renderer/tilemap.frag"
+    }
+  }
+}

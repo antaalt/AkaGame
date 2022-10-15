@@ -38,33 +38,36 @@ void ResourcesWidget::draw(World& world)
 			{
 				if (ImGui::BeginChild("FontChild", ImVec2(0, 300), true))
 				{
-					for (auto& it : FontManager::iterator)
+					AssetRegistry* registry = Application::app()->resource();
+					for (auto asset : *registry)
 					{
-						std::string name = it.first;
-						Font& font = it.second;
-						if (ImGui::TreeNode(name.c_str()))
+						if (asset.type != ResourceType::Font)
+							continue;
+						String name = asset.name;
+						Font* font = asset.get<Font>();
+						if (ImGui::TreeNode(name.cstr()))
 						{
-							ImGui::Text("Family : %s", font.family().cstr());
-							ImGui::Text("Style : %s", font.style().cstr());
-							ImGui::Text("Height : %upx", font.height());
+							ImGui::Text("Family : %s", font->family().cstr());
+							ImGui::Text("Style : %s", font->style().cstr());
+							ImGui::Text("Height : %upx", font->height());
 
-							Texture::Ptr atlas = font.getCharacter(0).texture.texture;
-							float uvx = 1.f / (atlas->height() / font.height());
-							float uvy = 1.f / (atlas->width() / font.height());
+							gfx::TextureHandle atlas = font->getCharacter(0).texture.texture;
+							float uvx = 1.f / (atlas.data->height / font->height());
+							float uvy = 1.f / (atlas.data->width / font->height());
 
 							uint32_t lineCount = 0;
-							for (uint32_t i = 0; i < (uint32_t)font.count(); i++)
+							for (uint32_t i = 0; i < (uint32_t)font->count(); i++)
 							{
-								const Character& character = font.getCharacter(i);
+								const Character& character = font->getCharacter(i);
 								ImGui::Image(
-									(ImTextureID)character.texture.texture->handle().value(),
+									(ImTextureID)character.texture.texture.data->native,
 									ImVec2(30, 30),
 #if defined(ORIGIN_BOTTOM_LEFT)
-									ImVec2(character.texture.get(0).u, character.texture.get(0).v + uvy),
-									ImVec2(character.texture.get(0).u + uvx, character.texture.get(0).v),
+									ImVec2(character.texture.getStart().u, character.texture.getEnd().v + uvy),
+									ImVec2(character.texture.getStart().u + uvx, character.texture.getEnd().v),
 #else
-									ImVec2(character.texture.get(0).u, character.texture.get(0).v),
-									ImVec2(character.texture.get(0).u + uvx, character.texture.get(0).v + uvy),
+									ImVec2(character.texture.getStart().u, character.texture.getEnd().v),
+									ImVec2(character.texture.getStart().u + uvx, character.texture.getEnd().v + uvy),
 #endif
 									ImVec4(1, 1, 1, 1),
 									ImVec4(1, 1, 1, 1)
@@ -77,15 +80,15 @@ void ResourcesWidget::draw(World& world)
 									ImGui::Text("Bearing : (%d, %d)", character.bearing.x, character.bearing.y);
 									ImVec2 size = ImVec2(300, 300);
 									ImGui::Image(
-										(ImTextureID)character.texture.texture->handle().value(),
+										(ImTextureID)character.texture.texture.data->native,
 										size,
 										ImVec2(0, 0),
 										ImVec2(1, 1),
 										ImVec4(1, 1, 1, 1),
 										ImVec4(1, 1, 1, 1)
 									);
-									uv2f start = character.texture.get(0);
-									uv2f end = character.texture.get(1);
+									uv2f start = character.texture.getStart();
+									uv2f end = character.texture.getEnd();
 									ImVec2 startVec = ImVec2(ImGui::GetItemRectMin().x + start.u * size.x, ImGui::GetItemRectMin().y + start.v * size.y);
 									ImVec2 endVec = ImVec2(ImGui::GetItemRectMin().x + end.u * size.x + 1, ImGui::GetItemRectMin().y + end.v * size.y + 1);
 									ImU32 red = (93 << 24) | (4 << 16) | (26 << 8) | (255 << 0);
@@ -125,9 +128,12 @@ void ResourcesWidget::draw(World& world)
 						}
 						else
 						{
-							try
+							/*try
 							{
-								FontManager::create(File::name(path), Font(path, height));
+								Blob blob;
+								if (!OS::File::read(path, &blob))
+									Logger::error("Failed to load font");
+								FontManager::create(OS::File::name(path), Font::create(blob.data(), blob.size(), height));
 								String::copy(bufferPath, 256, path.cstr());
 								height = 48;
 								path = "";
@@ -136,7 +142,7 @@ void ResourcesWidget::draw(World& world)
 							catch (const std::exception&)
 							{
 								error = "Failed loading font.";
-							}
+							}*/
 						}
 					}
 					ImGui::SameLine();
@@ -153,14 +159,18 @@ void ResourcesWidget::draw(World& world)
 			{
 				if (ImGui::BeginChild("SpriteChild", ImVec2(0, 300), true))
 				{
-					for (auto& it : SpriteManager::iterator)
+					AssetRegistry* registry = Application::app()->resource();
+					for (auto asset : *registry)
 					{
-						std::string name = it.first;
-						Sprite* sprite = &it.second;
-						if (ImGui::TreeNode(name.c_str()))
+						if (asset.type != ResourceType::Sprite)
+							continue;
+						String name = asset.name;
+						Sprite* sprite = asset.get<Sprite>();
+						if (ImGui::TreeNode(name.cstr()))
 						{
-							for (Sprite::Animation& animation : sprite->animations)
+							for (uint32_t i = 0; i < sprite->getAnimationCount(); i++)
 							{
+								SpriteAnimation& animation = sprite->getAnimation(i);
 								if (ImGui::TreeNodeEx(animation.name.cstr()))
 								{
 									char buffer[256];
@@ -168,7 +178,7 @@ void ResourcesWidget::draw(World& world)
 									if (ImGui::InputText("Name", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue))
 										animation.name = buffer;
 									uint32_t frameID = 0;
-									for (Sprite::Frame& frame : animation.frames)
+									for (SpriteFrame& frame : animation.frames)
 									{
 										int error = snprintf(buffer, 256, "Frame %u", frameID++);
 										if (ImGui::TreeNodeEx(buffer, ImGuiTreeNodeFlags_Bullet))
@@ -176,7 +186,7 @@ void ResourcesWidget::draw(World& world)
 											int d = (int)frame.duration.milliseconds();
 											if (ImGui::SliderInt("Duration", &d, 0, 1000))
 											{
-												frame.duration = Time::Unit::milliseconds(d);
+												frame.duration = Time::milliseconds(d);
 												auto view = world.registry().view<SpriteAnimatorComponent>();
 												view.each([sprite](SpriteAnimatorComponent& animator) {
 													// Reset current frame duration stored in animator
@@ -192,9 +202,9 @@ void ResourcesWidget::draw(World& world)
 												frame.width = (uint32_t)size[0];
 												frame.height = (uint32_t)size[1];
 											}
-											float ratio = static_cast<float>(frame.texture->width()) / static_cast<float>(frame.texture->height());
+											float ratio = static_cast<float>(frame.handle.data->width) / static_cast<float>(frame.handle.data->height);
 											ImGui::Image(
-												(ImTextureID)frame.texture->handle().value(),
+												(ImTextureID)frame.handle.data->native,
 												ImVec2(200, 200 * 1 / ratio),
 #if defined(ORIGIN_BOTTOM_LEFT)
 												ImVec2(0, 1), ImVec2(1, 0)
@@ -217,12 +227,12 @@ void ResourcesWidget::draw(World& world)
 										{
 											// TODO texture as resource ?
 											// TODO modal to select sampler
-											Sprite::Frame frame = Sprite::Frame::create(
-												Texture2D::create(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource),
-												Time::Unit::milliseconds(500)
+											/*SpriteFrame frame = SpriteFrame::create(
+												gfx::Texture::create2D(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource),
+												Time::milliseconds(500)
 											);
 											frame.texture->upload(image.data());
-											animation.frames.push_back(frame);
+											animation.frames.push_back(frame);*/
 										}
 									}
 									Modal::Error("Error", error);
@@ -234,9 +244,9 @@ void ResourcesWidget::draw(World& world)
 							ImGui::SameLine();
 							if (ImGui::Button("Add animation") && strlen(buffer) > 0)
 							{
-								Sprite::Animation animation;
+								SpriteAnimation animation;
 								animation.name = buffer;
-								sprite->animations.push_back(animation);
+								//sprite->animations.push_back(animation);
 							}
 
 							ImGui::TreePop();
@@ -254,11 +264,11 @@ void ResourcesWidget::draw(World& world)
 				{
 					static char spriteName[256];
 					ImGui::InputTextWithHint("Name##Sprite", "Sprite name", spriteName, 256);
-					if (ImGui::Button("Create##Sprite"))
+					/*if (ImGui::Button("Create##Sprite"))
 					{
 						SpriteManager::create(spriteName, Sprite());
 						ImGui::CloseCurrentPopup();
-					}
+					}*/
 					ImGui::SameLine();
 					if (ImGui::Button("Cancel"))
 						ImGui::CloseCurrentPopup();
@@ -282,10 +292,10 @@ void ResourcesWidget::draw(World& world)
 						}
 						else
 						{
-							try
+							/*try
 							{
 								FileStream stream(path, FileMode::Read, FileType::Binary);
-								SpriteManager::create(File::name(bufferPath), Sprite::parse(stream));
+								SpriteManager::create(OS::File::name(bufferPath), Sprite::parse(stream));
 								String::copy(bufferPath, 256, path.cstr());
 								path = "";
 								ImGui::CloseCurrentPopup();
@@ -293,7 +303,7 @@ void ResourcesWidget::draw(World& world)
 							catch (const std::exception&)
 							{
 								error = "Failed to load aseprite file.";
-							}
+							}*/
 						}
 					}
 					ImGui::SameLine();
@@ -307,20 +317,24 @@ void ResourcesWidget::draw(World& world)
 			{
 				if (ImGui::BeginChild("AudioChild", ImVec2(0, 300), true))
 				{
-					for (auto& it : AudioManager::iterator)
+					AssetRegistry* registry = Application::app()->resource();
+					for (auto asset : *registry)
 					{
-						std::string name = it.first;
-						AudioStream::Ptr audio = it.second;
-						if (ImGui::TreeNode(name.c_str()))
+						if (asset.type != ResourceType::Audio)
+							continue;
+						String name = asset.name;
+						//AudioStream* audio = asset.get<AudioStream>();
+					
+						if (ImGui::TreeNode(name.cstr()))
 						{
-							float duration = audio->samples() / (float)(audio->frequency() * audio->channels());
+							float duration = 0.f;// audio->samples() / (float)(audio->frequency() * audio->channels());
 							uint32_t ms = (uint32_t)(duration * 1000.f) % 1000;
 							uint32_t s = (uint32_t)(duration) % 60;
 							uint32_t m = (uint32_t)(duration / 60);
 							uint32_t h = (uint32_t)(duration / (60 * 60));
 							ImGui::Text("Duration : %02u:%02u:%02u.%03u", h, m, s, ms);
-							ImGui::Text("Frequency : %u", audio->frequency());
-							ImGui::Text("Channels : %u", audio->channels());
+							//ImGui::Text("Frequency : %u", audio->frequency());
+							//ImGui::Text("Channels : %u", audio->channels());
 							ImGui::TreePop();
 						}
 					}
@@ -349,21 +363,21 @@ void ResourcesWidget::draw(World& world)
 						}
 						else
 						{
-							AudioStream::Ptr stream;
+							AudioStream* stream;
 							if (memory)
 								stream = AudioStream::loadMemory(path);
 							else
 								stream = AudioStream::openStream(path);
 							if (stream == nullptr)
 								error = "Could not load audio";
-							else
+							/*else
 							{
-								AudioManager::create(File::name(path), std::move(stream));
+								AudioManager::create(OS::File::name(path), std::move(stream));
 								String::copy(bufferPath, 256, path.cstr());
 								path = "";
 								memory = false;
 								ImGui::CloseCurrentPopup();
-							}
+							}*/
 						}
 					}
 					ImGui::SameLine();

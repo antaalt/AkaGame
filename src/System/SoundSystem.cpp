@@ -2,7 +2,7 @@
 
 #include <Aka/OS/Logger.h>
 #include <Aka/Scene/World.h>
-#include <Aka/Audio/AudioBackend.h>
+#include <Aka/Audio/AudioDevice.h>
 #include "../Component/SoundInstance.h"
 
 namespace aka {
@@ -11,19 +11,19 @@ void onAudioAdd(entt::registry& registry, entt::entity entity)
 {
 	SoundInstance& sound = registry.get<SoundInstance>(entity);
 	sound.audio->seek(0);
-	AudioBackend::play(sound.audio);
+	Application::app()->audio()->play(sound.audio);
 }
 
 void onAudioRemove(entt::registry& registry, entt::entity entity)
 {
 	SoundInstance& sound = registry.get<SoundInstance>(entity);
-	AudioBackend::close(sound.audio);
+	Application::app()->audio()->close(sound.audio);
 }
 
 void onAudioUpdate(entt::registry& registry, entt::entity entity)
 {
 	SoundInstance& sound = registry.get<SoundInstance>(entity);
-	AudioBackend::play(sound.audio);
+	Application::app()->audio()->play(sound.audio);
 }
 
 void SoundSystem::onCreate(World& world)
@@ -40,7 +40,7 @@ void SoundSystem::onDestroy(World& world)
 	world.registry().on_update<SoundInstance>().disconnect<&onAudioUpdate>();
 }
 
-void SoundSystem::onUpdate(World& world, Time::Unit deltaTime)
+void SoundSystem::onUpdate(World& world, Time deltaTime)
 {
 	auto view = world.registry().view<SoundInstance>();
 	for (entt::entity entity : view) {
@@ -50,7 +50,7 @@ void SoundSystem::onUpdate(World& world, Time::Unit deltaTime)
 			if (sound.loop)
 			{
 				sound.audio->seek(0);
-				AudioBackend::play(sound.audio);
+				Application::app()->audio()->play(sound.audio);
 			}
 			else
 				world.registry().destroy(entity);

@@ -53,29 +53,42 @@ template <> const char* ComponentNode<SpriteAnimatorComponent>::name() { return 
 template <> const char* ComponentNode<SpriteAnimatorComponent>::icon() { return ICON_FA_PLAY; }
 template <> bool ComponentNode<SpriteAnimatorComponent>::draw(SpriteAnimatorComponent& animator)
 {
+	bool needUpdate = false;
 	char buffer[256];
 	// Set the name of the current sprite
 	char currentSpriteName[256] = "None";
 	Sprite* currentSprite = animator.sprite;
-	for (auto& sprite : SpriteManager::iterator)
-		if (currentSprite == &sprite.second)
-			String::copy(currentSpriteName, 256, sprite.first.cstr());
+	AssetRegistry* registry =  Application::app()->resource();
+	for (const Asset& asset : *registry)
+	{
+		if (asset.type != ResourceType::Sprite)
+			continue;
+		const Sprite* sprite = asset.get<Sprite>();
+		if (currentSprite == sprite)
+		{
+			String::copy(currentSpriteName, 256, asset.name.cstr());
+		}
+	}
 	snprintf(buffer, 256, "%s", currentSpriteName);
 	if (ImGui::BeginCombo("Sprite", buffer))
 	{
-		for (auto& sprite : SpriteManager::iterator)
+		for (Asset& asset : *registry)
 		{
-			bool sameSprite = (currentSprite == &sprite.second);
-			snprintf(buffer, 256, "%s", sprite.first.cstr());
+			if (asset.type != ResourceType::Sprite)
+				continue;
+			Sprite* sprite = asset.get<Sprite>();
+			bool sameSprite = (currentSprite == sprite);
+			snprintf(buffer, 256, "%s", asset.name.cstr());
 			if (ImGui::Selectable(buffer, sameSprite))
 			{
 				if (!sameSprite)
 				{
-					animator.sprite = &sprite.second;
+					animator.sprite = sprite;
 					animator.currentAnimation = 0;
 					animator.currentFrame = 0;
 					animator.update();
-					String::copy(currentSpriteName, 256, sprite.first.cstr());
+					String::copy(currentSpriteName, 256, asset.name.cstr());
+					needUpdate = true;
 				}
 			}
 			if (sameSprite)
@@ -84,21 +97,22 @@ template <> bool ComponentNode<SpriteAnimatorComponent>::draw(SpriteAnimatorComp
 		ImGui::EndCombo();
 	}
 	uint32_t i = 0;
-	for (Sprite::Animation& anim : animator.sprite->animations)
+	for (uint32_t i = 0; i < animator.sprite->getAnimationCount(); i++)
 	{
-		snprintf(buffer, 256, "%s (%" PRIu64 " ms)", anim.name.cstr(), anim.duration().milliseconds());
+		const SpriteAnimation& animation = animator.sprite->getAnimation(i);
+		snprintf(buffer, 256, "%s (%" PRIu64 " ms)", animation.name.cstr(), animation.getDuration().milliseconds());
 		bool currentAnimation = animator.currentAnimation == i;
 		if (ImGui::RadioButton(buffer, currentAnimation))
 		{
 			animator.currentAnimation = i;
 			animator.currentFrame = 0;
 			animator.update();
+			needUpdate = true;
 		}
-		i++;
 	}
-	ImGui::SliderInt("Frame", reinterpret_cast<int*>(&animator.currentFrame), 0, (int)animator.sprite->animations[animator.currentAnimation].frames.size() - 1);
-	ImGui::SliderInt("Layer", &animator.layer, -20, 20);
-	return false;
+	ImGui::SliderInt("Frame", reinterpret_cast<int*>(&animator.currentFrame), 0, (int)animator.sprite->getAnimation(animator.currentAnimation).frames.size() - 1);
+	ImGui::SliderInt("Layer", &animator.layerDepth, -20, 20);
+	return needUpdate;
 }
 
 template <> const char* ComponentNode<Collider2DComponent>::name() { return "Collider2D"; }
@@ -137,62 +151,71 @@ template <> bool ComponentNode<Camera2DComponent>::draw(Camera2DComponent& camer
 
 template <> const char* ComponentNode<SoundInstance>::name() { return "SoundInstance"; }
 template <> const char* ComponentNode<SoundInstance>::icon() { return ICON_FA_MUSIC; }
-template <> bool ComponentNode<SoundInstance>::draw(SoundInstance& audio)
+template <> bool ComponentNode<SoundInstance>::draw(SoundInstance& sound)
 {
 	bool needUpdate = false;
 	char currentAudio[256] = "None";
-	for (auto& a : AudioManager::iterator)
-		if (audio.audio == a.second)
-			String::copy(currentAudio, 256, a.first.cstr());
+	AssetRegistry* registry = Application::app()->resource();
+	for (Asset& asset : *registry)
+	{
+		if (asset.type != ResourceType::Audio)
+			continue;
+		String::copy(currentAudio, 256, asset.name.cstr());
+	}
 	if (ImGui::BeginCombo("Audio", currentAudio))
 	{
-		for (auto& it : AudioManager::iterator)
+		for (Asset& asset : *registry)
 		{
-			bool same = (audio.audio == it.second);
-			if (ImGui::Selectable(it.first.cstr(), same))
+			if (asset.type != ResourceType::Audio)
+				continue;
+			//AudioStream* audio = asset.get<AudioStream>();
+			/*bool same = (sound.audio == audio);
+			if (ImGui::Selectable(asset.name.cstr(), same))
 			{
 				if (!same)
 				{
-					AudioBackend::close(audio.audio);
-					audio.audio = it.second;
-					AudioBackend::play(audio.audio);
+					AudioDevice* device = Application::app()->audio();
+					device->close(sound.audio);
+					//sound.audio = audio;
+					device->play(sound.audio);
 					needUpdate = true;
 				}
 			}
 			if (same)
-				ImGui::SetItemDefaultFocus();
+				ImGui::SetItemDefaultFocus();*/
 		}
 		ImGui::EndCombo();
 	}
-	float current = audio.audio->offset() / (float)(audio.audio->frequency());
-	float duration = audio.audio->samples() / (float)(audio.audio->frequency());
+	float current = sound.audio->offset() / (float)(sound.audio->frequency());
+	float duration = sound.audio->samples() / (float)(sound.audio->frequency());
 	ImGui::Text("Duration : %02u:%02u.%03u", (uint32_t)(duration / 60), (uint32_t)(duration) % 60, (uint32_t)(duration * 1000.f) % 1000);
-	ImGui::Text("Frequency : %u", audio.audio->frequency());
-	ImGui::Text("Channels : %u", audio.audio->channels());
+	ImGui::Text("Frequency : %u", sound.audio->frequency());
+	ImGui::Text("Channels : %u", sound.audio->channels());
 	char buffer[10];
 	int error = snprintf(buffer, 10, "%02u:%02u.%03u", (uint32_t)(current / 60), (uint32_t)(current) % 60, (uint32_t)(current * 1000.f) % 1000);
 	AKA_ASSERT(error > 0, "");
 	ImGui::ProgressBar(current / duration, ImVec2(0.f, 0.f), buffer);
 	if (ImGui::Button(ICON_FA_BACKWARD))
-		audio.audio->seek((uint64_t)max(current - 10.f, 0.f) * audio.audio->frequency());
+		sound.audio->seek((uint64_t)max(current - 10.f, 0.f) * sound.audio->frequency());
 	ImGui::SameLine();
 	if (ImGui::Button(ICON_FA_PAUSE))
 	{
-		if (AudioBackend::playing(audio.audio))
-			AudioBackend::close(audio.audio);
+		AudioDevice* device = Application::app()->audio();
+		if (device->playing(sound.audio))
+			device->close(sound.audio);
 		else
-			AudioBackend::play(audio.audio);
+			device->play(sound.audio);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button(ICON_FA_FORWARD))
-		audio.audio->seek((uint64_t)min(current + 10.f, duration) * audio.audio->frequency());
-	float volume = audio.audio->volume();
+		sound.audio->seek((uint64_t)min(current + 10.f, duration) * sound.audio->frequency());
+	float volume = sound.audio->volume();
 	if (ImGui::SliderFloat("Volume", &volume, 0.f, 2.f))
 	{
-		audio.audio->setVolume(volume);
+		sound.audio->setVolume(volume);
 		needUpdate = true;
 	}
-	if (ImGui::Checkbox("Loop", &audio.loop))
+	if (ImGui::Checkbox("Loop", &sound.loop))
 	{
 		needUpdate = true;
 	}
@@ -211,8 +234,10 @@ template <> const char* ComponentNode<Text2DComponent>::name() { return "Text2D"
 template <> const char* ComponentNode<Text2DComponent>::icon() { return ICON_FA_FONT; }
 template <> bool ComponentNode<Text2DComponent>::draw(Text2DComponent& text)
 {
+	if (text.font == nullptr)
+		return false;
 	ImGui::ColorEdit4("Color", text.color.data);
-	ImGui::SliderInt("Layer", &text.layer, -20, 20);
+	ImGui::SliderInt("Layer", &text.layerDepth, -20, 20);
 
 	uint32_t currentHeight = text.font->height();
 	const char* currentFont = text.font->family().cstr();
@@ -220,16 +245,20 @@ template <> bool ComponentNode<Text2DComponent>::draw(Text2DComponent& text)
 	snprintf(buffer, 256, "%s (%u)", text.font->family().cstr(), text.font->height());
 	if (ImGui::BeginCombo("Font", buffer))
 	{
-		for (auto& font : FontManager::iterator)
+		AssetRegistry* registry = Application::app()->resource();
+		for (Asset& asset : *registry)
 		{
-			bool sameHeight = (currentHeight == font.second.height());
-			bool sameFamily = (currentFont == font.second.family().cstr());
+			if (asset.type != ResourceType::Font)
+				continue;
+			Font* font = asset.get<Font>();
+			bool sameHeight = (currentHeight == font->height());
+			bool sameFamily = (currentFont == font->family().cstr());
 			bool sameFont = sameHeight && sameFamily;
-			snprintf(buffer, 256, "%s (%u)", font.second.family().cstr(), font.second.height());
+			snprintf(buffer, 256, "%s (%u)", font->family().cstr(), font->height());
 			if (ImGui::Selectable(buffer, sameFont))
 			{
 				if (!sameFont)
-					text.font = &font.second;
+					text.font = font;
 			}
 			if (sameFont)
 				ImGui::SetItemDefaultFocus();
@@ -238,7 +267,7 @@ template <> bool ComponentNode<Text2DComponent>::draw(Text2DComponent& text)
 	}
 
 	char t[256];
-	String::copy(t, 256, text.text.c_str());
+	String::copy(t, 256, text.text.cstr());
 	if (ImGui::InputTextWithHint("Text", "Text to display", t, 256))
 		text.text = t;
 	return false;
@@ -296,14 +325,15 @@ template <> bool ComponentNode<TileLayerComponent>::draw(TileLayerComponent& lay
 		ImGui::SliderInt("Index", &id, 0, (int)layer.tileID.size() - 4);
 		ImGui::InputInt4("TileID", layer.tileID.data() + id);
 	}
-	ImGui::SliderInt("Layer", &layer.layer, -20, 20);
+	ImGui::SliderInt("Layer", &layer.layerDepth, -20, 20);
 	ImGui::ColorEdit4("Color", layer.color.data, ImGuiColorEditFlags_Float);
 	return false;
 }
 
 template <> const char* ComponentNode<TileMapComponent>::name() { return "TileMap"; }
 template <> const char* ComponentNode<TileMapComponent>::icon() { return ICON_FA_ATLAS; }
-template <> bool ComponentNode<TileMapComponent>::draw(TileMapComponent& map)
+template <> bool ComponentNode<TileMapComponent
+>::draw(TileMapComponent& map)
 {
 	vec2i gridCount = vec2i(map.gridCount);
 	vec2i gridSize = vec2i(map.gridSize);
@@ -311,7 +341,7 @@ template <> bool ComponentNode<TileMapComponent>::draw(TileMapComponent& map)
 		map.gridCount = vec2u(gridCount);
 	if (ImGui::InputInt2("Grid size", gridSize.data))
 		map.gridSize = vec2u(gridSize);
-	if (map.texture == nullptr)
+	if (map.texture == gfx::TextureHandle::null)
 	{
 		Path path;
 		if (Modal::LoadButton("Load image", &path))
@@ -319,16 +349,16 @@ template <> bool ComponentNode<TileMapComponent>::draw(TileMapComponent& map)
 			try
 			{
 				Image image = Image::load(path);
-				map.texture = Texture2D::create(image.width(), image.height(), TextureFormat::RGBA8, TextureFlag::ShaderResource);
-				map.texture->upload(image.data());
+				gfx::Texture::destroy(map.texture);
+				map.texture = gfx::Texture::create2D(image.width(), image.height(), gfx::TextureFormat::RGBA8, gfx::TextureFlag::ShaderResource, image.data());
 			}
 			catch (const std::exception&) {}
 		}
 	}
 	else
 	{
-		float ratio = static_cast<float>(map.texture->width()) / static_cast<float>(map.texture->height());
-		ImGui::Image((void*)map.texture->handle().value(), ImVec2(300, 300 * 1 / ratio), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1,1,1,1), ImVec4(0.5,0.5,0.5,1));
+		float ratio = static_cast<float>(map.texture.data->width) / static_cast<float>(map.texture.data->height);
+		ImGui::Image((void*)map.texture.data->native, ImVec2(300, 300 * 1 / ratio), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1,1,1,1), ImVec4(0.5,0.5,0.5,1));
 	}
 	return false;
 }
@@ -339,10 +369,10 @@ template <> bool ComponentNode<Particle2DComponent>::draw(Particle2DComponent& p
 {
 	int birthTime = (int)particle.birthTime.milliseconds();
 	if (ImGui::InputInt("Birth Time", &birthTime))
-		particle.birthTime = Time::Unit::milliseconds(birthTime);
+		particle.birthTime = Time::milliseconds(birthTime);
 	int lifeTime = (int)particle.lifeTime.milliseconds();
 	if (ImGui::InputInt("Life time", &lifeTime))
-		particle.lifeTime = Time::Unit::milliseconds(lifeTime);
+		particle.lifeTime = Time::milliseconds(lifeTime);
 	ImGui::InputFloat2("Velocity", particle.velocity.data);
 
 	float rot = particle.angularVelocity.radian();
@@ -424,6 +454,7 @@ bool filterValid(Entity entity, ComponentID filterComponentID)
 // Draw an overlay over current widget components
 void overlay(World &world, Entity entity)
 {
+	PlatformDevice* platform = Application::app()->platform();
 	Entity cameraEntity = Entity::null();
 	world.each([&cameraEntity](Entity entity) {
 		if (entity.has<Camera2DComponent>())
@@ -434,8 +465,7 @@ void overlay(World &world, Entity entity)
 		Transform2DComponent& cameraTransform = cameraEntity.get<Transform2DComponent>();
 		Camera2DComponent& camera = cameraEntity.get<Camera2DComponent>();
 		mat3f view = mat3f::inverse(cameraTransform.model());
-		Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
-		vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / vec2f(camera.camera.right, camera.camera.top);
+		vec2f scale = vec2f((float)platform->width(), (float)platform->height()) / vec2f(camera.camera.right, camera.camera.top);
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(236.f / 255.f, 11.f / 255.f, 67.f / 255.f, 1.f));
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// Animator overlay for current entity
@@ -443,7 +473,7 @@ void overlay(World &world, Entity entity)
 		{
 			Transform2DComponent& t = entity.get<Transform2DComponent>();
 			SpriteAnimatorComponent& a = entity.get<SpriteAnimatorComponent>();
-			const Sprite::Frame& f = a.getCurrentSpriteFrame();
+			const SpriteFrame& f = a.getCurrentSpriteFrame();
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
 			p.y = camera.camera.top - p.y;
 			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
@@ -482,6 +512,7 @@ void overlay(World &world, Entity entity)
 // Return the entity picked on click
 Entity pickEntity(World &world)
 {
+	PlatformDevice* platform = Application::app()->platform();
 	Entity cameraEntity = Entity::null();
 	world.each([&cameraEntity](Entity entity) {
 		if (entity.has<Camera2DComponent>())
@@ -491,11 +522,10 @@ Entity pickEntity(World &world)
 		return Entity::null();
 	Transform2DComponent& cameraTransform = cameraEntity.get<Transform2DComponent>();
 	Camera2DComponent& camera = cameraEntity.get<Camera2DComponent>();
-	Framebuffer::Ptr backbuffer = GraphicBackend::device()->backbuffer();
-	const vec2f scale = vec2f((float)backbuffer->width(), (float)backbuffer->height()) / vec2f(camera.camera.right, camera.camera.top);
+	const vec2f scale = vec2f((float)platform->width(), (float)platform->height()) / vec2f(camera.camera.right, camera.camera.top);
 	const mat3f cam = cameraTransform.model();
 	const mat3f view = mat3f::inverse(cam);
-	const vec2f screenPos(Mouse::position().x, Mouse::position().y);
+	const vec2f screenPos(platform->mouse().position().x, platform->mouse().position().y);
 	bool found = false;
 	int32_t layer = -100;
 	Entity picked = Entity::null();
@@ -520,16 +550,16 @@ Entity pickEntity(World &world)
 		{
 			Transform2DComponent& t = entity.get<Transform2DComponent>();
 			SpriteAnimatorComponent& a = entity.get<SpriteAnimatorComponent>();
-			const Sprite::Frame& f = a.getCurrentSpriteFrame();
+			const SpriteFrame& f = a.getCurrentSpriteFrame();
 			// local to world to view space
 			vec2f p = vec2f(view * t.model() * vec3f(0, 0, 1));
 			vec2f s = vec2f(view * t.model() * vec3f((float)f.width, (float)f.height, 0));
 			// scale to 1920x1080, bottom left
 			vec2f pos0 = scale * p;
 			vec2f pos1 = scale * (p + s);
-			if (layer < a.layer && pos0.x <= screenPos.x && pos0.y <= screenPos.y && pos1.x >= screenPos.x && pos1.y >= screenPos.y)
+			if (layer < a.layerDepth && pos0.x <= screenPos.x && pos0.y <= screenPos.y && pos1.x >= screenPos.x && pos1.y >= screenPos.y)
 			{
-				layer = a.layer;
+				layer = a.layerDepth;
 				picked = entity;
 			}
 		}
@@ -544,9 +574,9 @@ Entity pickEntity(World &world)
 			// scale to 1920x1080, bottom left
 			vec2f pos0 = scale * p;
 			vec2f pos1 = scale * (p + s);
-			if (layer < text.layer && pos0.x <= screenPos.x && pos0.y <= screenPos.y && pos1.x >= screenPos.x && pos1.y >= screenPos.y)
+			if (layer < text.layerDepth && pos0.x <= screenPos.x && pos0.y <= screenPos.y && pos1.x >= screenPos.x && pos1.y >= screenPos.y)
 			{
-				layer = text.layer;
+				layer = text.layerDepth;
 				picked = entity;
 			}
 		}
@@ -556,6 +586,7 @@ Entity pickEntity(World &world)
 
 void EntityWidget::draw(World& world)
 {
+	AssetRegistry* registry = Application::app()->resource();
 	ImGuiIO& io = ImGui::GetIO();
 	if (ImGui::IsMouseReleased(0) && !io.WantCaptureMouse)
 		m_currentEntity = pickEntity(world);
@@ -589,9 +620,14 @@ void EntityWidget::draw(World& world)
 						m_currentEntity.add<Transform2DComponent>(Transform2DComponent());
 					if (ImGui::BeginMenu(ComponentNode<SpriteAnimatorComponent>::name(), !m_currentEntity.has<SpriteAnimatorComponent>()))
 					{
-						for (auto &it : SpriteManager::iterator)
-							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
-								m_currentEntity.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(&it.second, 0));
+						for (Asset& asset : *registry)
+						{
+							if (asset.type != ResourceType::Sprite)
+								continue;
+							Sprite* sprite = asset.get<Sprite>();
+							if (ImGui::MenuItem(asset.name.cstr(), nullptr, nullptr, true))
+								m_currentEntity.add<SpriteAnimatorComponent>(SpriteAnimatorComponent(sprite, 0));
+						}
 						ImGui::EndMenu();
 					}
 					if (ImGui::MenuItem(ComponentNode<Collider2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<Collider2DComponent>()))
@@ -600,9 +636,14 @@ void EntityWidget::draw(World& world)
 						m_currentEntity.add<RigidBody2DComponent>(RigidBody2DComponent());
 					if (ImGui::BeginMenu(ComponentNode<Text2DComponent>::name(), !m_currentEntity.has<Text2DComponent>()))
 					{
-						for (auto &it : FontManager::iterator)
-							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
-								m_currentEntity.add<Text2DComponent>(Text2DComponent(vec2f(0.f), &it.second, "", color4f(1.f), 0));
+						for (Asset& asset : *registry)
+						{
+							if (asset.type != ResourceType::Sprite)
+								continue;
+							Font* font = asset.get<Font>();
+							if (ImGui::MenuItem(asset.name.cstr(), nullptr, nullptr, true))
+								m_currentEntity.add<Text2DComponent>(Text2DComponent(vec2f(0.f), font, "", color4f(1.f), 0));
+						}
 						ImGui::EndMenu();
 					}
 					if (ImGui::MenuItem(ComponentNode<TileMapComponent>::name(), nullptr, nullptr, !m_currentEntity.has<TileMapComponent>()))
@@ -617,9 +658,14 @@ void EntityWidget::draw(World& world)
 						m_currentEntity.add<Camera2DComponent>(Camera2DComponent());
 					if (ImGui::BeginMenu(ComponentNode<SoundInstance>::name(), !m_currentEntity.has<SoundInstance>()))
 					{
-						for (auto &it : AudioManager::iterator)
-							if (ImGui::MenuItem(it.first.cstr(), nullptr, nullptr, true))
-								m_currentEntity.add<SoundInstance>(SoundInstance(it.second, 1.f, false));
+						for (Asset& asset : *registry)
+						{
+							if (asset.type != ResourceType::Sprite)
+								continue;
+							//AudioStream* audio = asset.get<AudioStream>();
+							//if (ImGui::MenuItem(asset.name.cstr(), nullptr, nullptr, true))
+								//m_currentEntity.add<SoundInstance>(SoundInstance(audio, 1.f, false));
+						}
 						ImGui::EndMenu();
 					}
 					if (ImGui::MenuItem(ComponentNode<Particle2DComponent>::name(), nullptr, nullptr, !m_currentEntity.has<Particle2DComponent>()))

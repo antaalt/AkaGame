@@ -13,7 +13,7 @@ class PhysicSystem : public System
 {
 public:
 
-	void onFixedUpdate(World& world, Time::Unit deltaTime) override;
+	void onFixedUpdate(World& world, Time deltaTime) override;
 };
 
 };

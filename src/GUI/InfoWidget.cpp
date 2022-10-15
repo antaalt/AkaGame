@@ -9,13 +9,14 @@ namespace aka {
 
 void InfoWidget::draw(World& world)
 {
-	uint32_t width, height;
-	PlatformBackend::getSize(&width, &height);
+	PlatformDevice* platform = Application::app()->platform();
+	gfx::GraphicDevice* graphic = Application::app()->graphic();
+	uint32_t width = platform->width();
+	uint32_t height = platform->height();
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
 	ImGui::SetNextWindowPos(ImVec2((float)(width - 5), 25.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
 	if (ImGui::Begin("Info", nullptr, flags))
 	{
-		static Device device = Device::getDefault();
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("Resolution : %ux%u", width, height);
 		ImGui::Text("%.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
@@ -26,12 +27,11 @@ void InfoWidget::draw(World& world)
 		ImGui::Separator();
 		const char* apiName[] = {
 			"None",
+			"Vulkan",
 			"OpenGL",
 			"DirectX11"
 		};
-		ImGui::Text("Api : %s", apiName[(int)GraphicBackend::device()->api()]);
-		ImGui::Text("Device : %s", device.vendor);
-		ImGui::Text("Renderer : %s", device.renderer);
+		ImGui::Text("Api : %s", apiName[(int)graphic->api()]);
 	}
 	ImGui::End();
 
