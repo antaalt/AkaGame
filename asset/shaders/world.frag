@@ -13,6 +13,18 @@ uniform uvec2 gridCountAtlas;
 
 out vec4 FragColor;
 
+vec2 getPixelPerfectUV(vec2 uv)
+{
+    vec2 size = vec2(320, 180);
+    uv = floor(uv * size) + 0.5;
+    
+    // subpixel aa algorithm (COMMENT OUT TO COMPARE WITH POINT SAMPLING)
+    uv += 1.0 - clamp((1.0 - fract(pixel)) * scale, 0.0, 1.0);
+
+    // output
+   	return uv / iChannelResolution[0].xy;
+}
+
 void main()
 {
 	vec2 uv2 = vec2(uv.x, 1.0 - uv.y);
@@ -33,7 +45,7 @@ void main()
 	vec2 tileUV = (uv2 - tileUVOffset) / vec2(gridCountAtlas) * vec2(gridCount);
 	vec2 spriteUV = spriteUVOffset + tileUV;
 	// Get the color
-	FragColor = color * texture(image, vec2(spriteUV.x, 1.0 - spriteUV.y));
+	FragColor = color * texture(image, getPixelPerfectUV(vec2(spriteUV.x, 1.0 - spriteUV.y)));
 	if (FragColor.a == 0.0)
 		discard;
 }
